@@ -53,9 +53,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "HardwareProfile.h"
+#include <GenericTypeDefs.h>
+#include "../Compiler.h"
+#include "../../HardwareProfile.h"
 
 // RESERVED FEATURE -- do not change from current value of 1u as this is not
 // fully implemented yet.
@@ -83,7 +83,7 @@
  * User Configuration
  *   Load the user-specific configuration from TCPIPConfig.h
  *******************************************************************/
-#include "TCPIPConfig.h"
+#include "../../TCPIPConfig.h"
 
 /*******************************************************************
  * Configuration Rules Enforcement
@@ -284,13 +284,13 @@
 		#endif
 	#endif
 
-#include "TCPIPStack/StackTsk.h"
-#include "TCPIPStack/Helpers.h"
-#include "TCPIPStack/Delay.h"
+#include "StackTsk.h"
+#include "Helpers.h"
+#include "Delay.h"
 #include "../../../hardware/tick.h"
-#include "TCPIPStack/MAC.h"
-#include "TCPIPStack/IP.h"
-#include "TCPIPStack/ARP.h"
+#include "MAC.h"
+#include "IP.h"
+#include "ARP.h"
 
 #if defined(STACK_USE_BIGINT)
 	#include "TCPIPStack/BigInt.h"

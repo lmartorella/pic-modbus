@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../protocol.h"
+#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/protocol.h"
 #include "../hardware/counter.h"
 #include "flowCounter.h"
 

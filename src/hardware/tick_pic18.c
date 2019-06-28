@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "../../../src/nodes/pch.h"
 #include "tick.h"
 
 #ifdef _IS_ETH_CARD

@@ -82,8 +82,8 @@
 ********************************************************************/
 #define __DHCP_C
 
-#include "TCPIPConfig.h"
 #ifdef HAS_IP
+#include "../TCPIPConfig.h"
 
 #if defined(STACK_USE_DHCP_CLIENT)
 

@@ -56,7 +56,7 @@
 #ifndef __MAC_H
 #define __MAC_H
 
-#include "HardwareProfile.h"
+#include "../../HardwareProfile.h"
 
 #if defined(WF_CS_TRIS)
 	// Do not use the DMA and other goodies that Microchip Ethernet modules have

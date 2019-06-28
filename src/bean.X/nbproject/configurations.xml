@@ -7,15 +7,12 @@
       <logicalFolder name="f2" displayName="hardware" projectFiles="true">
         <itemPath>../hardware/eeprom.h</itemPath>
         <itemPath>../hardware/utilities.h</itemPath>
-        <itemPath>../hardware/hw.h</itemPath>
         <itemPath>../hardware/tick.h</itemPath>
         <itemPath>../hardware/leds.h</itemPath>
-        <itemPath>../hardware/fuses_eth_card.inc</itemPath>
-        <itemPath>../hardware/fuses_mcu_card.h</itemPath>
         <itemPath>../hardware/fuses_pic16f628.inc</itemPath>
-        <itemPath>../hardware/fuses_micro_bean.h</itemPath>
         <itemPath>../hardware/fuses_pic16f1827.inc</itemPath>
         <itemPath>../hardware/uart.h</itemPath>
+        <itemPath>../hardware/hw.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="tcpip" projectFiles="true">
         <itemPath>../tcpipstack/HardwareProfile.h</itemPath>

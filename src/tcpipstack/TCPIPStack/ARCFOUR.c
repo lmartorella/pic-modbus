@@ -55,7 +55,7 @@
  ********************************************************************/
 #define __ARCFOUR_C
 
-#include "TCPIPConfig.h"
+#include "../TCPIPConfig.h"
 
 #if defined(STACK_USE_SSL_SERVER) || defined(STACK_USE_SSL_CLIENT)
 

@@ -53,8 +53,8 @@
 #ifndef __DELAY_H
 #define __DELAY_H
 
-#include "Compiler.h"
-#include "HardwareProfile.h"
+#include "../Compiler.h"
+#include "../../HardwareProfile.h"
 #if defined(__18CXX) && !defined(HI_TECH_C)
 	#include <delays.h>
 #endif

@@ -1,6 +1,6 @@
-#include "../pch.h"
+#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/protocol.h"
 #include "digio.h"
-#include "../protocol.h"
 
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
 

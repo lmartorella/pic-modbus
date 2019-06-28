@@ -48,7 +48,7 @@
  ********************************************************************/
 #define __BIGINT_C
 
-#include "TCPIPConfig.h"
+#include "../TCPIPConfig.h"
 #include "HardwareProfile.h"
 #include "TCPIPStack/SSLClientSize.h"
 

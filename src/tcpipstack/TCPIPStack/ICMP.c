@@ -53,8 +53,8 @@
  ********************************************************************/
 #define __ICMP_C
 
-#include "TCPIPStack/TCPIP.h"
 #ifdef HAS_IP
+#include "../Include/TCPIPStack/TCPIP.h"
 
 #if defined(STACK_USE_ICMP_SERVER) || defined(STACK_USE_ICMP_CLIENT)
 

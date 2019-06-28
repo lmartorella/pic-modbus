@@ -56,7 +56,7 @@
 
 #define __HTTP2_C
 
-#include "TCPIPStack/TCPIP.h"
+#include "TCPIP.h"
 
 #if defined(STACK_USE_HTTP2_SERVER)
 

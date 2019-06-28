@@ -58,7 +58,7 @@
  ********************************************************************/
 #define __ANNOUNCE_C
 
-#include "TCPIPConfig.h"
+#include "../TCPIPConfig.h"
 
 #if defined STACK_USE_ANNOUNCE
 

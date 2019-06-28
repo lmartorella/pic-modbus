@@ -50,8 +50,7 @@
  ********************************************************************/
 #define __DELAY_C
 
-#include "TCPIPStack/TCPIP.h"
-
+//#include "../Include/TCPIP.h"
 
 #if !defined(__18CXX) || defined(HI_TECH_C)
 void DelayMs(WORD ms)

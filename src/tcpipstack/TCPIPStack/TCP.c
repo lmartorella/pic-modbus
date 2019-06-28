@@ -58,8 +58,8 @@
  ********************************************************************/
 #define __TCP_C
 
-#include "TCPIPStack/TCPIP.h"
 #ifdef HAS_IP
+#include "../Include/TCPIPStack/TCPIP.h"
 
 #if defined(STACK_USE_TCP)
 

@@ -1,7 +1,7 @@
-#include "../pch.h"
+#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/protocol.h"
+#include "../../../src/nodes/appio.h"
 #include "displaySink.h"
-#include "../appio.h"
-#include "../protocol.h"
 
 #if defined(HAS_BUS) && (defined(HAS_CM1602) || defined(_CONF_RASPBIAN))
 

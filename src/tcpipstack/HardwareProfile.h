@@ -5,4 +5,4 @@
 #define GetInstructionClock() (SYSTEM_CLOCK/4)
 #define GetPeripheralClock() (SYSTEM_CLOCK/4)
 
-#include <TCPIPStack/ETH97J60.h>
+#include "Include/TCPIPStack/ETH97J60.h"

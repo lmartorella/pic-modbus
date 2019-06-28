@@ -61,8 +61,8 @@
  ********************************************************************/
 #define __ARP_C
 
-#include "TCPIPStack/TCPIP.h"
 #ifdef HAS_IP
+#include "../Include/TCPIPStack/TCPIP.h"
 
 /****************************************************************************
   Section:

@@ -15,6 +15,11 @@
 void sinks_init();
 
 /**
+ * Poll sinks
+ */
+void sinks_poll();
+
+/**
  * The system sink type ID
  */
 #define SINK_SYS_ID "SYS "

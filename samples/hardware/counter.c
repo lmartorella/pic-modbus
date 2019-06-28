@@ -1,6 +1,6 @@
-#include "../pch.h"
+#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/persistence.h"
 #include "counter.h"
-#include "../persistence.h"
 
 #ifdef HAS_DIGITAL_COUNTER
 

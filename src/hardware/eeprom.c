@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../appio.h"
+#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/appio.h"
 #include "eeprom.h"
 
 /**
