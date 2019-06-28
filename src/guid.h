@@ -1,6 +1,9 @@
 #ifndef _VER_APP_H
 #define _VER_APP_H
 
+/**
+ * Classic GUID definition
+ */
 typedef struct 
 {
 	DWORD data1;
@@ -10,6 +13,9 @@ typedef struct
 	DWORD data4b;
 } GUID;
 
+/**
+ * Two-cc is used by protocol
+ */
 typedef union {
     char str[2];
     struct {
@@ -19,6 +25,9 @@ typedef union {
     BYTE bytes[2];
 } TWOCC;
 
+/**
+ * Four-cc is used by sink type IDs
+ */
 typedef union {
     char str[4];
     struct {

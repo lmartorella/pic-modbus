@@ -65,7 +65,7 @@ void bmp180_resetGetCalibData() {
     bmp180_buffer.sendBuffer[0] = ADDR_DEVICE_ID;
     i2c_sendReceive7(REG_WRITE, 1, bmp180_buffer.sendBuffer);
     s_state = STATE_ASK_ID;
-    s_lastTime = TickGet();
+    s_lastTime = timers_get();
 }
 
 void bmp180_readTempPressureData() {
@@ -76,7 +76,7 @@ void bmp180_readTempPressureData() {
     bmp180_buffer.sendBuffer[1] = MESSAGE_READ_TEMP;
     i2c_sendReceive7(REG_WRITE, 2, bmp180_buffer.sendBuffer);
     s_state = STATE_ASK_TEMP;
-    s_lastTime = TickGet();
+    s_lastTime = timers_get();
 }
 
 // Returns 1 if idle
@@ -84,7 +84,7 @@ bit bmp180_poll() {
     if (s_state == STATE_IDLE) {
         return 1;
     }
-    if ((TickGet() - s_lastTime) > TICK_SECOND) {
+    if ((timers_get() - s_lastTime) > TICK_SECOND) {
         fatal("B.LOCK");
     }
 
@@ -120,7 +120,7 @@ bit bmp180_poll() {
 
         case STATE_ASK_TEMP:
             // Wait 4.5ms
-            if ((TickGet() - s_lastTime) > (TICKS_PER_MSECOND * 5)) {
+            if ((timers_get() - s_lastTime) > (TICKS_PER_MSECOND * 5)) {
                 bmp180_buffer.sendBuffer[0] = ADDR_MSB;
                 i2c_sendReceive7(REG_WRITE, 1, bmp180_buffer.sendBuffer);
                 s_state = STATE_ASK_TEMP_2;
@@ -137,12 +137,12 @@ bit bmp180_poll() {
             bmp180_buffer.sendBuffer[1] = MESSAGE_READ_PRESS_OSS_3;
             i2c_sendReceive7(REG_WRITE, 2, bmp180_buffer.sendBuffer);
             s_state = STATE_ASK_PRESS;
-            s_lastTime = TickGet();
+            s_lastTime = timers_get();
             break;
 
         case STATE_ASK_PRESS:   
             // Wait 25ms (OSS = 3)
-            if ((TickGet() - s_lastTime) > (TICKS_PER_MSECOND * 30)) {
+            if ((timers_get() - s_lastTime) > (TICKS_PER_MSECOND * 30)) {
                 bmp180_buffer.sendBuffer[0] = ADDR_MSB;
                 i2c_sendReceive7(REG_WRITE, 1, bmp180_buffer.sendBuffer);
                 s_state = STATE_ASK_PRESS_2;

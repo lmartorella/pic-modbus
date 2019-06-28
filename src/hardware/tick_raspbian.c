@@ -10,7 +10,7 @@ DWORD TickGet() {
     return ((tv.tv_sec * 1000000ul) + tv.tv_usec);
 }
 
-void TickUpdate() {
+void timers_poll() {
     
 }
 

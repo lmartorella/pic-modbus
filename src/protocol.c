@@ -33,12 +33,12 @@ bit prot_registered;
 void prot_init()
 {
     // Align 1sec to now()
-    s_slowTimer = TickGet();
+    s_slowTimer = timers_get();
 
 #ifdef HAS_IP
     ip_prot_init();
 #else
-    println("No IP");
+    io_println("No IP");
 #endif
 
 #ifdef HAS_RS485
@@ -51,14 +51,14 @@ void prot_init()
     s_inWriteSink = s_inReadSink = -1;
 
 #ifdef DEBUGMODE
-    printch('K');
+    io_printChDbg('K');
 #endif
 }
 
 static void CLOS_command()
 {
 #ifdef DEBUGMODE
-    printch('l');
+    io_printChDbg('l');
 #endif
     // CLOSE the socket
     prot_control_write("\x1E", 1);
@@ -68,7 +68,7 @@ static void CLOS_command()
 static void SELE_command()
 {
 #ifdef DEBUGMODE
-    printch('s');
+    io_printChDbg('s');
 #endif
     // Select subnode. 
     WORD w;
@@ -92,7 +92,7 @@ static void SELE_command()
 static void CHIL_command()
 {
 #ifdef DEBUGMODE
-    printch('c');
+    io_printChDbg('c');
 #endif
     // Fetch my GUID
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
@@ -119,18 +119,12 @@ static void CHIL_command()
 static void SINK_command()
 {
 #ifdef DEBUGMODE
-    printch('k');
+    io_printChDbg('k');
 #endif
     
-#ifdef HAS_FIRMWARE
-    prot_control_writeW(e_header.sinkCount);
-    for (int i = 0; i < e_header.sinkCount; i++) {
-        prot_control_write(e_header.sinks[i].ID, sizeof(FOURCC));
-    }
-#else
     prot_control_writeW(SINK_IDS_COUNT);
     prot_control_write(SINK_IDS, SINK_IDS_COUNT * 4);
-#endif
+
     // end of transmission, over to Master
     prot_control_over();
 }
@@ -139,7 +133,7 @@ static void SINK_command()
 static void GUID_command()
 {
 #ifdef DEBUGMODE
-    printch('g');
+    io_printChDbg('g');
 #endif
     if (!prot_control_read(&pers_data.deviceId, sizeof(GUID))) {
         fatal("GU.u");
@@ -152,7 +146,7 @@ static void GUID_command()
 static void READ_command()
 {
 #ifdef DEBUGMODE
-    printch('r');
+    io_printChDbg('r');
 #endif
     WORD sinkId;
     if (!prot_control_readW(&sinkId))
@@ -166,7 +160,7 @@ static void READ_command()
 static void WRIT_command()
 {
 #ifdef DEBUGMODE
-    printch('w');
+    io_printChDbg('w');
 #endif
     WORD sinkId;
     if (!prot_control_readW(&sinkId))
@@ -176,7 +170,7 @@ static void WRIT_command()
     s_inReadSink = sinkId;
 }
 
-// Optimized for XC8
+// Code-memory optimized for small PIC XC8
 static bit memcmp2(char c1, char c2, char d1, char d2) {
     return d1 == c1 && d2 == c2;
 }
@@ -195,7 +189,7 @@ void prot_poll()
     StackApplications();
 #endif
 
-    TICK_TYPE now = TickGet();
+    TICK_TYPE now = timers_get();
     if (now - s_slowTimer >= TICKS_PER_SECOND)
     {
         s_slowTimer = now;
@@ -234,11 +228,7 @@ void prot_poll()
 
     if (s_inReadSink >= 0) {
         // Tolerates empty rx buffer
-#ifdef HAS_FIRMWARE
-        BOOL again = e_header.sinks[s_inReadSink].readPtr();
-#else
         BOOL again = sink_readHandlers[s_inReadSink]();
-#endif
         if (!again) {
             s_inReadSink = -1;
         }
@@ -246,11 +236,7 @@ void prot_poll()
     }
     if (s_inWriteSink >= 0) {
         // Address sink
-#ifdef HAS_FIRMWARE
-        BOOL again = e_header.sinks[s_inWriteSink].writePtr();
-#else
         BOOL again = sink_writeHandlers[s_inWriteSink]();
-#endif
         if (!again){
             s_inWriteSink = -1;
             // end of transmission, over to Master

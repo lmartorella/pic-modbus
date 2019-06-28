@@ -98,7 +98,7 @@ WORD prot_control_writeAvail()
 
 void ip_prot_init()
 {
-    println("IP/DHCP");
+    io_println("IP/DHCP");
 #if defined(__GNU)
     printf("Listen port: %d\n", SERVER_CONTROL_UDP_PORT);
 #endif
@@ -147,13 +147,13 @@ void ip_prot_slowTimer()
         {
             unsigned char* p = (unsigned char*)(&AppConfig.MyIPAddr);
             sprintf(buffer, "%d.%d.%d.%d", (int)p[0], (int)p[1], (int)p[2], (int)p[3]);
-            printlnUp(buffer);
+            io_io_printlnStatus(buffer);
             s_lastDhcpState = TRUE;
         }
         else
         {
             sprintf(buffer, "DHCP ERR");
-            printlnUp(buffer);
+            io_io_printlnStatus(buffer);
             s_lastDhcpState = FALSE;
             //fatal("DHCP.nok");
         }

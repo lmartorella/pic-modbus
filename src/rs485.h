@@ -1,8 +1,15 @@
 #ifndef RS485_H
 #define	RS485_H
 
+/**
+ * High-level RS485 operation module virtualization
+ */
+
 #ifdef HAS_RS485
 
+/**
+ * State of the wired line
+ */
 typedef enum {
     // Receiving, all OK
     RS485_LINE_RX = 1,
@@ -16,10 +23,13 @@ typedef enum {
     RS485_LINE_WAIT_FOR_START_TRANSMIT = 5,
 } RS485_STATE;
 
+extern RS485_STATE rs485_state;
+
 /**
  * Initialize asynchronous mode, but only half-duplex is used
  */
 void rs485_init();
+
 /**
  * To feed/receive channel
  */
@@ -44,15 +54,20 @@ extern bit rs485_master;
 // Read data, if available.
 bit rs485_read(BYTE* data, BYTE size);
 
-
+/**
+ * Get count of available bytes in the read buffer
+ */
 BYTE rs485_readAvail();
+
+/**
+ * Get count of available bytes in the write buffer
+ */
 BYTE rs485_writeAvail();
+
 // Get the last bit9 received
 extern bit rs485_lastRc9;
 // Get/set the skip flag. If set, rc9 = 0 bytes are skipped by receiver
 extern bit rs485_skipData;
-
-extern RS485_STATE rs485_state;
 
 // Don't change the line status, but simulate a TX time for disengage
 void rs485_waitDisengageTime();
@@ -79,7 +94,7 @@ typedef enum {
 } RS485_CONTROL_CHAR;
 
 #ifdef DEBUGMODE
-#define set_rs485_over() rs485_over=1;printch('>');
+#define set_rs485_over() rs485_over=1;io_printChDbg('>');
 #else
 #define set_rs485_over() rs485_over=1;
 #endif

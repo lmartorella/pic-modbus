@@ -6,6 +6,10 @@
 #include "persistence.h"
 #include "appio.h"
 
+/**
+ * Wired bus communication module for bean nodes
+ */
+
 #ifdef HAS_BUS_CLIENT
 
 static enum {
@@ -106,7 +110,7 @@ void bus_poll()
             if (rs485_lastRc9) {
                 // Received a break char, go idle
 #ifdef DEBUGMODE
-                printch('@');
+                io_printChDbg('@');
 #endif
                 bus_reinit_after_disengage();
             }
@@ -147,7 +151,7 @@ void bus_poll()
                     switch (buf) { 
                         case BUS_MSG_TYPE_ADDRESS_ASSIGN:
 #ifdef DEBUGMODE
-                            printch('^');
+                            io_printChDbg('^');
 #endif
                             if (s_availForAddressAssign) {
                                 // Master now knows me
@@ -161,7 +165,7 @@ void bus_poll()
 
                         case BUS_MSG_TYPE_HEARTBEAT:
 #ifdef DEBUGMODE
-                            printch('"');
+                            io_printChDbg('"');
 #endif
                             // Only respond to heartbeat if has address
                             if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
@@ -172,7 +176,7 @@ void bus_poll()
 
                         case BUS_MSG_TYPE_READY_FOR_HELLO:
 #ifdef DEBUGMODE
-                            printch('?');
+                            io_printChDbg('?');
 #endif
                             // Only respond to hello if ready to program
                             if (s_availForAddressAssign) {
@@ -183,7 +187,7 @@ void bus_poll()
 
                         case BUS_MSG_TYPE_CONNECT:
 #ifdef DEBUGMODE
-                            printch('=');
+                            io_printChDbg('=');
 #endif
                             if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
                                 // Master now knows me
@@ -197,7 +201,7 @@ void bus_poll()
                             break;
                         default:
 #ifdef DEBUGMODE
-                            printch('!');
+                            io_printChDbg('!');
 #endif
                             // Unknown command. Reset
                             // Restart from 0x55
@@ -206,7 +210,7 @@ void bus_poll()
                     }
                 
 #ifdef DEBUGMODE
-                    printch('-');
+                    io_printChDbg('-');
 #endif
                     // If not managed, reinit bus for the next message
                     bus_reinit_after_disengage();

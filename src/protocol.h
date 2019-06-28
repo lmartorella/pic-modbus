@@ -1,6 +1,10 @@
 #ifndef PROTOCOL_H
 #define	PROTOCOL_H
 
+/**
+ * Protocol implementation module
+ */
+
 #include "bus.h"
 #ifdef HAS_RS485
 #include "rs485.h"

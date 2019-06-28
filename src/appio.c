@@ -33,7 +33,7 @@ static void _stdout(const char* str) {
 }
 #endif
 
-void appio_init()
+void io_init()
 {
 #ifdef HAS_CM1602
     // reset display
@@ -80,20 +80,6 @@ static void _clr(BYTE addr)
 }
 #endif
 
-void clearln()
-{
-#ifdef HAS_CM1602
-	_clr(0x40);
-#endif
-}
-
-void clearlnUp()
-{
-#ifdef HAS_CM1602
-	_clr(0x00);
-#endif
-}
-
 #ifdef HAS_CM1602
 static void _print(const char* str, BYTE addr)
 {
@@ -103,7 +89,7 @@ static void _print(const char* str, BYTE addr)
 }
 #endif
 
-void println(const char* str)
+void io_println(const char* str)
 {
 #ifdef HAS_CM1602
 	_print(str, 0x40);	
@@ -115,7 +101,7 @@ void println(const char* str)
 #endif
 }
 
-void printlnUp(const char* str)
+void io_io_printlnStatus(const char* str)
 {
 #ifdef HAS_CM1602
 	_print(str, 0x00);	
@@ -127,7 +113,7 @@ void printlnUp(const char* str)
 #endif
 }
 
-void printch(char ch)
+void io_printChDbg(char ch)
 {
 #ifdef HAS_CM1602
     cm1602_write(ch);

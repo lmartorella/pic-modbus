@@ -1,41 +1,98 @@
 #ifndef _APPIO_INCLUDE_
 #define _APPIO_INCLUDE_
 
-void appio_init();
+/**
+ * General module for system-related functions
+ */
 
-// Clear the upper row (status)
-void clearlnUp();
-// Clear the below row
-void clearln();
-// Clear and print string in the upper row (status)
-void printlnUp(const char* msg);
-// Clear and print string in the below row
-void println(const char* msg);
-// Print a char in the current row at the cursor
-void printch(char ch);
+/**
+ * Init the IO module (display or notification led)
+ */
+void io_init();
 
-// The smallest type capable of representing all values in the enumeration type.
+/**
+ * Clear and print string in the upper row of the display (status)
+ */
+void io_io_printlnStatus(const char* msg);
+
+/**
+ * Clear and print string in the below row (messages)
+ */
+void io_println(const char* msg);
+
+/**
+ * Print a char in the current row at the cursor (for debug builds)
+ */
+void io_printChDbg(char ch);
+
+/**
+ * Enumerates the reason of a reset. Mainly used for MCU codes
+ */
 typedef enum 
 {
-    RESET_NONE = 0, // Manually set to none
-	RESET_POWER = 1,  // Power-on reset
+	/**
+	 * This is reset by the server after boot
+	 */
+    RESET_NONE = 0,
+
+	/**
+	 * Power-on reset (e.g. after a power loss), POR
+	 */
+	RESET_POWER = 1,
+
+	/**
+	 * Brownout (low voltage reset), BOR
+	 */
 	RESET_BROWNOUT,
+
+	/**
+	 * Used by PIC18F, CM
+	 */
 	RESET_CONFIGMISMATCH,
+
+	/**
+	 * Watchdog reset, due to code loop, TO.
+	 */
 	RESET_WATCHDOG,
+
+	/**
+	 * Stack overflow/underflow (STKFUL, STKUNF).
+	 */
 	RESET_STACKFAIL,
+
+	/**
+	 * Reset line activated (push-button zero configuration or programmer connected)
+	 */
 	RESET_MCLR,
+
+	/**
+	 * Custom software exception. See g_lastException string
+	 */
 	RESET_EXC
 } RESET_REASON;
 
-extern const char* g_lastException;
+/**
+ * Contains the reset reason code
+ */
 extern RESET_REASON g_resetReason;
 
-// Get last reset reason as 3 char code
+/**
+ * Contains a pointer to the program memory, that contains the ASCIIZ exception string
+ */
+extern const char* g_lastException;
+
+/**
+ * This should be called as very first line of code in MCUs to analyze the reset flags
+ */
 void sys_storeResetReason();
 
 #ifdef __GNU
+/**
+ * Log on log file (Raspbian only)
+ */
 void flog(const char* format, ...);
 #else
+// Not implemented in MCUs
 #define flog() 
 #endif
 

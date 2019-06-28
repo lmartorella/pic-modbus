@@ -80,7 +80,7 @@ bit halfduplex_read()
         // Else data OK
         s_state = ST_IDLE;
 #ifdef DEBUGMODE
-        printch('@');
+        io_printChDbg('@');
 #endif
         // Stop data
         return 0;

@@ -91,7 +91,7 @@ WORD TickGet()
 
 /*****************************************************************************
   Function:
-	void TickUpdate(void)
+	void timers_poll(void)
 
   Description:
 	Updates the tick value when an interrupt occurs.
@@ -105,7 +105,7 @@ WORD TickGet()
   Returns:
      The LSB of tick
   ***************************************************************************/
-void TickUpdate(void)
+void timers_poll(void)
 {
     if (TICK_INTCON_IF)
     {

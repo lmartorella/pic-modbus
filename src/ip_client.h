@@ -1,6 +1,10 @@
 #ifndef _PROT_H_APP_
 #define _PROT_H_APP_
 
+/**
+ * Module to implement a master node (IP client)
+ */
+
 #include "hardware/hw.h"
 
 #ifdef HAS_IP
@@ -14,10 +18,19 @@
 #include "hardware/ip_raspbian.h"
 #endif
 
+/**
+ * Poll activities
+ */
 void ip_poll();
-// Manage poll activities
+
+/**
+ * Initialize the IP module
+ */
 void ip_prot_init();
-// Manage slow timer (heartbeats)
+
+/**
+ * Called a slow timer (1 sec), for heartbeats
+ */
 void ip_prot_slowTimer();
 
 #endif

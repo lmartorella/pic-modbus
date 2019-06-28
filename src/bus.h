@@ -1,6 +1,10 @@
 #ifndef BUS_H
 #define	BUS_H
 
+/**
+ * Wired bus communication module (both master on bean nodes)
+ */
+
 #ifdef HAS_BUS
 
 #ifdef HAS_RS485

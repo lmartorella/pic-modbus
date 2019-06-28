@@ -1,9 +1,18 @@
 #ifndef UART_H
 #define	UART_H
 
+/**
+ * Module that virtualize UART support for bus wired communication from RS485 module.
+ * Requires 9-bit support
+ * Declared to decouple UART implementation, that can be native Microchip MCU or Raspbian/Raspberry based.
+ */
+
 typedef struct {
+    // Receive state of the 9th bit
     unsigned rc9 :1;
+    // Frame error occurred?
     unsigned ferr :1;
+    // Overflow error occurred?
     unsigned oerr :1;
 } UART_RX_MD;
 

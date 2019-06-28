@@ -2,6 +2,11 @@
 #include "../appio.h"
 #include "eeprom.h"
 
+/**
+ * This module defines the virtualization layer for data peristence
+ * (e.g. saves node ID)
+ */
+
 #ifdef _IS_ETH_CARD
 // Source: http://www.microchip.com/forums/m339126.aspx
 

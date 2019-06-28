@@ -2,16 +2,8 @@
 #include "sinks.h"
 #include "appio.h"
 #include "protocol.h"
-#include "sinks/displaySink.h"
-#include "sinks/digio.h"
-#include "sinks/dht11.h"
-#include "sinks/halfduplex.h"
-#include "sinks/bmp180.h"
-#include "sinks/flowCounter.h"
 
 #ifdef HAS_BUS
-
-#ifndef HAS_FIRMWARE
 
 static bit nil() {
     CLRWDT();
@@ -130,22 +122,6 @@ const SinkFunction const sink_writeHandlers[] = {
     ,customsink_write 
 #endif
 };
-
-#else
-
-const FIRMWARE_HEADER e_header @ FW_SINK_VECTOR_PTR;
-const BYTE _e_filler[FW_SIZE] @ FW_SINK_VECTOR_PTR;
-
-#endif
-
-void sinks_init() {
-#ifdef HAS_BMP180
-    bmp180_init();
-#endif
-#ifdef HAS_DHT11
-    dht11_init();
-#endif
-}
 
 const TWOCC ResetCode = { "RS" };
 const TWOCC ExceptionText = { "EX" };

@@ -1,6 +1,8 @@
 #include "pch.h"
 
-// Code-memory optimized version of memcmp
+/**
+ * Code-memory optimized version of memcmp
+ */
 bit memcmp8(void* p1, void* p2, BYTE size)
 {
     while (size-- > 0) {

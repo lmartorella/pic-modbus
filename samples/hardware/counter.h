@@ -7,6 +7,19 @@ void dcnt_interrupt();
 void dcnt_init();
 void dcnt_poll();
 
+/**
+ * The system persistence record
+ */
+typedef struct
+{
+    // Used by counter
+    DWORD dcnt_counter;
+} PersistentData2;
+
+static EEPROM_MODIFIER PersistentData s_persistentData2 = {
+    0
+};
+
 typedef struct {
     // Copied from persistence to better control atomicity of accesses. 
     // Ticks.

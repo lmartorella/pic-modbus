@@ -1,5 +1,9 @@
 #include "../pch.h"
 
+/**
+ * Uses .inc file to include compile-time code
+ */
+
 #ifdef _IS_ETH_CARD
 #include "fuses_eth_card.inc"
 #elif defined(_IS_PIC16F628_CARD)

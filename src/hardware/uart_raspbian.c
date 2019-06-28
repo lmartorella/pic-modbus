@@ -13,6 +13,11 @@
 #include <errno.h> 
 #include <math.h>
 
+/**
+ * TODO: implement a interrupt-based version of this UART polling. Required interrupt to be
+ * routed on Raspbian.
+ */
+
 typedef enum {
     UART_REG_DR = 0x00,
     UART_REG_RSRECR = 0x01,

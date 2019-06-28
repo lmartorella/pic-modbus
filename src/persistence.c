@@ -2,8 +2,10 @@
 #include "persistence.h"
 #include "appio.h"
 
+/**
+ * The RAM backed-up data for writings and readings
+ */
 PersistentData pers_data;
-
 
 #ifdef _IS_ETH_CARD
 #   define __ADDRESS @ 0x1F800
@@ -14,17 +16,13 @@ PersistentData pers_data;
 #endif
 
 static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = { 
+    // Zero GUID by default, it means unassigned
     { 0, 0, 0, 0, 0 }, 
 
-    // Used by bus_client
 #ifdef HAS_BUS_CLIENT
+    // Used by bus_client
     UNASSIGNED_SUB_ADDRESS, 
     0xff,
-#endif
-
-    // Used by counter
-#ifdef HAS_DIGITAL_COUNTER
-    0
 #endif
 };
 
@@ -36,7 +34,7 @@ static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] @ (0
 #define ROM_ADDR 0
 #endif
 
-void pers_init()
+void pers_load()
 {
 #if defined(HAS_EEPROM)
     rom_read(ROM_ADDR, (BYTE*)&pers_data, PERSISTENT_SIZE);

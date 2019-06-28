@@ -1,6 +1,10 @@
 #ifndef LEDS_H
 #define	LEDS_H
 
+/**
+ * Functions to regulate notification led
+ */
+
 #ifdef HAS_LED
 
 #define led_init() { LED_PORTBIT = 0; LED_TRISBIT = 0; }

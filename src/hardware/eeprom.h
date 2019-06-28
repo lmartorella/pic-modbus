@@ -3,6 +3,11 @@
 
 #include "../pch.h"
 
+/**
+ * This module defines the virtualization layer for data peristence
+ * (e.g. saves node ID)
+ */
+
 #ifdef _IS_ETH_CARD
 
 // PIC18 has memcpy

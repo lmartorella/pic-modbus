@@ -7,27 +7,24 @@
 #include "hardware/eeprom.h"
 #endif
 
-/********************
-  USER-DATA PART OF LOADER RECORD (PROGRAMMABLE)
-  The record is immediately before the Configuration word, in the higher program memory.
-  (loader do supports changing configuration words)
-*/
+/**
+ * The system persistence record
+ */
 typedef struct
 {
-  	// GUID:  application instance ID (used by user code)
+    /**
+     * The stored device ID
+     */
 	GUID deviceId;
     
     // Used by bus_client
 #ifdef HAS_BUS_CLIENT
+    /**
+     * The bean node bus address
+     */ 
     BYTE address;
     BYTE filler;
-#endif
-
-    // Used by counter
-#ifdef HAS_DIGITAL_COUNTER
-    DWORD dcnt_counter;
-#endif
-    
+#endif    
 } PersistentData;
 
 // The cached copy of the EEPROM data, read at startup/init
@@ -35,8 +32,8 @@ typedef struct
 extern PersistentData pers_data;
 
 // Update copy of persistence
-void pers_init();
-// Poll WR 
+void pers_load();
+// Poll long-running writing operations 
 #define pers_poll rom_poll
 // Program the new content of the UserData
 void pers_save();

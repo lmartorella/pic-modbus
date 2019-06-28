@@ -4,6 +4,10 @@
 #include "protocol.h"
 #include "appio.h"
 
+/**
+ * Wired bus communication module for master nodes
+ */
+
 #ifdef HAS_BUS_SERVER
 
 static BYTE s_childKnown[BUFFER_MASK_SIZE];
@@ -76,7 +80,7 @@ static void setChildKnown(signed char i)
     
     char msg[16];
     sprintf(msg, "%u nodes", countChildren());
-    println(msg);
+    io_println(msg);
 }
 
 void bus_init()
@@ -92,7 +96,7 @@ void bus_init()
     s_waitTxQuickEnd = 0;
     
     // Do full scan
-    s_lastScanTime = TickGet();
+    s_lastScanTime = timers_get();
 
     memset(&g_busStats, 0, sizeof(BUS_MASTER_STATS));
 }
@@ -106,7 +110,7 @@ void bus_resetDirtyChildren() {
 static void bus_scanNext()
 {
     BUS_MSG_TYPE msgType = BUS_MSG_TYPE_HEARTBEAT;
-    s_lastScanTime = TickGet();
+    s_lastScanTime = timers_get();
     
     // Poll next child 
     s_scanIndex++;
@@ -140,7 +144,7 @@ static void bus_registerNewNode() {
             s_busState = BUS_PRIV_STATE_IDLE;
             s_scanIndex = 0;
             
-            println("Children full");
+            io_println("Children full");
             
             return;
         }
@@ -207,7 +211,7 @@ void bus_poll()
             return;
         } else {
             // Start timeout and go ahead
-            s_lastTime = TickGet();
+            s_lastTime = timers_get();
             s_waitTxFlush = 0;
         }
     }
@@ -218,7 +222,7 @@ void bus_poll()
             return;
         } else {
             // Start timeout and go ahead
-            s_lastTime = TickGet();
+            s_lastTime = timers_get();
             s_waitTxQuickEnd = 0;
         }
     }
@@ -232,7 +236,7 @@ void bus_poll()
             }
             else {
                 // Do/doing a scan?
-                if (TickGet() - s_lastScanTime >= BUS_SCAN_TIMEOUT) {
+                if (timers_get() - s_lastScanTime >= BUS_SCAN_TIMEOUT) {
                     bus_scanNext();
                 }
             }
@@ -244,7 +248,7 @@ void bus_poll()
                 bus_checkAck();
             } else {
                 // Check for timeout
-                if (TickGet() - s_lastTime >= BUS_ACK_TIMEOUT) {
+                if (timers_get() - s_lastTime >= BUS_ACK_TIMEOUT) {
                     // Timeout. Dead bean?
                     // Do nothing, simply skip it for now.
                     s_busState = BUS_PRIV_STATE_IDLE;
@@ -252,7 +256,7 @@ void bus_poll()
             }
             break;
         case BUS_PRIV_STATE_SOCKET_CONNECTED:
-            if (TickGet() - s_lastTime >= BUS_SOCKET_TIMEOUT) {
+            if (timers_get() - s_lastTime >= BUS_SOCKET_TIMEOUT) {
                 // Timeout. Dead bean?
                 // Drop the TCP connection and reset the channel
                 bus_disconnectSocket(SOCKET_ERR_TIMEOUT);
@@ -333,7 +337,7 @@ static void bus_socketPoll()
         if (rx > 0) {
             prot_control_read(buffer, rx);
             rs485_write(FALSE, buffer, rx);
-            s_lastTime = TickGet();
+            s_lastTime = timers_get();
         }
     }
     else {
@@ -344,7 +348,7 @@ static void bus_socketPoll()
             // Read data and push it into IP
             tx = tx > sizeof(buffer) ? sizeof(buffer) : tx;
             rs485_read(buffer, tx);
-            s_lastTime = TickGet();
+            s_lastTime = timers_get();
                       
             if (rs485_lastRc9) {
                 // Read control char

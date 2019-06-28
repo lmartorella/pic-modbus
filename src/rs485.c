@@ -59,7 +59,7 @@ void rs485_init()
     s_oerr  = 0;
     s_lastTx = 0;
     s_writePtr = s_readPtr = s_buffer;
-    s_lastTick = TickGet();
+    s_lastTick = timers_get();
     
     rs485_state = RS485_LINE_RX;
     rs485_startRead();
@@ -169,11 +169,11 @@ void rs485_poll()
         fatal("U.OER");
     }
     
-    TICK_TYPE elapsed = TickGet() - s_lastTick;
+    TICK_TYPE elapsed = timers_get() - s_lastTick;
     switch (rs485_state){
         case RS485_LINE_TX:
             if (s_lastTx) {
-                s_lastTick = TickGet();
+                s_lastTick = timers_get();
                 rs485_state = RS485_LINE_TX_DISENGAGE;
                 s_lastTx = 0;
             }
@@ -184,7 +184,7 @@ void rs485_poll()
                 rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
                 // Enable RS485 driver
                 uart_trasmit();
-                s_lastTick = TickGet();
+                s_lastTick = timers_get();
             }
             break;
         case RS485_LINE_WAIT_FOR_START_TRANSMIT:
@@ -229,7 +229,7 @@ void rs485_write(BOOL address, const BYTE* data, BYTE size)
         uart_enable_tx();
 
         rs485_state = RS485_LINE_WAIT_FOR_ENGAGE;
-        s_lastTick = TickGet();
+        s_lastTick = timers_get();
     }
 
     // Disable interrupts
@@ -256,7 +256,7 @@ void rs485_write(BOOL address, const BYTE* data, BYTE size)
         case RS485_LINE_TX_DISENGAGE:
             // Re-convert it to tx
             rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
-            s_lastTick = TickGet();
+            s_lastTick = timers_get();
             break;
         case RS485_LINE_TX:
             // Was in transmit state: reenable TX feed interrupt
@@ -277,7 +277,7 @@ static void rs485_startRead()
     if (rs485_state != RS485_LINE_RX) {
         // Break all
         rs485_state = RS485_LINE_TX_DISENGAGE;
-        s_lastTick = TickGet();
+        s_lastTick = timers_get();
         return;
     }
     
@@ -304,7 +304,7 @@ void rs485_waitDisengageTime() {
         uart_rx_fifo_empty_set_mask(0);
         
         rs485_state = RS485_LINE_TX_DISENGAGE;
-        s_lastTick = TickGet();
+        s_lastTick = timers_get();
     }
 }
 

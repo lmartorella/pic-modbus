@@ -4,7 +4,6 @@
 #include "persistence.h"
 #include "protocol.h"
 #include "sinks.h"
-#include "apps/apps.h"
 
 #ifdef HAS_DIGITAL_COUNTER
 #include "hardware/counter.h"
@@ -14,7 +13,7 @@
 void interrupt PRIO_TYPE low_isr()
 {
     // Update tick timers at ~Khz freq
-    TickUpdate();
+    timers_poll();
 #ifdef HAS_RS485
     rs485_interrupt();
 #endif
@@ -35,9 +34,9 @@ void main()
 
     // Init Ticks on timer0 (low prio) module
     timers_init();
-    appio_init();
+    io_init();
 
-    pers_init();
+    pers_load();
 
 #if defined(HAS_SPI) && defined(HAS_I2C)
 #error Cannot enable both SPI and I2C
@@ -52,7 +51,7 @@ void main()
 #endif
 
 #ifdef HAS_SPI
-    println("Spi");
+    io_println("Spi");
     
     // Enable SPI
     // from 23k256 datasheet and figure 20.3 of PIC datasheet
