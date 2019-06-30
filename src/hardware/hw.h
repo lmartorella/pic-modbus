@@ -22,7 +22,7 @@
 #define _IS_PIC16F628_CARD
 
 #elif defined(_CONF_GARDEN_BEAN)
-#include "../../../samples/beans/hardware/fuses_garden_bean.h"
+#include "../../../samples/garden/fuses_garden_bean.h"
 #define _IS_PIC16F887_CARD
 
 #elif defined(_CONF_MICRO_BEAN)
