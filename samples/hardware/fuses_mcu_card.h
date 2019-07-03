@@ -61,7 +61,6 @@
 // ******
 // IP: uses PORTA0,1 (leds)
 // ******
-#define HAS_IP
 
 // 17007: release, 17008: debug
 #define SERVER_CONTROL_UDP_PORT 17007

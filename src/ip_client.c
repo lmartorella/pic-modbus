@@ -6,8 +6,8 @@
 
 #ifdef HAS_IP
 #ifdef __XC8
-    #include "Compiler.h"
-    #include "TCPIPStack/TCPIP.h"
+    #include "tcpipstack/Include/Compiler.h"
+    #include "tcpipstack/Include/TCPIPStack/TCPIP.h"
     APP_CONFIG AppConfig;
 #endif
 

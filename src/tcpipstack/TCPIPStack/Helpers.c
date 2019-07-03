@@ -55,10 +55,9 @@
  ********************************************************************/
 #define __HELPERS_C
 
-#include <stdarg.h>
 #ifdef HAS_IP
+#include <stdarg.h>
 #include "../Include/TCPIPStack/TCPIP.h"
-
 
 // Default Random Number Generator seed. 0x41FE9F9E corresponds to calling LFSRSeedRand(1)
 static DWORD dwLFSRRandSeed = 0x41FE9F9E;

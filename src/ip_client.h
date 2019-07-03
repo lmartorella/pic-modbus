@@ -10,8 +10,8 @@
 #ifdef HAS_IP
 
 #if __XC8
-#include "Compiler.h"
-#include "TCPIPStack/TCPIP.h"
+#include "tcpipstack/Include/Compiler.h"
+#include "tcpipstack/Include/TCPIPStack/TCPIP.h"
 #endif
 
 #if _CONF_RASPBIAN

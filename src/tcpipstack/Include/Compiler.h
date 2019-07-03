@@ -58,69 +58,69 @@
 #define __COMPILER_H
 
 // Include proper device header file
-#if defined(__18CXX) && !defined(HI_TECH_C)	
-	// PIC18 processor with Microchip C18 compiler
-    #define COMPILER_MPLAB_C18
-    #include <p18cxxx.h>
-#elif defined(__PICC18__) && defined(HI_TECH_C)	
-	// PIC18 processor with (Microchip) HI-TECH PICC-18 compiler
-	#if !defined(__18CXX)
-		#define __18CXX
-	#endif
-    #define COMPILER_HITECH_PICC18
-	#include <htc.h>
-#elif defined(__XC__)
+//#if defined(__18CXX) && !defined(HI_TECH_C)	
+//	// PIC18 processor with Microchip C18 compiler
+//    #define COMPILER_MPLAB_C18
+//    #include <p18cxxx.h>
+//#elif defined(__PICC18__) && defined(HI_TECH_C)	
+//	// PIC18 processor with (Microchip) HI-TECH PICC-18 compiler
+//	#if !defined(__18CXX)
+//		#define __18CXX
+//	#endif
+//    #define COMPILER_HITECH_PICC18
+//	#include <htc.h>
+//#elif defined(__XC__)
     #define COMPILER_XC
     #include <xc.h>
-#elif (defined(_PIC12) || defined(_PIC14) || defined(_PIC14E)) && defined(HI_TECH_C)
-	// PIC10/12/16 processor with (Microchip) HI-TECH PICC compiler
-    #define COMPILER_HITECH_PICC
-    #include <htc.h>
-#elif (defined(__PIC24F__) || defined(__PIC24FK__)) && defined(__C30__)	// Microchip C30 compiler
-	// PIC24F processor
-    #define COMPILER_MPLAB_C30
-	#include <p24Fxxxx.h>
-#elif defined(__PIC24H__) && defined(__C30__)	// Microchip C30 compiler
-	// PIC24H processor
-    #define COMPILER_MPLAB_C30
-	#include <p24Hxxxx.h>
-#elif defined(__PIC24E__) && defined(__C30__)	// Microchip C30 compiler
-	// PIC24E processor
-    #define COMPILER_MPLAB_C30
-	#include <p24Exxxx.h>
-#elif defined(__dsPIC33F__) && defined(__C30__)	// Microchip C30 compiler
-	// dsPIC33F processor
-    #define COMPILER_MPLAB_C30
-	#include <p33Fxxxx.h>
-#elif defined(__dsPIC33E__) && defined(__C30__)	// Microchip C30 compiler
-	// dsPIC33E processor
-    #define COMPILER_MPLAB_C30
-	#include <p33Exxxx.h>
-#elif defined(__dsPIC30F__) && defined(__C30__)	// Microchip C30 compiler
-	// dsPIC30F processor
-    #define COMPILER_MPLAB_C30
-	#include <p30fxxxx.h>
-#elif defined(__C30__)		// Microchip C30 compiler, but targeting "generic-16bit" processor.
-    #define COMPILER_MPLAB_C30
-	#include <p30sim.h>
-	// Define some useful inline assembly functions which are normally in the 
-	// processor header files, but absent from the generic p30sim.h file.
-	#if !defined(Nop)
-		#define Nop()    __builtin_nop()
-		#define ClrWdt() {__asm__ volatile ("clrwdt");}
-		#define Sleep()  {__asm__ volatile ("pwrsav #0");}
-		#define Idle()   {__asm__ volatile ("pwrsav #1");}
-	#endif
-#elif defined(__PIC32MX__)	// Microchip C32 compiler
-	#if !defined(__C32__)
-		#define __C32__
-	#endif
-    #define COMPILER_MPLAB_C32
-	#include <p32xxxx.h>
-	#include <plib.h>
-#else
-	#error Unknown processor or compiler.  See Compiler.h
-#endif
+//#elif (defined(_PIC12) || defined(_PIC14) || defined(_PIC14E)) && defined(HI_TECH_C)
+//	// PIC10/12/16 processor with (Microchip) HI-TECH PICC compiler
+//    #define COMPILER_HITECH_PICC
+//    #include <htc.h>
+//#elif (defined(__PIC24F__) || defined(__PIC24FK__)) && defined(__C30__)	// Microchip C30 compiler
+//	// PIC24F processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p24Fxxxx.h>
+//#elif defined(__PIC24H__) && defined(__C30__)	// Microchip C30 compiler
+//	// PIC24H processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p24Hxxxx.h>
+//#elif defined(__PIC24E__) && defined(__C30__)	// Microchip C30 compiler
+//	// PIC24E processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p24Exxxx.h>
+//#elif defined(__dsPIC33F__) && defined(__C30__)	// Microchip C30 compiler
+//	// dsPIC33F processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p33Fxxxx.h>
+//#elif defined(__dsPIC33E__) && defined(__C30__)	// Microchip C30 compiler
+//	// dsPIC33E processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p33Exxxx.h>
+//#elif defined(__dsPIC30F__) && defined(__C30__)	// Microchip C30 compiler
+//	// dsPIC30F processor
+//    #define COMPILER_MPLAB_C30
+//	#include <p30fxxxx.h>
+//#elif defined(__C30__)		// Microchip C30 compiler, but targeting "generic-16bit" processor.
+//    #define COMPILER_MPLAB_C30
+//	#include <p30sim.h>
+//	// Define some useful inline assembly functions which are normally in the 
+//	// processor header files, but absent from the generic p30sim.h file.
+//	#if !defined(Nop)
+//		#define Nop()    __builtin_nop()
+//		#define ClrWdt() {__asm__ volatile ("clrwdt");}
+//		#define Sleep()  {__asm__ volatile ("pwrsav #0");}
+//		#define Idle()   {__asm__ volatile ("pwrsav #1");}
+//	#endif
+//#elif defined(__PIC32MX__)	// Microchip C32 compiler
+//	#if !defined(__C32__)
+//		#define __C32__
+//	#endif
+//    #define COMPILER_MPLAB_C32
+//	#include <p32xxxx.h>
+//	#include <plib.h>
+//#else
+//	#error Unknown processor or compiler.  See Compiler.h
+//#endif
 
 #include <stdio.h>
 #include <stdlib.h>

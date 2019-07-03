@@ -4,22 +4,9 @@
 /**
  * Loads the MCU headers and additional fuses
  */
-
-#if defined(_CONF_TEST_ETH_CARD)
-#include "../../../samples/beans/hardware/fuses_test_eth_card.h"
-#define _IS_ETH_CARD
-
-#elif defined(_CONF_MCU_CARD)
+#if defined(_CONF_MCU_CARD)
 #include "../../../samples/beans/hardware/fuses_mcu_card.h"
 #define _IS_ETH_CARD
-
-#elif defined(_CONF_TEST_MINI_BEAN)
-#include "../../../samples/beans/hardware/fuses_test_mini_bean.h"
-#define _IS_PIC16F628_CARD
-
-#elif defined(_CONF_SOLAR_BEAN)
-#include "../../../samples/beans/hardware/fuses_solar_bean.h"
-#define _IS_PIC16F628_CARD
 
 #elif defined(_CONF_GARDEN_BEAN)
 #include "../../../samples/garden/fuses_garden_bean.h"

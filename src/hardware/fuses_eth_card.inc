@@ -1,6 +1,9 @@
 #include "../pch.h"
 #include "../appio.h"
 
+void Delay10TCYx(unsigned char);
+void Delay1KTCYx(unsigned char);
+    
 // ==== ETH CARD based on 18f87j60
 
 // For the list of fuses, run "mcc18.exe --help-config -p=18f87j60"

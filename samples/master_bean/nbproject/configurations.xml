@@ -15,6 +15,52 @@
         <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
         <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
         <itemPath>../../../src/nodes/hardware/utilities.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/fuses_eth_card.inc</itemPath>
+      </logicalFolder>
+      <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
+        <logicalFolder name="Include" displayName="Include" projectFiles="true">
+          <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Announce.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ARP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/AutoIP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/BerkeleyAPI.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/BigInt.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Delay.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/DHCP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/DNS.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ETH97J60.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/FTP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Hashes.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Helpers.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/HTTP2.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ICMP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/IP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/MAC.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/MPFS2.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/NBNS.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Random.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Reboot.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/regdef.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SMTP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNMP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNMPv3.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNTP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/StackTsk.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/TCP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/TCPIP.h</itemPath>
+            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/UDP.h</itemPath>
+          </logicalFolder>
+          <itemPath>../../../src/nodes/tcpipstack/Include/Compiler.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/debug.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/GenericTypeDefs_old.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/struct_queue.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/TimeDelay.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/timer.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
+        </logicalFolder>
+        <itemPath>../../../src/nodes/tcpipstack/HardwareProfile.h</itemPath>
+        <itemPath>../../../src/nodes/tcpipstack/TCPIPConfig.h</itemPath>
       </logicalFolder>
       <itemPath>../../../src/nodes/appio.h</itemPath>
       <itemPath>../../../src/nodes/bus.h</itemPath>
@@ -51,6 +97,21 @@
         <itemPath>../sinks/flowCounter.c</itemPath>
         <itemPath>../sinks/halfduplex.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
+        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ARP.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/DHCP.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/DNS.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ETH97J60.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/Hashes.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/Helpers.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ICMP.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/IP.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/StackTsk.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/TCP.c</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/UDP.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
       <itemPath>../../../src/nodes/main.c</itemPath>
       <itemPath>../../../src/nodes/persistence.c</itemPath>
       <itemPath>../../../src/nodes/appio.c</itemPath>
@@ -75,10 +136,10 @@
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="MicroBean" type="2">
+    <conf name="BusMaster" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F1827</targetDevice>
+        <targetDevice>PIC18F86J60</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
@@ -112,7 +173,7 @@
       </makeCustomizationType>
       <HI-TECH-COMP>
         <property key="asmlist" value="true"/>
-        <property key="define-macros" value="_CONF_MICRO_BEAN"/>
+        <property key="define-macros" value="_CONF_MCU_CARD;HAS_IP"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories" value=""/>
         <property key="favor-optimization-for" value="-speed,+space"/>
@@ -217,7 +278,7 @@
         <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
-        <property key="voltagevalue" value="5.0"/>
+        <property key="voltagevalue" value="2.125"/>
       </PICkit3PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>

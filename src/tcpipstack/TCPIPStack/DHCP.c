@@ -83,11 +83,9 @@
 #define __DHCP_C
 
 #ifdef HAS_IP
-#include "../TCPIPConfig.h"
+#include "../include/TCPIPStack/TCPIP.h"
 
 #if defined(STACK_USE_DHCP_CLIENT)
-
-#include "TCPIPStack/TCPIP.h"
 
 // Defines how long to wait before a DHCP request times out
 #define DHCP_TIMEOUT				(2ul*TICK_SECOND)

@@ -267,7 +267,6 @@ static void TCPRAMCopy_PicToEth(ETH_POINTER wDest, const BYTE* wSource, WORD wLe
 static void TCPRAMCopy_EthToEth(ETH_POINTER wDest, ETH_POINTER wSource, WORD wLength);
 #define TCPRAMCopy_PicToPic(wDest, wSource, wLength) memcpy(wDest, wSource, wLength)
 
-
 static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags);
 static void HandleTCPSeg(TCP_HEADER* h, WORD len);
 static BOOL FindMatchingSocket(TCP_HEADER* h, NODE_INFO* remote);

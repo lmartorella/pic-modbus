@@ -321,113 +321,113 @@
 	#include "TCPIPStack/SPIRAM.h"
 */
 #if defined(STACK_USE_UDP)
-	#include "TCPIPStack/UDP.h"
+	#include "UDP.h"
 #endif
 
 #if defined(STACK_USE_TCP)
-	#include "TCPIPStack/TCP.h"
+	#include "TCP.h"
 #endif
 
 #if defined(STACK_USE_BERKELEY_API)
-	#include "TCPIPStack/BerkeleyAPI.h"
+	#include "BerkeleyAPI.h"
 #endif
 
 #if defined(USE_LCD)
-	#include "TCPIPStack/LCDBlocking.h"
+	#include "LCDBlocking.h"
 #endif
 
 #if defined(STACK_USE_UART2TCP_BRIDGE)
-	#include "TCPIPStack/UART2TCPBridge.h"
+	#include "UART2TCPBridge.h"
 #endif
 
 #if defined(STACK_USE_UART)
-	#include "TCPIPStack/UART.h"
+	#include "UART.h"
 #endif
 
 #if defined(STACK_USE_DHCP_CLIENT) || defined(STACK_USE_DHCP_SERVER)
-	#include "TCPIPStack/DHCP.h"
+	#include "DHCP.h"
 #endif
 
 #if defined(STACK_USE_DNS) || defined(STACK_USE_DNS_SERVER)
-	#include "TCPIPStack/DNS.h"
+	#include "DNS.h"
 #endif
 
 #if defined(STACK_USE_MPFS2)
-	#include "TCPIPStack/MPFS2.h"
+	#include "MPFS2.h"
 #endif
 
 #if defined(STACK_USE_FTP_SERVER)
-	#include "TCPIPStack/FTP.h"
+	#include "FTP.h"
 #endif
 
 
 #if defined(STACK_USE_HTTP2_SERVER)
 	#ifdef STACK_USE_MDD
-		#include "TCPIPStack/FileSystem.h"
-		#include "TCPIPStack/_HTTP2.h"
+		#include "FileSystem.h"
+		#include "_HTTP2.h"
 	#else
-		#include "TCPIPStack/HTTP2.h"
+		#include "HTTP2.h"
 	#endif
 #endif
 
 #if defined(STACK_USE_ICMP_SERVER) || defined(STACK_USE_ICMP_CLIENT)
-	#include "TCPIPStack/ICMP.h"
+	#include "ICMP.h"
 #endif
 
 #if defined(STACK_USE_ANNOUNCE)
-	#include "TCPIPStack/Announce.h"
+	#include "Announce.h"
 #endif
 
 #if defined(STACK_USE_SNMP_SERVER)
-	#include "TCPIPStack/SNMP.h"
+	#include "SNMP.h"
 	#include "mib.h"
 #endif
 
 #if defined(STACK_USE_NBNS)
-	#include "TCPIPStack/NBNS.h"
+	#include "NBNS.h"
 #endif
 
 #if defined(STACK_USE_DNS)
-	#include "TCPIPStack/DNS.h"
+	#include "DNS.h"
 #endif
 
 #if defined(STACK_USE_DYNAMICDNS_CLIENT)
-	#include "TCPIPStack/DynDNS.h"
+	#include "DynDNS.h"
 #endif
 
 #if defined(STACK_USE_TELNET_SERVER)
-	#include "TCPIPStack/Telnet.h"
+	#include "Telnet.h"
 #endif
 
 #if defined(STACK_USE_SMTP_CLIENT)
-	#include "TCPIPStack/SMTP.h"
+	#include "SMTP.h"
 #endif
 
 #if defined(STACK_USE_TFTP_CLIENT)
-	#include "TCPIPStack/TFTPc.h"
+	#include "TFTPc.h"
 #endif
 
 #if defined(STACK_USE_REBOOT_SERVER)
-	#include "TCPIPStack/Reboot.h"
+	#include "Reboot.h"
 #endif
 
 #if defined(STACK_USE_SNTP_CLIENT)
-	#include "TCPIPStack/SNTP.h"
+	#include "SNTP.h"
 #endif
 
 #if defined(STACK_USE_UDP_PERFORMANCE_TEST)
-	#include "TCPIPStack/UDPPerformanceTest.h"
+	#include "UDPPerformanceTest.h"
 #endif
 
 #if defined(STACK_USE_TCP_PERFORMANCE_TEST)
-	#include "TCPIPStack/TCPPerformanceTest.h"
+	#include "TCPPerformanceTest.h"
 #endif
 
 #if defined(STACK_USE_SSL)
-	#include "TCPIPStack/SSL.h"
+	#include "SSL.h"
 #endif
 
 #if defined(WF_CS_TRIS)
-    #include "TCPIPStack/WFMac.h"
+    #include "WFMac.h"
 #endif
 #endif
