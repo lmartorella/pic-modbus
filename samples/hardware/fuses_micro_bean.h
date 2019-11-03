@@ -95,6 +95,11 @@
 #define DCNT_IF INTCONbits.INTF
 #define DCNT_IE INTCONbits.INTE
 
+// Digital event-based input
+#define HAS_DIGIO_IN
+#define DIGIO_PORT_IN_BIT PORTBbits.RB0
+#define DIGIO_TRIS_IN_BIT TRISBbits.TRISB0
+
 // Reset the device with fatal error
 extern persistent BYTE g_exceptionPtr;
 #define fatal(msg) { g_exceptionPtr = (BYTE)msg; RESET(); }

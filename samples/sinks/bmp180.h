@@ -1,6 +1,9 @@
 #ifndef _BPM180_H_SINK_
 #define	_BPM180_H_SINK_
 
+// BPM180 I2C module to read barometric data (air pressure)
+#ifdef HAS_BMP180
+
 #define SINK_BMP180_ID "BM18"
 
 void bmp180_init();
@@ -27,6 +30,8 @@ typedef union {
     };
 } BMP180_BUFFER;
 extern BMP180_BUFFER bmp180_buffer;
+
+#endif
 
 #endif	
 

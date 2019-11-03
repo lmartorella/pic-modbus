@@ -1,6 +1,7 @@
 #ifndef DIG_COUNTER_H
 #define	DIG_COUNTER_H
 
+// Used for flow counter. Uses interrupts to not lose any tick.
 #ifdef HAS_DIGITAL_COUNTER
 
 void dcnt_interrupt();
