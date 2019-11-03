@@ -24,6 +24,10 @@ typedef struct
      */ 
     BYTE address;
     BYTE filler;
+#endif
+
+#ifdef HAS_PERSISTENT_SINK_DATA
+    PERSISTENT_SINK_DATA sinkData;
 #endif    
 } PersistentData;
 

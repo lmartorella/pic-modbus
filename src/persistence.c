@@ -24,6 +24,10 @@ static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = {
     UNASSIGNED_SUB_ADDRESS, 
     0xff,
 #endif
+    
+#ifdef HAS_PERSISTENT_SINK_DATA
+    PERSISTENT_SINK_DATA_DEFAULT_DATA
+#endif
 };
 
 

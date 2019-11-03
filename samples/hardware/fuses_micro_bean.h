@@ -65,6 +65,7 @@
 //TXCKSEL:1  TX/CK function is on RB5
 
 #undef HAS_I2C
+/*
 #define I2C_PORT_SDA PORTBbits.RB1
 #define I2C_TRIS_SDA TRISBbits.TRISB1
 #define I2C_PORT_SCL PORTBbits.RB4
@@ -87,16 +88,28 @@
 #define I2C_SSPCON2_ACKEN SSP1CON2bits.ACKEN
 #define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
 #define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
+*/
 
-#undef HAS_BMP180
-
-#undef HAS_DIGITAL_COUNTER
+// Digital flow counter
+#define HAS_DIGITAL_COUNTER
 #define DCNT_IF INTCONbits.INTF
 #define DCNT_IE INTCONbits.INTE
 
 // Reset the device with fatal error
 extern persistent BYTE g_exceptionPtr;
 #define fatal(msg) { g_exceptionPtr = (BYTE)msg; RESET(); }
+
+// Custom persistence data
+#define HAS_PERSISTENT_SINK_DATA
+typedef struct
+{
+    // Used by counter
+    DWORD dcnt_counter;
+} PERSISTENT_SINK_DATA;
+#define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
+
+#define HAS_INTERRUPT_VECTOR
+#define INTERRUPT_VECTOR dcnt_interrupt();
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

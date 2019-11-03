@@ -13,8 +13,8 @@ void interrupt PRIO_TYPE low_isr()
 #ifdef HAS_RS485
     rs485_interrupt();
 #endif
-#ifdef HAS_DIGITAL_COUNTER
-    dcnt_interrupt();
+#ifdef HAS_INTERRUPT_VECTOR
+    INTERRUPT_VECTOR
 #endif
 }
 #endif

@@ -5,26 +5,39 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f628.inc</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f887.inc</itemPath>
-        <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/ip_raspbian.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/utilities.h</itemPath>
+        <itemPath>../hardware/fuses_micro_bean.h</itemPath>
+        <itemPath>../hardware/cm1602.h</itemPath>
+        <itemPath>../hardware/counter.h</itemPath>
+        <itemPath>../hardware/i2c.h</itemPath>
+        <itemPath>../hardware/max232.h</itemPath>
       </logicalFolder>
-      <itemPath>../../../src/nodes/appio.h</itemPath>
-      <itemPath>../../../src/nodes/bus.h</itemPath>
-      <itemPath>../../../src/nodes/guid.h</itemPath>
-      <itemPath>../../../src/nodes/ip_client.h</itemPath>
-      <itemPath>../../../src/nodes/pch.h</itemPath>
-      <itemPath>../../../src/nodes/persistence.h</itemPath>
-      <itemPath>../../../src/nodes/protocol.h</itemPath>
-      <itemPath>../../../src/nodes/rs485.h</itemPath>
-      <itemPath>../../../src/nodes/sinks.h</itemPath>
+      <logicalFolder name="f1" displayName="sdk" projectFiles="true">
+        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+          <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/utilities.h</itemPath>
+        </logicalFolder>
+        <itemPath>../../../src/nodes/ip_client.h</itemPath>
+        <itemPath>../../../src/nodes/pch.h</itemPath>
+        <itemPath>../../../src/nodes/persistence.h</itemPath>
+        <itemPath>../../../src/nodes/protocol.h</itemPath>
+        <itemPath>../../../src/nodes/rs485.h</itemPath>
+        <itemPath>../../../src/nodes/appio.h</itemPath>
+        <itemPath>../../../src/nodes/bus.h</itemPath>
+        <itemPath>../../../src/nodes/guid.h</itemPath>
+        <itemPath>../../../src/nodes/sinks.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="sinks" projectFiles="true">
+        <itemPath>../sinks/bmp180.h</itemPath>
+        <itemPath>../sinks/dht11.h</itemPath>
+        <itemPath>../sinks/digio.h</itemPath>
+        <itemPath>../sinks/displaySink.h</itemPath>
+        <itemPath>../sinks/flowCounter.h</itemPath>
+        <itemPath>../sinks/halfduplex.h</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -34,14 +47,26 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick_pic18.c</itemPath>
         <itemPath>../hardware/cm1602.c</itemPath>
         <itemPath>../hardware/counter.c</itemPath>
         <itemPath>../hardware/i2c.c</itemPath>
         <itemPath>../hardware/max232_sw.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="sdk" projectFiles="true">
+        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+          <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
+          <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
+        </logicalFolder>
+        <itemPath>../../../src/nodes/appio.c</itemPath>
+        <itemPath>../../../src/nodes/bus_client.c</itemPath>
+        <itemPath>../../../src/nodes/lib8.c</itemPath>
+        <itemPath>../../../src/nodes/main.c</itemPath>
+        <itemPath>../../../src/nodes/persistence.c</itemPath>
+        <itemPath>../../../src/nodes/protocol.c</itemPath>
+        <itemPath>../../../src/nodes/rs485.c</itemPath>
+        <itemPath>../../../src/nodes/sinks.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.c</itemPath>
@@ -51,16 +76,6 @@
         <itemPath>../sinks/flowCounter.c</itemPath>
         <itemPath>../sinks/halfduplex.c</itemPath>
       </logicalFolder>
-      <itemPath>../../../src/nodes/main.c</itemPath>
-      <itemPath>../../../src/nodes/persistence.c</itemPath>
-      <itemPath>../../../src/nodes/appio.c</itemPath>
-      <itemPath>../../../src/nodes/bus_client.c</itemPath>
-      <itemPath>../../../src/nodes/bus_server.c</itemPath>
-      <itemPath>../../../src/nodes/lib8.c</itemPath>
-      <itemPath>../../../src/nodes/ip_client.c</itemPath>
-      <itemPath>../../../src/nodes/sinks.c</itemPath>
-      <itemPath>../../../src/nodes/rs485.c</itemPath>
-      <itemPath>../../../src/nodes/protocol.c</itemPath>
       <itemPath>../samples.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"

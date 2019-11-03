@@ -25,7 +25,7 @@ void dcnt_interrupt() {
 }
 
 void dcnt_init() {
-    s_lastCounter = s_data.counter = pers_data.dcnt_counter;
+    s_lastCounter = s_data.counter = pers_data.sinkData.dcnt_counter;
     s_data.flow = 0;
     s_counterDirty = 0;
     s_persTimer = 0;
@@ -52,7 +52,7 @@ void dcnt_poll() {
         s_lastCounter = currCounter;
         
         if ((++s_persTimer) == 0) {          
-            pers_data.dcnt_counter = s_lastCounter;
+            pers_data.sinkData.dcnt_counter = s_lastCounter;
             pers_save();
             s_counterDirty = 0;
         }

@@ -2,6 +2,7 @@
 #define	FLOWCOUNTER_H
 
 #ifdef HAS_DIGITAL_COUNTER 
+#include "../hardware/counter.h"
 
 #define SINK_FLOW_COUNTER "FLOW"
 
