@@ -38,9 +38,6 @@ const char* const SINK_IDS =
 #if defined(HAS_DIGITAL_COUNTER)
     SINK_FLOW_COUNTER
 #endif
-#if defined(HAS_CUSTOM_SINK)
-    SINK_CUSTOM_ID 
-#endif
 ;
 
 const int SINK_IDS_COUNT = 
@@ -64,9 +61,6 @@ const int SINK_IDS_COUNT =
     + 1
 #endif
 #if defined(HAS_DIGITAL_COUNTER)
-    + 1
-#endif
-#if defined(HAS_CUSTOM_SINK)
     + 1
 #endif
 ;
@@ -94,9 +88,6 @@ const SinkFunction const sink_readHandlers[] = {
 #if defined(HAS_DIGITAL_COUNTER)
     ,nil
 #endif
-#if defined(HAS_CUSTOM_SINK)
-    ,customsink_read 
-#endif
 };
 
 const SinkFunction const sink_writeHandlers[] = {
@@ -121,9 +112,6 @@ const SinkFunction const sink_writeHandlers[] = {
 #endif
 #if defined(HAS_DIGITAL_COUNTER)
     ,flow_write
-#endif
-#if defined(HAS_CUSTOM_SINK)
-    ,customsink_write 
 #endif
 };
 
