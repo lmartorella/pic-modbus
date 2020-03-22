@@ -127,7 +127,7 @@ bit digio_in_write()
             return 1;
         }
         
-        // Write event count + table of events
+        // Write next event, and advance the read counter
         prot_control_write(&s_events[s_evtBegin], sizeof(EVENT_TABLE_t));
         s_evtBegin = (s_evtBegin + 1) % EVENT_BUFFER_SIZE;
 
