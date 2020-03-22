@@ -31,7 +31,7 @@ The inpuit sink let the pin values to be read. High-impedence level is not suppo
 
 In addition to the current pin values, the log of last unread change event of the level is returned, with the precision of the internal tick counter (<1 ms in the micro-bean). This allow more precision for switches will less polling requirement. Changes are internally polled, no interrupt line is used.
 
-This sink doesn't use non-volatile memory: in case of reset, the pin state will reset, and should be reconfigured by the server.
+This sink doesn't use non-volatile memory: in case of reset, the pin state will reset, and it should be reconfigured by the firmware.
 
 This is the content of the read packet. It contains static configuration and actual values:
 
