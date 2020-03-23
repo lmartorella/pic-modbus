@@ -159,4 +159,7 @@ void sinks_poll() {
         dcnt_poll();
     }
 #endif
+#ifdef HAS_DIGIO_IN
+    digio_in_poll();
+#endif
 }
