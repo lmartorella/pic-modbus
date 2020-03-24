@@ -22,6 +22,7 @@ void StackTask();
 void TCPDiscard(TCP_SOCKET socket);
 void TCPDisconnect(TCP_SOCKET socket);
 WORD TCPIsGetReady(TCP_SOCKET socket);
+WORD TCPIsPutReady(TCP_SOCKET socket);
 BOOL TCPIsConnected(TCP_SOCKET socket);
 void TCPFlush(TCP_SOCKET socket);
 WORD TCPGetArray(TCP_SOCKET socket, BYTE* buf, WORD size);
