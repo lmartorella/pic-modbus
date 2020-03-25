@@ -56,8 +56,6 @@
      BAUDCONbits.SCKP = 0;\
      BAUDCONbits.BRG16 = 0;\
      SPBRG = 12;\
-     ANSELBbits.ANSB2 = 0;\
-     ANSELBbits.ANSB5 = 0;\
      APFCON0bits.RXDTSEL = 1;\
      APFCON1bits.TXCKSEL = 1;\
 
@@ -97,8 +95,9 @@
 
 // Digital event-based input
 #define HAS_DIGIO_IN
-#define DIGIO_PORT_IN_BIT PORTBbits.RB0
-#define DIGIO_TRIS_IN_BIT TRISBbits.TRISB0
+#define DIGIO_PORT_IN_BIT PORTBbits.RB3
+#define DIGIO_TRIS_IN_BIT TRISBbits.TRISB3
+#define DIGIO_EVENT_BUFFER_SIZE 32
 
 // Reset the device with fatal error
 extern persistent BYTE g_exceptionPtr;
@@ -113,8 +112,12 @@ typedef struct
 } PERSISTENT_SINK_DATA;
 #define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
 
-#define HAS_INTERRUPT_VECTOR
-#define INTERRUPT_VECTOR dcnt_interrupt();
+#define INTERRUPT_VECTOR dcnt_interrupt
+
+#define INIT_PORTS() \
+     ANSELBbits.ANSB2 = 0;\
+     ANSELBbits.ANSB5 = 0;\
+     ANSELBbits.ANSB3 = 0;\
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

@@ -5,6 +5,10 @@
 #include "protocol.h"
 #include "sinks.h"
 
+#ifdef INTERRUPT_VECTOR
+extern void INTERRUPT_VECTOR();
+#endif
+
 #ifdef __XC8
 void interrupt PRIO_TYPE low_isr()
 {
@@ -13,8 +17,8 @@ void interrupt PRIO_TYPE low_isr()
 #ifdef HAS_RS485
     rs485_interrupt();
 #endif
-#ifdef HAS_INTERRUPT_VECTOR
-    INTERRUPT_VECTOR
+#ifdef INTERRUPT_VECTOR
+    INTERRUPT_VECTOR();
 #endif
 }
 #endif
@@ -43,7 +47,11 @@ void main()
     BUSPOWER_TRIS = 0;
     BUSPOWER_PORT = 1;
 #endif
-
+    
+#ifdef INIT_PORTS
+    INIT_PORTS();
+#endif
+            
     sinks_init();
         
     enableInterrupts();
