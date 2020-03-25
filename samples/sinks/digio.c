@@ -4,9 +4,6 @@
 
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
 
-// Event buffer of ticks
-#define EVENT_BUFFER_SIZE 16
-
 #ifdef HAS_DIGIO_IN
 static BYTE s_lastInState;
 
@@ -14,9 +11,9 @@ static BYTE s_lastInState;
 static BYTE s_evtBegin;
 static BYTE s_evtEnd;
 typedef struct { TICK_TYPE tick; BYTE state; } EVENT_TABLE_t;
-static EVENT_TABLE_t s_events[EVENT_BUFFER_SIZE];
+static EVENT_TABLE_t s_events[DIGIO_EVENT_BUFFER_SIZE];
 
-// Protocol write state. Any number from 1 to EVENT_BUFFER_SIZE means that 
+// Protocol write state. Any number from 1 to DIGIO_EVENT_BUFFER_SIZE means that 
 // N events are yet to be sent (from the older).
 static enum { IN_STATE_HEADER = 0x00 } s_in_writeState;
 #endif
@@ -76,7 +73,7 @@ void digio_in_poll() {
     BYTE state = DIGIO_PORT_IN_BIT;
     if (state != s_lastInState) {
         // Allocate a new event in the table
-        BYTE newEnd = (s_evtEnd + 1) % EVENT_BUFFER_SIZE; 
+        BYTE newEnd = (s_evtEnd + 1) % DIGIO_EVENT_BUFFER_SIZE; 
         if (newEnd == s_evtBegin) {
             // Overflow
             fatal("EVTOV");
@@ -115,7 +112,7 @@ bit digio_in_write()
 
         // Now calc how many events should be sent. s_in_writeState is the 
         // event count
-        s_in_writeState = (s_evtEnd - s_evtBegin) % EVENT_BUFFER_SIZE;
+        s_in_writeState = (s_evtEnd - s_evtBegin) % DIGIO_EVENT_BUFFER_SIZE;
         prot_control_write(&s_in_writeState, 1);
 
         // Finished?
@@ -129,7 +126,7 @@ bit digio_in_write()
         
         // Write next event, and advance the read counter
         prot_control_write(&s_events[s_evtBegin], sizeof(EVENT_TABLE_t));
-        s_evtBegin = (s_evtBegin + 1) % EVENT_BUFFER_SIZE;
+        s_evtBegin = (s_evtBegin + 1) % DIGIO_EVENT_BUFFER_SIZE;
 
         // Finished?
         s_in_writeState--;
