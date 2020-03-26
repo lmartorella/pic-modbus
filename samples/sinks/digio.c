@@ -4,8 +4,12 @@
 
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
 
+// Debounce at 0.1s
+#define DEBOUNCE_TIMEOUT (TICKS_PER_SECOND / 10)
+
 #ifdef HAS_DIGIO_IN
 static BYTE s_lastInState;
+static TICK_TYPE s_debounceTimer;
 
 // Circular buffer
 static BYTE s_evtBegin;
@@ -28,6 +32,7 @@ void digio_init()
     s_in_writeState = IN_STATE_HEADER;
     s_evtBegin = s_evtEnd = 0;
     s_lastInState = DIGIO_PORT_IN_BIT;
+    s_debounceTimer = timers_get();
 #endif
     
 #ifdef HAS_DIGIO_OUT
@@ -70,19 +75,22 @@ bit digio_out_read()
 #ifdef HAS_DIGIO_IN
 
 void digio_in_poll() {
-    BYTE state = DIGIO_PORT_IN_BIT;
-    if (state != s_lastInState) {
-        // Allocate a new event in the table
-        BYTE newEnd = (s_evtEnd + 1) % DIGIO_EVENT_BUFFER_SIZE; 
-        if (newEnd == s_evtBegin) {
-            // Overflow
-            fatal("EVTOV");
+    TICK_TYPE now = timers_get();
+    if (now - s_debounceTimer >= DEBOUNCE_TIMEOUT)
+    {
+        s_debounceTimer = now;
+        BYTE state = DIGIO_PORT_IN_BIT;
+        if (state != s_lastInState) {
+            s_lastInState = state;
+            // Allocate a new event in the table
+            s_events[s_evtEnd].state = state;
+            s_events[s_evtEnd].tick = timers_get();
+            s_evtEnd = (s_evtEnd + 1) % DIGIO_EVENT_BUFFER_SIZE; 
+            if (s_evtEnd == s_evtBegin) {
+                // Overflow
+                fatal("EVTOV");
+            }
         }
-        s_evtEnd = newEnd;
-        s_events[s_evtBegin].state = state;
-        s_events[s_evtBegin].tick = timers_get();
-        
-        s_lastInState = state;
     }
 }
 
