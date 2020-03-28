@@ -38,12 +38,23 @@ static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] @ (0
 #define ROM_ADDR 0
 #endif
 
+#if defined(_CONF_RASPBIAN)
+#include <unistd.h>
+#include <limits.h>
+
+static FILE* pers_fopen(const char* mode) {
+    char cwd[PATH_MAX];
+    flog("Opening: %shome.mem", getcwd(cwd, PATH_MAX));
+    return fopen("home.mem", mode);
+}
+#endif
+
 void pers_load()
 {
 #if defined(HAS_EEPROM)
     rom_read(ROM_ADDR, (BYTE*)&pers_data, PERSISTENT_SIZE);
 #elif defined(_CONF_RASPBIAN)
-    FILE* file = fopen("home.mem", "rb");
+    FILE* file = pers_fopen("rb");
     if (file) {
         if (fread(&pers_data, PERSISTENT_SIZE, 1, file) == 1) {
             flog("Persistence file read");
@@ -61,7 +72,7 @@ void pers_save()
 #if defined(HAS_EEPROM)
     rom_write(ROM_ADDR, (BYTE*)&pers_data, PERSISTENT_SIZE);
 #elif defined(_CONF_RASPBIAN)
-    FILE* file = fopen("home.mem", "wb");
+    FILE* file = pers_fopen("wb");
     if (file) {
         if (fwrite(&pers_data, PERSISTENT_SIZE, 1, file) == 1) {
             flog("Persistence file written");

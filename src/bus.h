@@ -43,8 +43,7 @@ typedef enum {
 #ifdef HAS_BUS_SERVER
 
 // 8*8 = 63 max children (last is broadcast)
-#define MAX_CHILDREN 2
-#define BUFFER_MASK_SIZE ((MAX_CHILDREN + 7) / 8)
+#define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
 
 typedef enum {
     BUS_STATE_NONE,

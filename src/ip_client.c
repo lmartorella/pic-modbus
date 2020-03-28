@@ -147,13 +147,13 @@ void ip_prot_slowTimer()
         {
             unsigned char* p = (unsigned char*)(&AppConfig.MyIPAddr);
             sprintf(buffer, "%d.%d.%d.%d", (int)p[0], (int)p[1], (int)p[2], (int)p[3]);
-            io_io_printlnStatus(buffer);
+            io_printlnStatus(buffer);
             s_lastDhcpState = TRUE;
         }
         else
         {
             sprintf(buffer, "DHCP ERR");
-            io_io_printlnStatus(buffer);
+            io_printlnStatus(buffer);
             s_lastDhcpState = FALSE;
             //fatal("DHCP.nok");
         }

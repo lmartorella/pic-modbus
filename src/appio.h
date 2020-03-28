@@ -13,7 +13,7 @@ void io_init();
 /**
  * Clear and print string in the upper row of the display (status)
  */
-void io_io_printlnStatus(const char* msg);
+void io_printlnStatus(const char* msg);
 
 /**
  * Clear and print string in the below row (messages)

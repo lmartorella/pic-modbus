@@ -101,7 +101,7 @@ void io_println(const char* str)
 #endif
 }
 
-void io_io_printlnStatus(const char* str)
+void io_printlnStatus(const char* str)
 {
 #ifdef HAS_CM1602
 	_print(str, 0x00);	

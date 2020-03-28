@@ -47,7 +47,7 @@ static bit s_waitTxQuickEnd;
 static void bus_socketCreate();
 static void bus_socketPoll();
 
-static bit isChildKnown(signed char i)
+static bit isChildKnown(BYTE i)
 {
     return (s_childKnown[i / 8] & (1 << (i % 8))) != 0;
 }
@@ -65,22 +65,30 @@ static BYTE countChildren()
     return count;
 }
 
-static void setDirtyChild(signed char i)
+static void setDirtyChild(BYTE i)
 {
-    flog("setDirtyChild: %d", i);
+    flog("setDirty: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     bus_dirtyChildren[i / 8] |= (1 << (i % 8));
 }
 
-static void setChildKnown(signed char i)
-{
-    setDirtyChild(i);
-    s_childKnown[i / 8] |= (1 << (i % 8));
-
-    flog("setChildKnown: %d", i);
-    
+static void updateDisp() {
     char msg[16];
     sprintf(msg, "%u nodes", countChildren());
     io_println(msg);
+}
+
+static void setChildKnown(BYTE i) {
+    setDirtyChild(i);
+    s_childKnown[i / 8] |= (1 << (i % 8));
+    flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
+    updateDisp();
+}
+
+static void setChildDead(BYTE i) {
+    setDirtyChild(i);
+    s_childKnown[i / 8] &= ~(1 << (i % 8));
+    flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
+    updateDisp();
 }
 
 void bus_init()
@@ -102,6 +110,9 @@ void bus_init()
 }
 
 void bus_resetDirtyChildren() {
+    if (bus_hasDirtyChildren) {
+        flog("resetDirty");
+    }
     bus_hasDirtyChildren = 0;
     memset(bus_dirtyChildren, 0, BUFFER_MASK_SIZE);
 }
@@ -114,7 +125,7 @@ static void bus_scanNext()
     
     // Poll next child 
     s_scanIndex++;
-    if (s_scanIndex >= MAX_CHILDREN) {
+    if (s_scanIndex >= MASTER_MAX_CHILDREN) {
         // Do broadcast now
         s_scanIndex = BROADCAST_ADDRESS;
         msgType = BUS_MSG_TYPE_READY_FOR_HELLO;
@@ -139,7 +150,7 @@ static void bus_registerNewNode() {
     // Check for valid node
     while (isChildKnown(s_scanIndex)) {
         s_scanIndex++;
-        if (s_scanIndex >= MAX_CHILDREN) {
+        if (s_scanIndex >= MASTER_MAX_CHILDREN) {
             // Ops, no space
             s_busState = BUS_PRIV_STATE_IDLE;
             s_scanIndex = 0;
@@ -250,7 +261,9 @@ void bus_poll()
                 // Check for timeout
                 if (timers_get() - s_lastTime >= BUS_ACK_TIMEOUT) {
                     // Timeout. Dead bean?
-                    // Do nothing, simply skip it for now.
+                    if (s_scanIndex != BROADCAST_ADDRESS && isChildKnown(s_scanIndex)) {
+                        setChildDead(s_scanIndex);
+                    }
                     s_busState = BUS_PRIV_STATE_IDLE;
                 }
             }
