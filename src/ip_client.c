@@ -34,6 +34,7 @@ static void pollControlPort();
 void prot_control_close()
 {
     TCPFlush(s_controlSocket);
+    // Leave the socket open
 }
 
 // Close the control port listener

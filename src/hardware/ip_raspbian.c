@@ -1,26 +1,37 @@
 #include "../pch.h"
 #include "ip_raspbian.h"
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <linux/tcp.h>
-#include <unistd.h>
-#include <ifaddrs.h>
+#include "../stats_raspbian.h"
+
 #include <errno.h>
 #include <fcntl.h>
+#include <ifaddrs.h>
+#include <limits.h>
 #include <poll.h>
+#include <time.h>
+#include <unistd.h>
+#include <linux/tcp.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/select.h>
 
 AppConfig_t AppConfig;
 in_addr_t ip_bcastAddr;
 static int tcp_sock;
 static int listen_socket;
+static TICK_TYPE listenSocketAccepted;
+static TICK_TYPE statsTimer;
+
 #define TCP_BUFSIZE 1024
 static BYTE tcp_buffer[TCP_BUFSIZE];
 static BYTE* tcp_bufPtr = &tcp_buffer[0];
-        
-void StackInit() {
-    struct ifaddrs *ifaddr, *ifa;
 
+static Stats* socketStatsMs;
+
+void StackInit() {
+    socketStatsMs = stats_new();
+    statsTimer = timers_get();
+    
+    struct ifaddrs *ifaddr;
     if (getifaddrs(&ifaddr) == -1) {
         fatal("getifaddrs");
     }
@@ -45,6 +56,7 @@ void StackInit() {
     listen_socket = -1;
 }
 
+// Open listen socket
 TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vSocketPurpose) {
     if (dwRemoteHost != 0 || vRemoteHostType != TCP_OPEN_SERVER || vSocketPurpose != TCP_PURPOSE_GENERIC_TCP_SERVER) {
         fatal("Not supported");
@@ -67,7 +79,7 @@ TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vS
         fatal("TCP bind failed");
     }
 
-    if (listen(tcp_sock, 0) != 0) {
+    if (listen(tcp_sock, 1) != 0) {
         fatal("TCP listen failed");
     }
     
@@ -75,8 +87,13 @@ TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vS
 }
 
 void TCPDisconnect(TCP_SOCKET socket) {
-    close(listen_socket);
-    listen_socket = -1;
+    if (listen_socket >= 0) {
+        close(listen_socket);
+        listen_socket = -1;
+
+        // Records duration in ms
+        stats_add(socketStatsMs, (size_t)((timers_get() - listenSocketAccepted) / (TICKS_PER_SECOND / 1000u)));
+    }
     tcp_bufPtr = &tcp_buffer[0];
 }
 
@@ -121,6 +138,37 @@ BOOL TCPIsConnected(TCP_SOCKET socket) {
 }
 
 void StackTask() {
+    TICK_TYPE now = timers_get();
+    if ((now - statsTimer) > (TICKS_PER_SECOND * 60u)) {
+        if (socketStatsMs->durationsCount > 0) {
+            // Log stats
+            int minDuration = INT_MAX;
+            int maxDuration = 0;
+            for (int i = 0; i < socketStatsMs->durationsCount; i++) {
+                int d = (int)socketStatsMs->durationsTable[i];
+                if (d > maxDuration) {
+                    maxDuration = d;
+                }
+                if (d < minDuration) {
+                    minDuration = d;
+                }
+            }
+
+            char buffer[100];
+            time_t nowT = time(NULL);
+            struct tm nowTm;
+            localtime_r(&nowT, &nowTm);
+            strftime(buffer, 100, "%Y-%m-%d %H:%M:%S", &nowTm);
+
+            FILE* f = fopen("e2eStats.log", "a");
+            fprintf(f, "%s SocketStats: n: %d, min: %d, max: %d\n", buffer, socketStatsMs->durationsCount, minDuration, maxDuration);
+            fclose(f);
+            
+            stats_clear(socketStatsMs);            
+        }
+        statsTimer = now;
+    }
+
     if (listen_socket < 0) {
         // clear the socket set
         fd_set readfds;
@@ -162,6 +210,8 @@ void StackTask() {
             setsockopt(listen_socket, SOL_SOCKET, SO_SNDLOWAT, &sndlowat, sizeof(sndlowat));
             int nodelay = 1;
             setsockopt(listen_socket, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+            
+            listenSocketAccepted = timers_get();
         } 
     }
 }
