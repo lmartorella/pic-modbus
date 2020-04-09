@@ -137,35 +137,53 @@ BOOL TCPIsConnected(TCP_SOCKET socket) {
     return (listen_socket >= 0);
 }
 
+static void logStats() {
+    FILE* f = fopen("e2eStats.log", "a");
+    char lineHeader[100];
+    time_t nowT = time(NULL);
+    struct tm nowTm;
+    localtime_r(&nowT, &nowTm);
+    strftime(lineHeader, sizeof(lineHeader), "%Y-%m-%d %H:%M:%S", &nowTm);
+
+    if (socketStatsMs->durationsCount > 0) {
+        // Log stats
+        int minDuration = INT_MAX;
+        int maxDuration = 0;
+        for (int i = 0; i < socketStatsMs->durationsCount; i++) {
+            int d = (int)socketStatsMs->durationsTable[i];
+            if (d > maxDuration) {
+                maxDuration = d;
+            }
+            if (d < minDuration) {
+                minDuration = d;
+            }
+        }
+        fprintf(f, "%s SocketStats: n: %d, min: %d, max: %d\n", lineHeader, socketStatsMs->durationsCount, minDuration, maxDuration);
+    }
+
+    // Log listen_socket status
+    if (listen_socket >= 0) {
+        struct pollfd pfd;
+        pfd.fd = listen_socket;
+        pfd.events = POLLIN | POLLHUP | POLLRDHUP;
+        int err = poll(&pfd, 1, 0);
+        if (err < 0) {
+            fprintf(f, "%s err polling listen socket: %d, errno: %d\n", lineHeader, err, errno);
+        } else if (err > 0) {
+            fprintf(f, "%s listen socket queued evt:%d\n", lineHeader, (int)pfd.revents);
+        }
+    } else { 
+        fprintf(f, "%s no listen socket\n", lineHeader);
+    }
+
+    fclose(f);
+}
+
 void StackTask() {
     TICK_TYPE now = timers_get();
     if ((now - statsTimer) > (TICKS_PER_SECOND * 60u)) {
-        if (socketStatsMs->durationsCount > 0) {
-            // Log stats
-            int minDuration = INT_MAX;
-            int maxDuration = 0;
-            for (int i = 0; i < socketStatsMs->durationsCount; i++) {
-                int d = (int)socketStatsMs->durationsTable[i];
-                if (d > maxDuration) {
-                    maxDuration = d;
-                }
-                if (d < minDuration) {
-                    minDuration = d;
-                }
-            }
-
-            char buffer[100];
-            time_t nowT = time(NULL);
-            struct tm nowTm;
-            localtime_r(&nowT, &nowTm);
-            strftime(buffer, 100, "%Y-%m-%d %H:%M:%S", &nowTm);
-
-            FILE* f = fopen("e2eStats.log", "a");
-            fprintf(f, "%s SocketStats: n: %d, min: %d, max: %d\n", buffer, socketStatsMs->durationsCount, minDuration, maxDuration);
-            fclose(f);
-            
-            stats_clear(socketStatsMs);            
-        }
+        logStats();
+        stats_clear(socketStatsMs);            
         statsTimer = now;
     }
 
