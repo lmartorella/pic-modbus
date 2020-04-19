@@ -46,7 +46,7 @@ bit line_read()
     // Done
     s_state = STATE_NONE;
     s_buf[s_pos] = 0;
-    io_io_printlnStatus(s_buf);
+    io_printlnStatus(s_buf);
     return 0;
 }
 

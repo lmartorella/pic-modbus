@@ -13,6 +13,7 @@
 #define PRIO_TYPE low_priority
 
 #define HAS_BUS
+#define MASTER_MAX_CHILDREN 4
 
 // ******* 
 // DISPLAY
@@ -62,9 +63,11 @@
 // IP: uses PORTA0,1 (leds)
 // ******
 
-// 17007: release, 17008: debug
+#ifdef DEBUG
+#define SERVER_CONTROL_UDP_PORT 17008
+#else
 #define SERVER_CONTROL_UDP_PORT 17007
-// 20000: release, 20001: debug
+#endif
 #define CLIENT_TCP_PORT 20000
 
 // ******

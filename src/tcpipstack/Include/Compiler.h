@@ -165,16 +165,16 @@
     #define FAR  far
     #define ROM  const
     #define rom
-    #ifndef Nop()
+    #ifndef Nop
     #define Nop() NOP();
     #endif
-    #ifndef ClrWdt()
+    #ifndef ClrWdt
     #define ClrWdt()  CLRWDT();
     #endif
-    #ifndef Reset()
+    #ifndef Reset
     #define Reset()   RESET();
     #endif
-    #ifndef Sleep()
+    #ifndef Sleep
     #define Sleep()   SLEEP();
     #endif
 
