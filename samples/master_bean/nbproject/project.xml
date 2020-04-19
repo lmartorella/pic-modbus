@@ -18,7 +18,11 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>BusMaster</name>
+                    <name>Release</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Prototype</name>
                     <type>2</type>
                 </confElem>
             </confList>

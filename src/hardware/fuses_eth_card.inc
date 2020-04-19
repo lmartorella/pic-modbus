@@ -34,7 +34,11 @@ void Delay1KTCYx(unsigned char);
 #pragma config FOSC = HS, FOSC2 = ON
 
 // Debugger
+#ifdef __DEBUG
 #pragma config DEBUG = ON
+#else
+#pragma config DEBUG = OFF
+#endif
     
 // No code protection
 #pragma config CP0 = OFF
