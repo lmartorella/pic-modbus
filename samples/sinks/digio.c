@@ -28,7 +28,7 @@ void digio_init()
 {
 #ifdef HAS_DIGIO_IN
     // First enable input bits
-    DIGIO_TRIS_IN_BIT = 1;
+    INIT_DIGIO_IN_PORT();
     s_in_writeState = IN_STATE_HEADER;
     s_evtBegin = s_evtEnd = 0;
     s_lastInState = DIGIO_PORT_IN_BIT;

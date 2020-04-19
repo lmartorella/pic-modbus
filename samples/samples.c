@@ -7,6 +7,8 @@
 #include "sinks/halfduplex.h"
 #include "sinks/bmp180.h"
 #include "sinks/flowCounter.h"
+#include "sinks/integratorSink.h"
+#include "hardware/an_integrator.h"
 
 static bit nil() {
     CLRWDT();
@@ -36,7 +38,10 @@ const char* const SINK_IDS =
     SINK_BMP180_ID 
 #endif
 #if defined(HAS_DIGITAL_COUNTER)
-    SINK_FLOW_COUNTER
+    SINK_FLOW_COUNTER_ID
+#endif
+#if defined(HAS_ANALOG_INTEGRATOR)
+    SINK_ANALOG_INTEGRATOR_ID
 #endif
 ;
 
@@ -61,6 +66,9 @@ const int SINK_IDS_COUNT =
     + 1
 #endif
 #if defined(HAS_DIGITAL_COUNTER)
+    + 1
+#endif
+#if defined(HAS_ANALOG_INTEGRATOR)
     + 1
 #endif
 ;
@@ -88,6 +96,9 @@ const SinkFunction const sink_readHandlers[] = {
 #if defined(HAS_DIGITAL_COUNTER)
     ,nil
 #endif
+#if defined(HAS_ANALOG_INTEGRATOR)
+    ,nil
+#endif
 };
 
 const SinkFunction const sink_writeHandlers[] = {
@@ -112,6 +123,9 @@ const SinkFunction const sink_writeHandlers[] = {
 #endif
 #if defined(HAS_DIGITAL_COUNTER)
     ,flow_write
+#endif
+#if defined(HAS_ANALOG_INTEGRATOR)
+    ,anint_sinkWrite
 #endif
 };
 
@@ -139,6 +153,9 @@ void sinks_init() {
 #ifdef HAS_DHT11
     dht11_init();
 #endif
+#ifdef HAS_ANALOG_INTEGRATOR
+    anint_init();
+#endif
 }
 
 void sinks_poll() {
@@ -149,5 +166,8 @@ void sinks_poll() {
 #endif
 #ifdef HAS_DIGIO_IN
     digio_in_poll();
+#endif
+#ifdef HAS_ANALOG_INTEGRATOR
+    anint_poll();
 #endif
 }
