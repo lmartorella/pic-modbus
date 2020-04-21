@@ -13,6 +13,8 @@ typedef struct {
     // The data
     ANALOG_INTEGRATOR_DATA data;
 } SINK_MSG;
+// Ensure float are 32bits
+static char x[sizeof(float) - 4];
 
 bit anint_sinkWrite() {
     if (prot_control_writeAvail() < sizeof(SINK_MSG)) {

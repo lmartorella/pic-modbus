@@ -106,8 +106,8 @@
 
 // Analog integrator
 #define HAS_ANALOG_INTEGRATOR
-// 1A = 1mA, on 39ohm = 39mA, sampled at 1.024V = 0.0380859375 of the scale
-#define ANALOG_INTEGRATOR_FACTOR 0.0380859375f
+// 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
+#define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
 // Uses RB1, range from 0V to 1.024V
 #define INIT_ANALOG_INTEGRATOR() \
     ANSELBbits.ANSB1 = 1;   \
