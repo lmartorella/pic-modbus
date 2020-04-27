@@ -5,7 +5,7 @@
 #ifdef HAS_DIGITAL_COUNTER 
 #include "../hardware/counter.h"
 
-#define SINK_FLOW_COUNTER "FLOW"
+#define SINK_FLOW_COUNTER_ID "FLOW"
 
 bit flow_write();
 

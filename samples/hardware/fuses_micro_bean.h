@@ -89,15 +89,37 @@
 */
 
 // Digital flow counter
-#define HAS_DIGITAL_COUNTER
-#define DCNT_IF INTCONbits.INTF
-#define DCNT_IE INTCONbits.INTE
+#undef HAS_DIGITAL_COUNTER
+//#define DCNT_IF INTCONbits.INTF
+//#define DCNT_IE INTCONbits.INTE
 
 // Digital event-based input
-#define HAS_DIGIO_IN
+#undef HAS_DIGIO_IN
+/*
 #define DIGIO_PORT_IN_BIT PORTBbits.RB3
-#define DIGIO_TRIS_IN_BIT TRISBbits.TRISB3
 #define DIGIO_EVENT_BUFFER_SIZE 32
+#define INIT_DIGIO_IN_PORT() \
+     ANSELBbits.ANSB3 = 0;   \
+     TRISBbits.TRISB3 = 1;   \
+#define INTERRUPT_VECTOR dcnt_interrupt
+*/
+
+// Analog integrator
+#define HAS_ANALOG_INTEGRATOR
+// 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
+#define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
+// Uses RB1, range from 0V to 1.024V
+#define INIT_ANALOG_INTEGRATOR() \
+    ANSELBbits.ANSB1 = 1;   \
+    TRISBbits.TRISB1 = 1;   \
+    FVRCONbits.ADFVR = 1;   \
+    FVRCONbits.CDAFVR = 0;  \
+    FVRCONbits.FVREN = 1;   \
+    while (!FVRCONbits.FVRRDY); \
+    ADCON0bits.CHS = 11;    \
+    ADCON1bits.ADNREF = 0;  \
+    ADCON1bits.ADPREF = 3;  \
+
 
 // Reset the device with fatal error
 extern persistent BYTE g_exceptionPtr;
@@ -112,12 +134,9 @@ typedef struct
 } PERSISTENT_SINK_DATA;
 #define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
 
-#define INTERRUPT_VECTOR dcnt_interrupt
-
 #define INIT_PORTS() \
      ANSELBbits.ANSB2 = 0;\
      ANSELBbits.ANSB5 = 0;\
-     ANSELBbits.ANSB3 = 0;\
 
 #endif	/* FUSES_MICRO_BEAN_H */
 
