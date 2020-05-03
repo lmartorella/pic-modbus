@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "uart.h"
+#include "../appio.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -162,11 +163,23 @@ static BOOL s_rxEn;
 static BOOL s_txFifoMask;
 static BOOL s_rxFifoMask;
 
+// Sometimes the PL011 gets stuck in busy mode.
+static const TICK_TYPE MAX_WAIT_TICKS = TICKS_PER_SECOND / 4;
+
 static void uart_reset() {
     // 1. Disable UART
     mmap_wr(uartMap, UART_REG_CR, 0);
+
     // 2. Wait for the end of transmission or reception of the current character
-    while (mmap_rd(uartMap, UART_REG_FR) & UART_REG_FR_BUSY);
+    TICK_TYPE start = timers_get();
+    while (mmap_rd(uartMap, UART_REG_FR) & UART_REG_FR_BUSY) {
+        if (timers_get() - start > MAX_WAIT_TICKS) {
+            // Something wrong. De-stuck it breaking the loop
+            flog("UART_REG_FR_BUSY: %s", "Stuck");
+            break;
+        }
+    }
+
     // 3. Flush the transmit FIFO by setting the FEN bit to 0 in the Line Control Register, UART_LCRH
     mmap_wr(uartMap, UART_REG_LCRH, 0);
     // 4. Reprogram the Control Register, UART_LCR, writing xBRD registers and the LCRH at the end (strobe)
