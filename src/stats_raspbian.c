@@ -19,13 +19,13 @@ void stats_delete(Stats* stats) {
 void stats_add(Stats* stats, size_t item) {
     if (stats->durationsCount >= stats->durationsSize) {
         stats->durationsSize = stats->durationsSize * 2;
-        stats->durationsTable = realloc(stats->durationsTable, stats->durationsSize);
+        stats->durationsTable = realloc(stats->durationsTable, sizeof(size_t) * stats->durationsSize);
     }
     stats->durationsTable[stats->durationsCount++] = item;
 }
 
 void stats_clear(Stats* stats) {
-    stats->durationsTable = realloc(stats->durationsTable, MIN_SIZE);
+    stats->durationsTable = realloc(stats->durationsTable, sizeof(size_t) * MIN_SIZE);
     stats->durationsSize = MIN_SIZE;
     stats->durationsCount = 0;
 }
