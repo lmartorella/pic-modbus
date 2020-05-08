@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "ip_raspbian.h"
 #include "../stats_raspbian.h"
+#include "../appio.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -224,10 +225,44 @@ void StackTask() {
             }
             
             // 1 byte enough for sending (e.g. close), low water 
+            /*
+             * NOT CHANGEABLE IN LINUX
             int sndlowat = 1;
-            setsockopt(listen_socket, SOL_SOCKET, SO_SNDLOWAT, &sndlowat, sizeof(sndlowat));
+            if (setsockopt(listen_socket, SOL_SOCKET, SO_SNDLOWAT, &sndlowat, sizeof(int)) != 0) {
+                flog("Error in setsockopt SO_SNDLOWAT: %d", errno);
+                fatal("SocketError");
+            }
+            */
             int nodelay = 1;
-            setsockopt(listen_socket, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+            if (setsockopt(listen_socket, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(int)) != 0) {
+                flog("Error in setsockopt TCP_NODELAY: %d", errno);
+                fatal("SocketError");
+            }
+            
+            // Enables keep-alive
+            int yes = 1;
+            if (setsockopt(listen_socket, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) != 0) {
+                flog("Error in setsockopt SO_KEEPALIVE: %d", errno);
+                fatal("SocketError");
+            }
+            // Keep-alive timeout in seconds
+            int idle = 15;
+            if (setsockopt(listen_socket, IPPROTO_TCP, TCP_KEEPIDLE, &idle, sizeof(int)) != 0) {
+                flog("Error in setsockopt TCP_KEEPIDLE: %d", errno);
+                fatal("SocketError");
+            }
+            // Time between individual keepalives
+            int interval = 15;
+            if (setsockopt(listen_socket, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(int)) != 0) {
+                flog("Error in setsockopt TCP_KEEPINTVL: %d", errno);
+                fatal("SocketError");
+            }
+            // Max failed count of keepalives
+            int maxpkt = 3;
+            if (setsockopt(listen_socket, IPPROTO_TCP, TCP_KEEPCNT, &maxpkt, sizeof(int)) != 0) {
+                flog("Error in setsockopt TCP_KEEPCNT: %d", errno);
+                fatal("SocketError");
+            }
             
             listenSocketAccepted = timers_get();
         } 
