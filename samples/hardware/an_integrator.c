@@ -25,6 +25,8 @@ void anint_init() {
 }
 
 // Sample line 4 times per seconds and accumulate value in 32-bit value.
+// This means that, at max reading (10 bit), you have 2^(31-10)/4 seconds to read accumulator before overflow (~145h)
+// However count is 16 bit signed, so it resets first (after 2^15/4 seconds, ~136 minutes in case of no readings)
 void anint_poll() {
     switch (_state) {
         case IDLE: {
