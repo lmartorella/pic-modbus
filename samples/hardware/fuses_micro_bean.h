@@ -122,8 +122,8 @@
 
 
 // Reset the device with fatal error
-extern persistent BYTE g_exceptionPtr;
-#define fatal(msg) { g_exceptionPtr = (BYTE)msg; RESET(); }
+extern persistent const char* g_exceptionPtr;
+#define fatal(msg) { g_exceptionPtr = msg; RESET(); }
 
 // Custom persistence data
 #define HAS_PERSISTENT_SINK_DATA

@@ -11,6 +11,7 @@
         <itemPath>../hardware/i2c.h</itemPath>
         <itemPath>../hardware/max232.h</itemPath>
         <itemPath>../hardware/an_integrator.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
@@ -59,7 +60,6 @@
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
           <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
           <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/appio.c</itemPath>

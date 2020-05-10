@@ -27,7 +27,7 @@ bit sys_read()
     prot_control_read(&cmd, 1);
     switch (cmd) {
         case SYSSINK_CMD_RESET:
-            // Reset device
+            // Reset device (not as MClr zeroconf)
             fatal("RST");
             break;
         case SYSSINK_CMD_CLRRST:
@@ -52,6 +52,9 @@ bit sys_write()
         
         const char *exc = g_lastException;
         l = strlen(exc);
+        if (l > 8) {
+            l = 8;
+        }
         prot_control_writeW(l);
         prot_control_write(exc, l);
     }
