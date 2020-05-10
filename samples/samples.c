@@ -9,6 +9,7 @@
 #include "sinks/flowCounter.h"
 #include "sinks/integratorSink.h"
 #include "hardware/an_integrator.h"
+#include "hardware/i2c.h"
 
 static bit nil() {
     CLRWDT();

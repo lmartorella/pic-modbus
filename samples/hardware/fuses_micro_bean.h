@@ -62,8 +62,7 @@
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5
 
-#undef HAS_I2C
-/*
+#define HAS_I2C
 #define I2C_PORT_SDA PORTBbits.RB1
 #define I2C_TRIS_SDA TRISBbits.TRISB1
 #define I2C_PORT_SCL PORTBbits.RB4
@@ -86,7 +85,7 @@
 #define I2C_SSPCON2_ACKEN SSP1CON2bits.ACKEN
 #define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
 #define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
-*/
+#define HAS_BMP180
 
 // Digital flow counter
 #undef HAS_DIGITAL_COUNTER
@@ -105,7 +104,8 @@
 */
 
 // Analog integrator
-#define HAS_ANALOG_INTEGRATOR
+#undef HAS_ANALOG_INTEGRATOR
+/*
 // 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
 #define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
 // Uses RB1, range from 0V to 1.024V
@@ -119,11 +119,15 @@
     ADCON0bits.CHS = 11;    \
     ADCON1bits.ADNREF = 0;  \
     ADCON1bits.ADPREF = 3;  \
-
+*/
 
 // Reset the device with fatal error
 extern persistent const char* g_exceptionPtr;
 #define fatal(msg) { g_exceptionPtr = msg; RESET(); }
+
+#define INIT_PORTS() \
+     ANSELBbits.ANSB2 = 0;\
+     ANSELBbits.ANSB5 = 0;\
 
 // Custom persistence data
 #define HAS_PERSISTENT_SINK_DATA
@@ -133,10 +137,6 @@ typedef struct
     DWORD dcnt_counter;
 } PERSISTENT_SINK_DATA;
 #define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
-
-#define INIT_PORTS() \
-     ANSELBbits.ANSB2 = 0;\
-     ANSELBbits.ANSB5 = 0;\
 
 #endif	/* FUSES_MICRO_BEAN_H */
 
