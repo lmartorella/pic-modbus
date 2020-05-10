@@ -184,7 +184,8 @@ static void bus_checkAck()
     rs485_read(buffer, ACK_MSG_SIZE);
     if (!rs485_lastRc9 && buffer[0] == 0x55 && buffer[1] == 0xaa && buffer[2] == s_scanIndex) {
         // Ok, good response
-        if (buffer[3] == BUS_ACK_TYPE_HELLO) {
+        switch (buffer[3]) { 
+        case BUS_ACK_TYPE_HELLO:
             if (s_scanIndex == BROADCAST_ADDRESS) {
                 // Need registration.
                 bus_registerNewNode();
@@ -200,13 +201,21 @@ static void bus_checkAck()
                 bus_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
-        }
-        else if (buffer[3] == BUS_ACK_TYPE_HEARTBEAT) {
+            break;
+        case BUS_ACK_TYPE_HEARTBEAT:
             if (!isChildKnown(s_scanIndex) && s_scanIndex != BROADCAST_ADDRESS) {
                 // A node with address registered, but I didn't knew it. Register it.
                 bus_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
+            break;
+        case BUS_ACK_TYPE_READ_STATUS:
+            // Set as dirty node (status to fetch)
+            if (isChildKnown(s_scanIndex)) {
+                bus_hasDirtyChildren = 1;
+                setDirtyChild(s_scanIndex);
+            }
+            break;
         }
     }
     // Next one.
