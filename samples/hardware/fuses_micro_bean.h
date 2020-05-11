@@ -124,8 +124,9 @@
 #define EXC_TEST
 
 // Reset the device with fatal error
-extern persistent const char* g_exceptionPtr;
-#define fatal(msg) { g_exceptionPtr = msg; RESET(); }
+#define LAST_EXC_TYPE WORD
+extern __persistent LAST_EXC_TYPE g_exceptionPtr;
+#define fatal(msg) { g_exceptionPtr = (LAST_EXC_TYPE)msg; RESET(); }
 
 #define INIT_PORTS() \
      ANSELBbits.ANSB2 = 0;\

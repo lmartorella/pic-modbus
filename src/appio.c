@@ -5,7 +5,7 @@
 #include "../../samples/beans/hardware/cm1602.h"
 #endif
 
-const char* g_lastException;
+LAST_EXC_TYPE g_lastException = 0;
 RESET_REASON g_resetReason;
 
 extern void wait1s();
@@ -45,19 +45,19 @@ void io_init()
     cm1602_setDdramAddr(0);
     cm1602_writeStr("Boot: ");
     cm1602_writeStr(g_resetReasonMsgs[g_resetReason]);
-    if (g_resetReason == RESET_EXC)
+    if (g_resetReason == RESET_EXC && g_lastException != 0)
     {
         cm1602_setDdramAddr(0x40);
-        cm1602_writeStr(g_lastException);
+        cm1602_writeStr((const char*)g_lastException);
     }
 
     wait1s();
 #elif defined(HAS_DEBUG_LINE)
     _stdout("Boot: ");
     _stdout(g_resetReasonMsgs[g_resetReason]);
-    if (g_resetReason == RESET_EXC)
+    if (g_resetReason == RESET_EXC && g_lastException != 0)
     {
-        _stdout(g_lastException);
+        _stdout((const char*)g_lastException);
     }
 #endif
 

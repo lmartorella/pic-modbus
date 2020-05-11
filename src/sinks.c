@@ -49,11 +49,11 @@ bit sys_write()
     if (g_resetReason == RESET_EXC)
     {
         prot_control_write(&ExceptionText, sizeof(TWOCC));
-        
-        const char *exc = g_lastException;
+
+        const char *exc = (const char *)g_lastException;
         l = strlen(exc);
-        if (l > 8) {
-            l = 8;
+        if (l > 12) {
+            l = 12;
         }
         prot_control_writeW(l);
         prot_control_write(exc, l);

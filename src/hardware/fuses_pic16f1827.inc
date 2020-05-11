@@ -44,7 +44,7 @@ extern unsigned char __resetbits;
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-persistent const char* g_exceptionPtr;
+persistent LAST_EXC_TYPE g_exceptionPtr;
 
 void sys_storeResetReason()
 {

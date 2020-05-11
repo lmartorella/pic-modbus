@@ -190,7 +190,10 @@
 #endif
 #endif
 
+#define EXC_TEST
+
 // Reset the device with fatal error
+#define LAST_EXC_TYPE long
 void fatal(const char* msg);
 
 #endif

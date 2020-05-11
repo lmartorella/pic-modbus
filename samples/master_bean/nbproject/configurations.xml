@@ -6,9 +6,6 @@
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
         <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f628.inc</itemPath>
-        <itemPath>../../../src/nodes/hardware/fuses_pic16f887.inc</itemPath>
         <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
         <itemPath>../../../src/nodes/hardware/ip_raspbian.h</itemPath>
         <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
