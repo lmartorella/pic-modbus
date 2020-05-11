@@ -121,6 +121,8 @@
     ADCON1bits.ADPREF = 3;  \
 */
 
+#define EXC_TEST
+
 // Reset the device with fatal error
 extern persistent const char* g_exceptionPtr;
 #define fatal(msg) { g_exceptionPtr = msg; RESET(); }
