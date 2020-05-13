@@ -10,7 +10,7 @@
 
 #ifdef HAS_BUS_SERVER
 
-static BYTE s_childKnown[BUFFER_MASK_SIZE];
+BYTE bus_knownChildren[BUFFER_MASK_SIZE];
 BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
 bit bus_hasDirtyChildren;
 
@@ -49,14 +49,14 @@ static void bus_socketPoll();
 
 static bit isChildKnown(BYTE i)
 {
-    return (s_childKnown[i / 8] & (1 << (i % 8))) != 0;
+    return (bus_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
 static BYTE countChildren()
 {
     BYTE count = 0;
-    for (BYTE i = 0; i < sizeof(s_childKnown); i++) {
-        BYTE d = s_childKnown[i];
+    for (BYTE i = 0; i < sizeof(bus_knownChildren); i++) {
+        BYTE d = bus_knownChildren[i];
         while(d) {
             count += (d & 1);
             d >>= 1;
@@ -79,14 +79,14 @@ static void updateDisp() {
 
 static void setChildKnown(BYTE i) {
     setDirtyChild(i);
-    s_childKnown[i / 8] |= (1 << (i % 8));
+    bus_knownChildren[i / 8] |= (1 << (i % 8));
     flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
     updateDisp();
 }
 
 static void setChildDead(BYTE i) {
     setDirtyChild(i);
-    s_childKnown[i / 8] &= ~(1 << (i % 8));
+    bus_knownChildren[i / 8] &= ~(1 << (i % 8));
     flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     updateDisp();
 }
@@ -94,7 +94,7 @@ static void setChildDead(BYTE i) {
 void bus_init()
 {
     // No beans are known, nor dirty
-    memset(s_childKnown, 0, BUFFER_MASK_SIZE);
+    memset(bus_knownChildren, 0, BUFFER_MASK_SIZE);
     bus_resetDirtyChildren();
     
     // Starts from zero
@@ -428,7 +428,7 @@ int bus_getChildrenMaskSize()
 
 const BYTE* bus_getChildrenMask()
 {
-    return s_childKnown;
+    return bus_knownChildren;
 }
 
 #endif

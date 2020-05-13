@@ -10,6 +10,10 @@
     #include "tcpipstack/Include/TCPIPStack/TCPIP.h"
     APP_CONFIG AppConfig;
 #endif
+    
+#ifndef HAS_BUS_SERVER
+#error IP requires bus server
+#endif
 
 // UDP broadcast socket
 static UDP_SOCKET s_heloSocket;  
@@ -17,17 +21,6 @@ static UDP_SOCKET s_heloSocket;
 static TCP_SOCKET s_controlSocket;
 static bit s_lastDhcpState = FALSE;
 static bit s_sendHelo = 0;
-
-/*
-	HOME request
-*/
-__PACK typedef struct
-{
-	char preamble[4];
-	char messageType[4];
-	GUID device;
-	WORD controlPort;
-} HOME_REQUEST;
 
 static void pollControlPort();
 
@@ -166,26 +159,37 @@ void ip_prot_slowTimer()
     }
 }
 
+/*
+	HOME request
+*/
+__PACK typedef struct
+{
+	char preamble[4];
+	char messageType[4];
+	GUID device;
+	WORD controlPort;
+} HOME_REQUEST;
+
 void ip_poll() 
 {
     if (s_sendHelo) {
         // Still no HOME? Ping HELO
-        if (UDPIsPutReady(s_heloSocket) >= sizeof(HOME_REQUEST))
+        if (UDPIsPutReady(s_heloSocket) >= (sizeof(HOME_REQUEST) + BUFFER_MASK_SIZE + 2))
         {
             UDPPutString("HOME");
-#ifdef HAS_BUS_SERVER
-            UDPPutString(prot_registered ? (bus_hasDirtyChildren ? "CCHN" : "HTBT") : "HEL4");
-#else
-            UDPPutString(prot_registered ? "HTBT" : "HEL4");
-#endif
+            UDPPutString(prot_registered ? (bus_hasDirtyChildren ? "CCHN" : "HTB2") : "HEL4");
             UDPPutArray((BYTE*)(&pers_data.deviceId), sizeof(GUID));
             UDPPutW(CLIENT_TCP_PORT);
-#ifdef HAS_BUS_SERVER
-            if (prot_registered && bus_hasDirtyChildren) {
+            if (prot_registered) {
                 UDPPutW(BUFFER_MASK_SIZE);
-                UDPPutArray(bus_dirtyChildren, BUFFER_MASK_SIZE);
+                if (bus_hasDirtyChildren) {
+                    // CCHN: mask of changed children
+                    UDPPutArray(bus_dirtyChildren, BUFFER_MASK_SIZE);
+                } else {
+                    // HTB2: list of alive children
+                    UDPPutArray(bus_knownChildren, BUFFER_MASK_SIZE);
+                }
             }
-#endif
             UDPFlush();
             
             s_sendHelo = 0;

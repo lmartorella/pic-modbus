@@ -70,6 +70,7 @@ BUS_STATE bus_getState();
 // Dirty children
 extern bit bus_hasDirtyChildren;
 extern BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
+extern BYTE bus_knownChildren[BUFFER_MASK_SIZE];
 void bus_resetDirtyChildren();
 
 // Get active children mask & size

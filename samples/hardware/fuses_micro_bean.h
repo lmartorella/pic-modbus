@@ -62,7 +62,8 @@
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5
 
-#define HAS_I2C
+#undef HAS_I2C
+/*
 #define I2C_PORT_SDA PORTBbits.RB1
 #define I2C_TRIS_SDA TRISBbits.TRISB1
 #define I2C_PORT_SCL PORTBbits.RB4
@@ -86,6 +87,7 @@
 #define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
 #define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
 #define HAS_BMP180
+*/
 
 // Digital flow counter
 #undef HAS_DIGITAL_COUNTER
@@ -104,8 +106,7 @@
 */
 
 // Analog integrator
-#undef HAS_ANALOG_INTEGRATOR
-/*
+#define HAS_ANALOG_INTEGRATOR
 // 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
 #define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
 // Uses RB1, range from 0V to 1.024V
@@ -119,13 +120,13 @@
     ADCON0bits.CHS = 11;    \
     ADCON1bits.ADNREF = 0;  \
     ADCON1bits.ADPREF = 3;  \
-*/
 
-#define EXC_TEST
+//#define EXC_TEST
 
-// Reset the device with fatal error
+// persistent char* are not supported by xc8 1.37
 #define LAST_EXC_TYPE WORD
 extern __persistent LAST_EXC_TYPE g_exceptionPtr;
+// Reset the device with fatal error
 #define fatal(msg) { g_exceptionPtr = (LAST_EXC_TYPE)msg; RESET(); }
 
 #define INIT_PORTS() \
