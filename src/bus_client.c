@@ -169,7 +169,9 @@ void bus_poll()
 #endif
                             // Only respond to heartbeat if has address
                             if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
-                                bus_sendAck(s_known ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_HELLO);
+                                bus_sendAck(s_known ? 
+                                    (g_resetReason == RESET_NONE ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_READ_STATUS) 
+                                        : BUS_ACK_TYPE_HELLO);
                                 return;
                             }
                             break;

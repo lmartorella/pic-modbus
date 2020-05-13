@@ -9,6 +9,7 @@
 #include "sinks/flowCounter.h"
 #include "sinks/integratorSink.h"
 #include "hardware/an_integrator.h"
+#include "hardware/i2c.h"
 
 static bit nil() {
     CLRWDT();
@@ -129,6 +130,9 @@ const SinkFunction const sink_writeHandlers[] = {
 #endif
 };
 
+#ifdef EXC_TEST
+static TICK_TYPE s_lastTest;
+#endif
 
 void sinks_init() {
 #ifdef HAS_MAX232_SOFTWARE
@@ -156,6 +160,10 @@ void sinks_init() {
 #ifdef HAS_ANALOG_INTEGRATOR
     anint_init();
 #endif
+    
+#ifdef EXC_TEST
+    s_lastTest = timers_get();
+#endif
 }
 
 void sinks_poll() {
@@ -169,5 +177,11 @@ void sinks_poll() {
 #endif
 #ifdef HAS_ANALOG_INTEGRATOR
     anint_poll();
+#endif
+    
+#ifdef EXC_TEST
+    if (timers_get() - s_lastTest > (TICKS_PER_SECOND * 8)) {
+        fatal("TEST_TIM");
+    }
 #endif
 }

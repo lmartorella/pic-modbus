@@ -86,6 +86,7 @@
 #define I2C_SSPCON2_ACKEN SSP1CON2bits.ACKEN
 #define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
 #define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
+#define HAS_BMP180
 */
 
 // Digital flow counter
@@ -120,10 +121,17 @@
     ADCON1bits.ADNREF = 0;  \
     ADCON1bits.ADPREF = 3;  \
 
+//#define EXC_TEST
 
+// persistent char* are not supported by xc8 1.37
+#define LAST_EXC_TYPE WORD
+extern __persistent LAST_EXC_TYPE g_exceptionPtr;
 // Reset the device with fatal error
-extern persistent BYTE g_exceptionPtr;
-#define fatal(msg) { g_exceptionPtr = (BYTE)msg; RESET(); }
+#define fatal(msg) { g_exceptionPtr = (LAST_EXC_TYPE)msg; RESET(); }
+
+#define INIT_PORTS() \
+     ANSELBbits.ANSB2 = 0;\
+     ANSELBbits.ANSB5 = 0;\
 
 // Custom persistence data
 #define HAS_PERSISTENT_SINK_DATA
@@ -133,10 +141,6 @@ typedef struct
     DWORD dcnt_counter;
 } PERSISTENT_SINK_DATA;
 #define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
-
-#define INIT_PORTS() \
-     ANSELBbits.ANSB2 = 0;\
-     ANSELBbits.ANSB5 = 0;\
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

@@ -10,7 +10,7 @@
 
 #ifdef HAS_BUS_SERVER
 
-static BYTE s_childKnown[BUFFER_MASK_SIZE];
+BYTE bus_knownChildren[BUFFER_MASK_SIZE];
 BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
 bit bus_hasDirtyChildren;
 
@@ -49,14 +49,14 @@ static void bus_socketPoll();
 
 static bit isChildKnown(BYTE i)
 {
-    return (s_childKnown[i / 8] & (1 << (i % 8))) != 0;
+    return (bus_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
 static BYTE countChildren()
 {
     BYTE count = 0;
-    for (BYTE i = 0; i < sizeof(s_childKnown); i++) {
-        BYTE d = s_childKnown[i];
+    for (BYTE i = 0; i < sizeof(bus_knownChildren); i++) {
+        BYTE d = bus_knownChildren[i];
         while(d) {
             count += (d & 1);
             d >>= 1;
@@ -79,14 +79,14 @@ static void updateDisp() {
 
 static void setChildKnown(BYTE i) {
     setDirtyChild(i);
-    s_childKnown[i / 8] |= (1 << (i % 8));
+    bus_knownChildren[i / 8] |= (1 << (i % 8));
     flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
     updateDisp();
 }
 
 static void setChildDead(BYTE i) {
     setDirtyChild(i);
-    s_childKnown[i / 8] &= ~(1 << (i % 8));
+    bus_knownChildren[i / 8] &= ~(1 << (i % 8));
     flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     updateDisp();
 }
@@ -94,7 +94,7 @@ static void setChildDead(BYTE i) {
 void bus_init()
 {
     // No beans are known, nor dirty
-    memset(s_childKnown, 0, BUFFER_MASK_SIZE);
+    memset(bus_knownChildren, 0, BUFFER_MASK_SIZE);
     bus_resetDirtyChildren();
     
     // Starts from zero
@@ -184,7 +184,8 @@ static void bus_checkAck()
     rs485_read(buffer, ACK_MSG_SIZE);
     if (!rs485_lastRc9 && buffer[0] == 0x55 && buffer[1] == 0xaa && buffer[2] == s_scanIndex) {
         // Ok, good response
-        if (buffer[3] == BUS_ACK_TYPE_HELLO) {
+        switch (buffer[3]) { 
+        case BUS_ACK_TYPE_HELLO:
             if (s_scanIndex == BROADCAST_ADDRESS) {
                 // Need registration.
                 bus_registerNewNode();
@@ -200,13 +201,21 @@ static void bus_checkAck()
                 bus_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
-        }
-        else if (buffer[3] == BUS_ACK_TYPE_HEARTBEAT) {
+            break;
+        case BUS_ACK_TYPE_HEARTBEAT:
             if (!isChildKnown(s_scanIndex) && s_scanIndex != BROADCAST_ADDRESS) {
                 // A node with address registered, but I didn't knew it. Register it.
                 bus_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
+            break;
+        case BUS_ACK_TYPE_READ_STATUS:
+            // Set as dirty node (status to fetch)
+            if (isChildKnown(s_scanIndex)) {
+                bus_hasDirtyChildren = 1;
+                setDirtyChild(s_scanIndex);
+            }
+            break;
         }
     }
     // Next one.
@@ -419,7 +428,7 @@ int bus_getChildrenMaskSize()
 
 const BYTE* bus_getChildrenMask()
 {
-    return s_childKnown;
+    return bus_knownChildren;
 }
 
 #endif

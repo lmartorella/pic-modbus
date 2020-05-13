@@ -79,7 +79,7 @@ extern RESET_REASON g_resetReason;
 /**
  * Contains a pointer to the program memory, that contains the ASCIIZ exception string
  */
-extern const char* g_lastException;
+extern LAST_EXC_TYPE g_lastException;
 
 /**
  * This should be called as very first line of code in MCUs to analyze the reset flags

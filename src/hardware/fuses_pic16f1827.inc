@@ -44,40 +44,30 @@ extern unsigned char __resetbits;
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-persistent BYTE g_exceptionPtr;
+persistent LAST_EXC_TYPE g_exceptionPtr;
 
 void sys_storeResetReason()
 {
     // Set 4MHz oscillator
     OSCCON = 0xea;// b11101010; = PLL en, 4Mhz, internal
 
-    // See datasheet table 14-5
-    if (PCONbits.nPOR) {
-        if (!PCONbits.nBOR) {
-            g_resetReason = RESET_BROWNOUT;
-            PCONbits.nBOR = 1;
-        }
-        else {
-            if (!(__resetbits & nTObit)) {
-                // Watchdog is used for RESET() on pic16!
-                if (g_exceptionPtr != 0) { 
-                    g_resetReason = RESET_EXC;
-                    g_lastException = (const char*)g_exceptionPtr;
-                }
-                else {
-                    g_resetReason = RESET_WATCHDOG;
-                }
-            }
-            else {
-                g_resetReason = RESET_MCLR;
-            }
-        }
-    }
-    else {
+    // See datasheet table 7.10
+    if (!PCONbits.nPOR) {
         g_resetReason = RESET_POWER;        
-        PCONbits.nPOR = 1;
-        PCONbits.nBOR = 1;
+    } else if (!PCONbits.nBOR) {
+	g_resetReason = RESET_BROWNOUT;
+    } else if (!(__resetbits & nTObit)) {
+	g_resetReason = RESET_WATCHDOG;
+    } else if (!PCONbits.nRMCLR) {
+	g_resetReason = RESET_MCLR;
+    } else if (!PCONbits.nRI) {
+	g_resetReason = RESET_EXC;
+	g_lastException = g_exceptionPtr;
+    } else if (PCONbits.STKOVF || PCONbits.STKUNF) {
+	g_resetReason = RESET_STACKFAIL;
     }
+
+    PCON = 0xf; // reset all reset reasons
     g_exceptionPtr = 0;
 }
 

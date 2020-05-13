@@ -11,6 +11,7 @@
         <itemPath>../hardware/i2c.h</itemPath>
         <itemPath>../hardware/max232.h</itemPath>
         <itemPath>../hardware/an_integrator.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
@@ -59,7 +60,6 @@
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
           <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/fuses_pic16f1827.inc</itemPath>
           <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/appio.c</itemPath>
@@ -242,8 +242,8 @@
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
                   value="${programoptions.preservedataflash.ranges}"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="programoptions.preserveeeprom.ranges" value="f000-f0ff"/>
+        <property key="programoptions.preserveeeprom" value="true"/>
+        <property key="programoptions.preserveeeprom.ranges" value="000-0ff"/>
         <property key="programoptions.preserveprogram.ranges" value=""/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>

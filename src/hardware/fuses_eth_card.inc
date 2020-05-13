@@ -99,7 +99,7 @@ void enableInterrupts()
     
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-static persistent char g_exception[3];
+static persistent LAST_EXC_TYPE g_exception;
 
 // Check RCON and STKPTR register for anormal reset cause
 void sys_storeResetReason()
@@ -112,8 +112,7 @@ void sys_storeResetReason()
 	// Software exception. 
 	// Obtain last reason from appio.h 
 	g_resetReason = RESET_EXC;
-	g_lastException = *(const char**)(&g_exception[0]);
-	g_exception[0] = g_exception[1] = g_exception[2] = 0;
+	g_lastException = g_exception;
 	RCONbits.NOT_RI = 1;
     }
     else if (!RCONbits.NOT_POR)
@@ -155,13 +154,15 @@ void sys_storeResetReason()
 	// Else it was reset manually (MCLR)
 	g_resetReason = RESET_MCLR;
     }
+
+    g_exception = 0;
     CLRWDT();
 }
 
 // Long (callable) version of fatal
 void fatal(const char* str)
 {
-    *((const char**)(&g_exception[0])) = str;
+    g_exception = (LAST_EXC_TYPE)str;
     wait30ms();
     RESET(); // generates RCON.RI
 }

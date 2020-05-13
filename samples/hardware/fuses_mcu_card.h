@@ -190,6 +190,8 @@
 #endif
 #endif
 
+// persistent char* are not supported by xc8 1.37
+#define LAST_EXC_TYPE long
 // Reset the device with fatal error
 void fatal(const char* msg);
 

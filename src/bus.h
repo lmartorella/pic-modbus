@@ -35,7 +35,9 @@ typedef enum {
     // Bean: ack heartbeat
     BUS_ACK_TYPE_HEARTBEAT = 0x20,
     // Bean: notify unknown (response to BUS_MSG_TYPE_READY_FOR_HELLO)
-    BUS_ACK_TYPE_HELLO = 0x21
+    BUS_ACK_TYPE_HELLO = 0x21,
+    // Bean: notify status dirty (e.g. exception/error to read). Only sent to regular heartbeat (known)
+    BUS_ACK_TYPE_READ_STATUS = 0x22
 } BUS_ACK_TYPE;
 
 #define UNASSIGNED_SUB_ADDRESS 0xff
@@ -68,6 +70,7 @@ BUS_STATE bus_getState();
 // Dirty children
 extern bit bus_hasDirtyChildren;
 extern BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
+extern BYTE bus_knownChildren[BUFFER_MASK_SIZE];
 void bus_resetDirtyChildren();
 
 // Get active children mask & size
