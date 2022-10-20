@@ -33,7 +33,7 @@ typedef unsigned char BOOL;
 #include <string.h>
 
 #include "hardware/hw.h"
-#include "hardware/utilities.h"
+#include "hardware/wait.h"
 #include "guid.h"
 
 #ifdef __XC8

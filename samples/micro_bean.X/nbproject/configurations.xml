@@ -20,7 +20,7 @@
           <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
           <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
           <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/utilities.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/wait.h</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/ip_client.h</itemPath>
         <itemPath>../../../src/nodes/pch.h</itemPath>
@@ -58,9 +58,9 @@
       </logicalFolder>
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/eeprom.c</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/appio.c</itemPath>
         <itemPath>../../../src/nodes/bus_client.c</itemPath>

@@ -88,7 +88,7 @@ void sys_storeResetReason();
 
 #ifdef __GNU
 /**
- * Log on log file (Raspbian only)
+ * Log on log file (Linux only)
  */
 void flog(const char* format, ...);
 #else

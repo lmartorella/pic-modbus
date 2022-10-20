@@ -3,7 +3,7 @@
 
 // Drives a 2-lines LCD display (CM1602)
 
-#if defined(HAS_BUS) && (defined(HAS_CM1602) || defined(_CONF_RASPBIAN))
+#if defined(HAS_RS485_BUS) && (defined(HAS_CM1602) || defined(_CONF_RASPBIAN))
 
 #define SINK_LINE_ID "LINE"
 bit line_read();

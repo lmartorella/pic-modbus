@@ -10,9 +10,9 @@
 #include "rs485.h"
 #endif
 
-#ifdef HAS_BUS
+#ifdef HAS_RS485_BUS
 
-#ifdef HAS_BUS_CLIENT
+#ifdef HAS_RS485_BUS_CLIENT
 // Directly with define in order to minimize stack usage
 #define prot_control_readW(w) rs485_read((BYTE*)w, 2) 
 #define prot_control_read(data, size) rs485_read((BYTE*)data, size)

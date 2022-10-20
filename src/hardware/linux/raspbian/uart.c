@@ -1,6 +1,6 @@
-#include "../pch.h"
-#include "uart.h"
-#include "../appio.h"
+#include "../../pch.h"
+#include "../uart.h"
+#include "../../appio.h"
 
 #include <stdlib.h>
 #include <stdio.h>

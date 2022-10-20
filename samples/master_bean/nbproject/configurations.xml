@@ -7,11 +7,11 @@
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
         <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
         <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/ip_raspbian.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/linux/ip.h</itemPath>
         <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
         <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
         <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/utilities.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/wait.h</itemPath>
         <itemPath>../../../src/nodes/hardware/fuses_eth_card.inc</itemPath>
         <itemPath>../hardware/fuses_mcu_card.h</itemPath>
       </logicalFolder>
@@ -78,10 +78,10 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/hardware/eeprom.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/hw.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick_pic16.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick_pic18.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/eeprom.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/tick_pic18.c</itemPath>
         <itemPath>../hardware/cm1602.c</itemPath>
         <itemPath>../hardware/counter.c</itemPath>
         <itemPath>../hardware/i2c.c</itemPath>

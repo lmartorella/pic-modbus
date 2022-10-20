@@ -15,7 +15,7 @@
 #endif
 
 #if _CONF_RASPBIAN
-#include "hardware/ip_raspbian.h"
+#include "hardware/linux/ip.h"
 #endif
 
 /**

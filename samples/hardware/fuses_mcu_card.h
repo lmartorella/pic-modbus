@@ -21,7 +21,7 @@
 #define SYSTEM_CLOCK 25000000ull
 #define PRIO_TYPE low_priority
 
-#define HAS_BUS
+#define HAS_RS485_BUS
 #define MASTER_MAX_CHILDREN 4
 
 // ******* 

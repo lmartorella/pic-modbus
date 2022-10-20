@@ -2,7 +2,7 @@
 #include "../../../src/nodes/protocol.h"
 #include "halfduplex.h"
 
-#if (defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)) && defined(HAS_BUS)
+#if (defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)) && defined(HAS_RS485_BUS)
 
 static struct {
     // 0xff -> echo data

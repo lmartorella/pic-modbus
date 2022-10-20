@@ -18,7 +18,7 @@ typedef struct
 	GUID deviceId;
     
     // Used by bus_client
-#ifdef HAS_BUS_CLIENT
+#ifdef HAS_RS485_BUS_CLIENT
     /**
      * The bean node bus address
      */ 

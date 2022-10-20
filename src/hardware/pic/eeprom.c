@@ -1,9 +1,9 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/appio.h"
-#include "eeprom.h"
+#include "../../../../src/nodes/pch.h"
+#include "../../../../src/nodes/appio.h"
+#include "../eeprom.h"
 
 /**
- * This module defines the virtualization layer for data peristence
+ * This module defines the virtualization layer for data persistence
  * (e.g. saves node ID)
  */
 

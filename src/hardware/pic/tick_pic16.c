@@ -1,5 +1,5 @@
-#include "../../../src/nodes/pch.h"
-#include "tick.h"
+#include "../../../../src/nodes/pch.h"
+#include "../tick.h"
 
 #if defined(_IS_PIC16F628_CARD) || defined(_IS_PIC16F887_CARD) || defined(_IS_PIC16F1827_CARD)
 

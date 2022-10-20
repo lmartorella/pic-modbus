@@ -3,12 +3,12 @@
 #include "appio.h"
 #include "protocol.h"
 
-#ifdef HAS_BUS
+#ifdef HAS_RS485_BUS
 
 const TWOCC ResetCode = { "RS" };
 const TWOCC ExceptionText = { "EX" };
 const TWOCC EndOfMetadataText = { "EN" };
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
 const TWOCC BusMasterStats = { "BM" };
 #endif
 
@@ -59,11 +59,11 @@ bit sys_write()
         prot_control_write(exc, l);
     }
 
-    #ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
     prot_control_write(&BusMasterStats, sizeof(TWOCC));
     prot_control_write(&g_busStats, sizeof(BUS_MASTER_STATS));
     memset(&g_busStats, 0, sizeof(BUS_MASTER_STATS));
-    #endif
+#endif
 
     prot_control_write(&EndOfMetadataText, sizeof(TWOCC));
     // Finish

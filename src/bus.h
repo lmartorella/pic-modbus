@@ -5,13 +5,13 @@
  * Wired bus communication module (both master on bean nodes)
  */
 
-#ifdef HAS_BUS
+#ifdef HAS_RS485_BUS
 
 #ifdef HAS_RS485
 #ifdef HAS_IP
-#define HAS_BUS_SERVER
+#define HAS_RS485_BUS_SERVER
 #else
-#define HAS_BUS_CLIENT
+#define HAS_RS485_BUS_CLIENT
 #endif
 #endif // HAS_RS485
 
@@ -42,7 +42,7 @@ typedef enum {
 
 #define UNASSIGNED_SUB_ADDRESS 0xff
 
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
 
 // 8*8 = 63 max children (last is broadcast)
 #define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
@@ -51,7 +51,7 @@ typedef enum {
     BUS_STATE_NONE,
     BUS_STATE_SOCKET_CONNECTED,
     BUS_STATE_SOCKET_TIMEOUT,
-    BUS_STATE_SOCKET_FERR,
+    BUS_STATE_SOCKET_FRAME_ERR,
 } BUS_STATE;
 
 typedef struct {
@@ -84,7 +84,7 @@ typedef enum {
     // Socket data timeout (no data in BUS_SOCKET_TIMEOUT)
     SOCKET_ERR_TIMEOUT = -3,
     // When a frame error on the wire
-    SOCKET_ERR_FERR = -4,
+    SOCKET_ERR_FRAME_ERR = -4,
     // When the server (IP) closes the socket
     SOCKET_ERR_CLOSED_BY_PARENT = -5
 } SOCKET_STATE;

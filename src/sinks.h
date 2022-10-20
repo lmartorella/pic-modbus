@@ -7,7 +7,7 @@
 
 #include "hardware/hw.h"
 
-#ifdef HAS_BUS
+#ifdef HAS_RS485_BUS
 
 /**
  * Init sinks

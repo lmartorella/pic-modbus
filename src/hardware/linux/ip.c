@@ -1,7 +1,7 @@
-#include "../pch.h"
-#include "ip_raspbian.h"
-#include "../stats_raspbian.h"
-#include "../appio.h"
+#include "../../pch.h"
+#include "ip.h"
+#include "../../stats_raspbian.h"
+#include "../../appio.h"
 
 #include <errno.h>
 #include <fcntl.h>

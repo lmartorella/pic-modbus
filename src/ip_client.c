@@ -11,7 +11,7 @@
     APP_CONFIG AppConfig;
 #endif
     
-#ifndef HAS_BUS_SERVER
+#ifndef HAS_RS485_BUS_SERVER
 #error IP requires bus server
 #endif
 

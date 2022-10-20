@@ -5,7 +5,7 @@
 #include "bus.h"
 #include "sinks.h"
 
-#ifdef HAS_BUS
+#ifdef HAS_RS485_BUS
 
 #ifdef HAS_IP
 #include "ip_client.h"
@@ -78,7 +78,7 @@ static void SELE_command()
     
     // Select subnode.
     // Simply ignore when no subnodes
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
     if (w > 0)
     {
         // Otherwise connect the socket
@@ -98,7 +98,7 @@ static void CHIL_command()
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
     prot_control_write(&pers_data.deviceId, sizeof(GUID));
     
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
     // Propagate the request to all children to fetch their GUIDs
     WORD count = bus_getChildrenMaskSize();
     prot_control_writeW(count);
@@ -203,13 +203,13 @@ void prot_poll()
 #endif
     
     if (!prot_control_isConnected()) {
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
         bus_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
 #endif
         return;
     }
 
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
     // Socket connected?
     switch (bus_getState()) {
         case BUS_STATE_SOCKET_CONNECTED:
@@ -219,7 +219,7 @@ void prot_poll()
             // drop the TCP connection        
             prot_control_abort();
             break;
-        case BUS_STATE_SOCKET_FERR:
+        case BUS_STATE_SOCKET_FRAME_ERR:
             // drop the TCP connection        
             prot_control_abort();
             break;

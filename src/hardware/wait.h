@@ -1,5 +1,5 @@
-#ifndef _UTILS_BEAN_H_
-#define _UTILS_BEAN_H_
+#ifndef _WAIT_BEAN_H_
+#define _WAIT_BEAN_H_
 
 #ifdef __XC8
 #include <GenericTypeDefs.h>

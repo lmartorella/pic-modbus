@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "tick.h"
+#include "../../pch.h"
+#include "../tick.h"
 #include <sys/time.h>
 
 DWORD TickGet() {

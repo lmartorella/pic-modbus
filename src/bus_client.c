@@ -10,13 +10,13 @@
  * Wired bus communication module for bean nodes
  */
 
-#ifdef HAS_BUS_CLIENT
+#ifdef HAS_RS485_BUS_CLIENT
 
 static enum {
     STATE_HEADER_0 = 0,         // header0, 55
     STATE_HEADER_1 = 1,         // header1, aa
     STATE_HEADER_2 = 2,         // header2, address
-    STATE_HEADER_ADRESS = 2,         // header2
+    STATE_HEADER_ADDRESS = 2,   // header2
     STATE_HEADER_3 = 3,         // msgtype
             
     STATE_SOCKET_OPEN = 10,
@@ -131,7 +131,7 @@ void bus_poll()
                 // Waiting for header?
                 if (s_state < STATE_HEADER_3) {
                     // Keep an eye to address if in assign state
-                    if (s_state == STATE_HEADER_ADRESS && s_availForAddressAssign) {
+                    if (s_state == STATE_HEADER_ADDRESS && s_availForAddressAssign) {
                         // Store the byte, in case of s_skipNextAddressCheck
                         s_tempAddressForAssignment = buf;
                         // Go ahead

@@ -8,7 +8,7 @@
  * Wired bus communication module for master nodes
  */
 
-#ifdef HAS_BUS_SERVER
+#ifdef HAS_RS485_BUS_SERVER
 
 BYTE bus_knownChildren[BUFFER_MASK_SIZE];
 BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
@@ -318,8 +318,8 @@ BUS_STATE bus_getState()
         return BUS_STATE_SOCKET_CONNECTED;
     if (s_socketConnected == SOCKET_ERR_TIMEOUT) 
         return BUS_STATE_SOCKET_TIMEOUT;
-    if (s_socketConnected == SOCKET_ERR_FERR) 
-        return BUS_STATE_SOCKET_FERR;
+    if (s_socketConnected == SOCKET_ERR_FRAME_ERR) 
+        return BUS_STATE_SOCKET_FRAME_ERR;
     return BUS_STATE_NONE;
 }
 
