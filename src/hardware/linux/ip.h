@@ -36,7 +36,7 @@ UDP_SOCKET UDPOpenEx(DWORD remoteHost, BYTE remoteHostType, UDP_PORT localPort, 
 #define UDP_OPEN_NODE_INFO	4u
 #define INVALID_UDP_SOCKET      (0xffu)		// Indicates a UDP socket that is not valid
 WORD UDPIsPutReady(UDP_SOCKET s);
-void UDPPutString(const BYTE *strData);
+void UDPPutString(const char *strData);
 void UDPPutArray(const BYTE *cData, WORD wDataLen);
 void UDPPutW(WORD w);
 void UDPFlush();

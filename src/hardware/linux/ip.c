@@ -316,8 +316,8 @@ WORD UDPIsPutReady(UDP_SOCKET sock) {
     return UDP_BUFSIZE - (udp_bufPtr - &udp_buffer[0]); 
 }
 
-void UDPPutString(const BYTE *strData) {
-    UDPPutArray(strData, strlen(strData));
+void UDPPutString(const char *strData) {
+    UDPPutArray((const BYTE *)strData, strlen(strData));
 }
 
 void UDPPutArray(const BYTE *cData, WORD wDataLen) {
