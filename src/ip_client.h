@@ -14,7 +14,7 @@
 #include "tcpipstack/Include/TCPIPStack/TCPIP.h"
 #endif
 
-#if _CONF_RASPBIAN
+#if _CONF_LINUX
 #include "hardware/linux/ip.h"
 #endif
 

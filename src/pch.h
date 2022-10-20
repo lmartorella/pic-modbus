@@ -7,7 +7,7 @@
 #define HAS_EEPROM
 #endif
 
-#ifdef _CONF_RASPBIAN
+#ifdef _CONF_LINUX
 
 typedef unsigned char BYTE;
 typedef unsigned short WORD;

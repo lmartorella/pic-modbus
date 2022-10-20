@@ -60,7 +60,7 @@ void main()
     while (1) {   
         CLRWDT();
         
-#ifdef _CONF_RASPBIAN
+#ifdef _CONF_LINUX
         usleep(300);
         rs485_interrupt();
 #endif

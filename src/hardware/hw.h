@@ -16,7 +16,7 @@
 #include "../../../samples/beans/hardware/fuses_micro_bean.h"
 #define _IS_PIC16F1827_CARD
 
-#elif defined(_CONF_RASPBIAN)
+#elif defined(_CONF_LINUX)
 #include "../../../samples/netmaster/hardware/fuses_raspbian.h"
 #define _IS_RASPI_CARD
 

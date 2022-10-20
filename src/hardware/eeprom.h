@@ -1,7 +1,7 @@
 #ifndef _ROM_INCLUDE_H_
 #define _ROM_INCLUDE_H_
 
-#include "../../pch.h"
+#include "../pch.h"
 
 /**
  * This module defines the virtualization layer for data persistence
