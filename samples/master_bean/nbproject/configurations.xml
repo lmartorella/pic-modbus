@@ -110,7 +110,7 @@
           <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/UDP.c</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <itemPath>../../../src/nodes/main.c</itemPath>
+      <itemPath>../main.c</itemPath>
       <itemPath>../../../src/nodes/persistence.c</itemPath>
       <itemPath>../../../src/nodes/appio.c</itemPath>
       <itemPath>../../../src/nodes/bus_client.c</itemPath>

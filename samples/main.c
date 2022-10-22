@@ -1,15 +1,14 @@
-#include "pch.h"
-#include "ip_client.h"
-#include "appio.h"
-#include "persistence.h"
-#include "protocol.h"
-#include "sinks.h"
+#include "../../src/nodes/pch.h"
+#include "../../src/nodes/ip_client.h"
+#include "../../src/nodes/appio.h"
+#include "../../src/nodes/persistence.h"
+#include "../../src/nodes/protocol.h"
+#include "../../src/nodes/sinks.h"
 
 #ifdef INTERRUPT_VECTOR
 extern void INTERRUPT_VECTOR();
 #endif
 
-#ifdef __XC8
 void interrupt PRIO_TYPE low_isr()
 {
     // Update tick timers at ~Khz freq
@@ -21,7 +20,6 @@ void interrupt PRIO_TYPE low_isr()
     INTERRUPT_VECTOR();
 #endif
 }
-#endif
 
 void main()
 {
@@ -59,12 +57,7 @@ void main()
     // I'm alive
     while (1) {   
         CLRWDT();
-        
-#ifdef _CONF_LINUX
-        usleep(300);
-        rs485_interrupt();
-#endif
-        
+
 #if defined(HAS_RS485_BUS_CLIENT) || defined(HAS_RS485_BUS_SERVER)
         bus_poll();
 #endif

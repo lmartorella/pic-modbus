@@ -62,10 +62,10 @@
           <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
           <itemPath>../../../src/nodes/hardware/pic/eeprom.c</itemPath>
         </logicalFolder>
+        <itemPath>../main.c</itemPath>
         <itemPath>../../../src/nodes/appio.c</itemPath>
         <itemPath>../../../src/nodes/bus_client.c</itemPath>
         <itemPath>../../../src/nodes/lib8.c</itemPath>
-        <itemPath>../../../src/nodes/main.c</itemPath>
         <itemPath>../../../src/nodes/persistence.c</itemPath>
         <itemPath>../../../src/nodes/protocol.c</itemPath>
         <itemPath>../../../src/nodes/rs485.c</itemPath>
