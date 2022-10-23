@@ -2,8 +2,9 @@
 #include "protocol.h"
 #include "appio.h"
 #include "persistence.h"
-#include "bus.h"
 #include "sinks.h"
+#include "bus_primary.h"
+#include "bus_secondary.h"
 
 #ifdef HAS_RS485_BUS
 
@@ -41,8 +42,10 @@ void prot_init()
     io_println("No IP");
 #endif
 
-#ifdef HAS_RS485
-    bus_init();
+#ifdef HAS_RS485_BUS_PRIMARY
+    bus_prim_init();
+#elif defined HAS_RS485_BUS_SECONDARY
+    bus_sec_init();
 #endif
     
     prot_registered = FALSE;
@@ -78,11 +81,11 @@ static void SELE_command()
     
     // Select subnode.
     // Simply ignore when no subnodes
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
     if (w > 0)
     {
         // Otherwise connect the socket
-        bus_connectSocket(w - 1);
+        bus_prim_connectSocket(w - 1);
     }
 #endif
     prot_registered = TRUE;
@@ -98,13 +101,13 @@ static void CHIL_command()
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
     prot_control_write(&pers_data.deviceId, sizeof(GUID));
     
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
     // Propagate the request to all children to fetch their GUIDs
-    WORD count = bus_getChildrenMaskSize();
+    WORD count = bus_prim_getChildrenMaskSize();
     prot_control_writeW(count);
-    prot_control_write(bus_getChildrenMask(), count);
+    prot_control_write(bus_prim_getChildrenMask(), count);
 
-    bus_resetDirtyChildren();
+    bus_prim_resetDirtyChildren();
 #else    
     // No children
     WORD count = 0;
@@ -203,15 +206,15 @@ void prot_poll()
 #endif
     
     if (!prot_control_isConnected()) {
-#ifdef HAS_RS485_BUS_SERVER
-        bus_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
+#ifdef HAS_RS485_BUS_PRIMARY
+        bus_prim_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
 #endif
         return;
     }
 
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
     // Socket connected?
-    switch (bus_getState()) {
+    switch (bus_prim_getState()) {
         case BUS_STATE_SOCKET_CONNECTED:
             // TCP is still polled by bus
             return;

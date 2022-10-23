@@ -1,6 +1,6 @@
 # Sample applications
 
-This folder contains some samples of hardware beans to interface the net master with the real world.
+This folder contains some samples of hardware Microchip-based beans to interface the net master with the real world.
 
 ## Digital input and output
 
@@ -8,7 +8,7 @@ The most simple sink is the one that let you to access the digital pins of the M
 
 ### Output sink
 
-The output sink let the pin values to be changed. High-impedence level is not supported.
+The output sink let the pin values to be changed. High-impedance level is not supported.
 
 This sink doesn't use non-volatile memory: in case of reset, the pin state will reset, and should be reconfigured by the server.
 
@@ -18,7 +18,7 @@ This is the content of the read packet (to read settings):
 |--|--|--|
 | Number of bits | 1 | The number of digital pins available |
 
-Once the settins are read, each write command can be used to change the state of the pins:
+Once the settings are read, each write command can be used to change the state of the pins:
 
 |Field|Size (bytes)|Description|
 |--|--|--|
@@ -27,7 +27,7 @@ Once the settins are read, each write command can be used to change the state of
 
 ### Input sink
 
-The inpuit sink let the pin values to be read. High-impedence level is not supported.
+The input sink let the pin values to be read. High-impedance level is not supported.
 
 In addition to the current pin values, the log of last unread change event of the level is returned, with the precision of the internal tick counter (<1 ms in the micro-bean). This allow more precision for switches will less polling requirement. Changes are internally polled, no interrupt line is used.
 

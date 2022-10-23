@@ -2,13 +2,14 @@
 #include "sinks.h"
 #include "appio.h"
 #include "protocol.h"
+#include "bus_primary.h"
 
 #ifdef HAS_RS485_BUS
 
 const TWOCC ResetCode = { "RS" };
 const TWOCC ExceptionText = { "EX" };
 const TWOCC EndOfMetadataText = { "EN" };
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
 const TWOCC BusMasterStats = { "BM" };
 #endif
 
@@ -59,10 +60,10 @@ bit sys_write()
         prot_control_write(exc, l);
     }
 
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
     prot_control_write(&BusMasterStats, sizeof(TWOCC));
-    prot_control_write(&g_busStats, sizeof(BUS_MASTER_STATS));
-    memset(&g_busStats, 0, sizeof(BUS_MASTER_STATS));
+    prot_control_write(&bus_prim_busStats, sizeof(BUS_PRIMARY_STATS));
+    memset(&bus_prim_busStats, 0, sizeof(BUS_PRIMARY_STATS));
 #endif
 
     prot_control_write(&EndOfMetadataText, sizeof(TWOCC));

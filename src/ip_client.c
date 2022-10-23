@@ -3,6 +3,7 @@
 #include "appio.h"
 #include "ip_client.h"
 #include "persistence.h"
+#include "bus_primary.h"
 
 #ifdef HAS_IP
 #ifdef __XC8
@@ -11,7 +12,7 @@
     APP_CONFIG AppConfig;
 #endif
     
-#ifndef HAS_RS485_BUS_SERVER
+#ifndef HAS_RS485_BUS_PRIMARY
 #error IP requires bus server
 #endif
 
@@ -177,17 +178,17 @@ void ip_poll()
         if (UDPIsPutReady(s_heloSocket) >= (sizeof(HOME_REQUEST) + BUFFER_MASK_SIZE + 2))
         {
             UDPPutString("HOME");
-            UDPPutString(prot_registered ? (bus_hasDirtyChildren ? "CCHN" : "HTB2") : "HEL4");
+            UDPPutString(prot_registered ? (bus_prim_hasDirtyChildren ? "CCHN" : "HTB2") : "HEL4");
             UDPPutArray((BYTE*)(&pers_data.deviceId), sizeof(GUID));
             UDPPutW(CLIENT_TCP_PORT);
             if (prot_registered) {
                 UDPPutW(BUFFER_MASK_SIZE);
-                if (bus_hasDirtyChildren) {
+                if (bus_prim_hasDirtyChildren) {
                     // CCHN: mask of changed children
-                    UDPPutArray(bus_dirtyChildren, BUFFER_MASK_SIZE);
+                    UDPPutArray(bus_prim_dirtyChildren, BUFFER_MASK_SIZE);
                 } else {
                     // HTB2: list of alive children
-                    UDPPutArray(bus_knownChildren, BUFFER_MASK_SIZE);
+                    UDPPutArray(bus_prim_knownChildren, BUFFER_MASK_SIZE);
                 }
             }
             UDPFlush();

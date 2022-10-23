@@ -19,8 +19,8 @@ static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = {
     // Zero GUID by default, it means unassigned
     { 0, 0, 0, 0, 0 }, 
 
-#ifdef HAS_RS485_BUS_CLIENT
-    // Used by bus_client
+#ifdef HAS_RS485_BUS_SECONDARY
+    // Used by bus secondary
     UNASSIGNED_SUB_ADDRESS, 
     0xff,
 #endif

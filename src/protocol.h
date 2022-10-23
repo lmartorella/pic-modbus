@@ -5,14 +5,47 @@
  * Protocol implementation module
  */
 
-#include "bus.h"
 #ifdef HAS_RS485
 #include "rs485.h"
 #endif
 
 #ifdef HAS_RS485_BUS
 
-#ifdef HAS_RS485_BUS_CLIENT
+typedef enum { 
+    // Message to beat a bean
+    BUS_MSG_TYPE_HEARTBEAT = 1,
+    // Message to ask unknown bean to present (broadcast)
+    BUS_MSG_TYPE_READY_FOR_HELLO = 2,
+    // Message to ask the only unknown bean to register itself
+    BUS_MSG_TYPE_ADDRESS_ASSIGN = 3,
+    // Command/data will follow: socket open
+    BUS_MSG_TYPE_CONNECT = 4
+} BUS_MSG_TYPE;
+
+typedef enum { 
+    // Bean: ack heartbeat
+    BUS_ACK_TYPE_HEARTBEAT = 0x20,
+    // Bean: notify unknown (response to BUS_MSG_TYPE_READY_FOR_HELLO)
+    BUS_ACK_TYPE_HELLO = 0x21,
+    // Bean: notify status dirty (e.g. exception/error to read). Only sent to regular heartbeat (known)
+    BUS_ACK_TYPE_READ_STATUS = 0x22
+} BUS_ACK_TYPE;
+
+// Low-level socket state. The byte can be used on the wire as break char
+typedef enum {
+    // Normal state when not connected
+    SOCKET_NOT_CONNECTED = -2,
+    // Socket data timeout (no data in BUS_SOCKET_TIMEOUT)
+    SOCKET_ERR_TIMEOUT = -3,
+    // When a frame error on the wire
+    SOCKET_ERR_FRAME_ERR = -4,
+    // When the server (IP) closes the socket
+    SOCKET_ERR_CLOSED_BY_PARENT = -5
+} SOCKET_STATE;
+
+#define UNASSIGNED_SUB_ADDRESS 0xff
+
+#ifdef HAS_RS485_BUS_SECONDARY
 // Directly with define in order to minimize stack usage
 #define prot_control_readW(w) rs485_read((BYTE*)w, 2) 
 #define prot_control_read(data, size) rs485_read((BYTE*)data, size)

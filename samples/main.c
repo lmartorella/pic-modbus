@@ -58,7 +58,7 @@ void main()
     while (1) {   
         CLRWDT();
 
-#if defined(HAS_RS485_BUS_CLIENT) || defined(HAS_RS485_BUS_SERVER)
+#if defined(HAS_RS485_BUS_SECONDARY) || defined(HAS_RS485_BUS_PRIMARY)
         bus_poll();
 #endif
 #ifdef HAS_RS485_BUS

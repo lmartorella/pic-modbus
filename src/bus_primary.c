@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ip_client.h"
-#include "bus.h"
+#include "bus_primary.h"
 #include "protocol.h"
 #include "appio.h"
 
@@ -8,11 +8,11 @@
  * Wired bus communication module for master nodes
  */
 
-#ifdef HAS_RS485_BUS_SERVER
+#ifdef HAS_RS485_BUS_PRIMARY
 
-BYTE bus_knownChildren[BUFFER_MASK_SIZE];
-BYTE bus_dirtyChildren[BUFFER_MASK_SIZE];
-bit bus_hasDirtyChildren;
+BYTE bus_prim_knownChildren[BUFFER_MASK_SIZE];
+BYTE bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
+bit bus_prim_hasDirtyChildren;
 
 // Ack message contains ACK
 #define ACK_MSG_SIZE 4
@@ -39,24 +39,24 @@ static enum {
     BUS_PRIV_STATE_SOCKET_CONNECTED
 } s_busState;
 
-BUS_MASTER_STATS g_busStats;
+BUS_PRIMARY_STATS bus_prim_busStats;
 
 static bit s_waitTxFlush;
 static bit s_waitTxQuickEnd;
 
-static void bus_socketCreate();
-static void bus_socketPoll();
+static void socketCreate();
+static void socketPoll();
 
 static bit isChildKnown(BYTE i)
 {
-    return (bus_knownChildren[i / 8] & (1 << (i % 8))) != 0;
+    return (bus_prim_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
 static BYTE countChildren()
 {
     BYTE count = 0;
-    for (BYTE i = 0; i < sizeof(bus_knownChildren); i++) {
-        BYTE d = bus_knownChildren[i];
+    for (BYTE i = 0; i < sizeof(bus_prim_knownChildren); i++) {
+        BYTE d = bus_prim_knownChildren[i];
         while(d) {
             count += (d & 1);
             d >>= 1;
@@ -68,7 +68,7 @@ static BYTE countChildren()
 static void setDirtyChild(BYTE i)
 {
     flog("setDirty: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
-    bus_dirtyChildren[i / 8] |= (1 << (i % 8));
+    bus_prim_dirtyChildren[i / 8] |= (1 << (i % 8));
 }
 
 static void updateDisp() {
@@ -79,23 +79,23 @@ static void updateDisp() {
 
 static void setChildKnown(BYTE i) {
     setDirtyChild(i);
-    bus_knownChildren[i / 8] |= (1 << (i % 8));
+    bus_prim_knownChildren[i / 8] |= (1 << (i % 8));
     flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
     updateDisp();
 }
 
 static void setChildDead(BYTE i) {
     setDirtyChild(i);
-    bus_knownChildren[i / 8] &= ~(1 << (i % 8));
+    bus_prim_knownChildren[i / 8] &= ~(1 << (i % 8));
     flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     updateDisp();
 }
 
-void bus_init()
+void bus_prim_init()
 {
     // No beans are known, nor dirty
-    memset(bus_knownChildren, 0, BUFFER_MASK_SIZE);
-    bus_resetDirtyChildren();
+    memset(bus_prim_knownChildren, 0, BUFFER_MASK_SIZE);
+    bus_prim_resetDirtyChildren();
     
     // Starts from zero
     s_scanIndex = BROADCAST_ADDRESS;
@@ -106,19 +106,19 @@ void bus_init()
     // Do full scan
     s_lastScanTime = timers_get();
 
-    memset(&g_busStats, 0, sizeof(BUS_MASTER_STATS));
+    memset(&bus_prim_busStats, 0, sizeof(BUS_PRIMARY_STATS));
 }
 
-void bus_resetDirtyChildren() {
-    if (bus_hasDirtyChildren) {
+void bus_prim_resetDirtyChildren() {
+    if (bus_prim_hasDirtyChildren) {
         flog("resetDirty");
     }
-    bus_hasDirtyChildren = 0;
-    memset(bus_dirtyChildren, 0, BUFFER_MASK_SIZE);
+    bus_prim_hasDirtyChildren = 0;
+    memset(bus_prim_dirtyChildren, 0, BUFFER_MASK_SIZE);
 }
 
 // Ask for the next known child
-static void bus_scanNext()
+static void scanNext()
 {
     BUS_MSG_TYPE msgType = BUS_MSG_TYPE_HEARTBEAT;
     s_lastScanTime = timers_get();
@@ -142,7 +142,7 @@ static void bus_scanNext()
     s_busState = BUS_PRIV_STATE_WAIT_ACK;
 }
 
-static void bus_registerNewNode() {
+static void registerNewNode() {
     flog("Registering new children");
     
     // Find a free slot
@@ -176,7 +176,7 @@ static void bus_registerNewNode() {
     s_busState = BUS_PRIV_STATE_WAIT_ACK;
 }
 
-static void bus_checkAck()
+static void checkAck()
 {
     BYTE buffer[ACK_MSG_SIZE];
     // Receive bytes
@@ -188,31 +188,31 @@ static void bus_checkAck()
         case BUS_ACK_TYPE_HELLO:
             if (s_scanIndex == BROADCAST_ADDRESS) {
                 // Need registration.
-                bus_registerNewNode();
+                registerNewNode();
                 return;
             }
             else if (isChildKnown(s_scanIndex)) {
                 // A known node reset! Notify it.
-                bus_hasDirtyChildren = 1;
+                bus_prim_hasDirtyChildren = 1;
                 setDirtyChild(s_scanIndex);
             }
             else {
                 // Not known node hello: register it
-                bus_hasDirtyChildren = 1;
+                bus_prim_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
             break;
         case BUS_ACK_TYPE_HEARTBEAT:
             if (!isChildKnown(s_scanIndex) && s_scanIndex != BROADCAST_ADDRESS) {
                 // A node with address registered, but I didn't knew it. Register it.
-                bus_hasDirtyChildren = 1;
+                bus_prim_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
             break;
         case BUS_ACK_TYPE_READ_STATUS:
             // Set as dirty node (status to fetch)
             if (isChildKnown(s_scanIndex)) {
-                bus_hasDirtyChildren = 1;
+                bus_prim_hasDirtyChildren = 1;
                 setDirtyChild(s_scanIndex);
             }
             break;
@@ -222,7 +222,7 @@ static void bus_checkAck()
     s_busState = BUS_PRIV_STATE_IDLE;
 }
 
-void bus_poll()
+void bus_prim_poll()
 {   
     if (s_waitTxFlush) {
         // Finished TX?
@@ -252,12 +252,12 @@ void bus_poll()
         case BUS_PRIV_STATE_IDLE:
             // Should open a socket?
             if (s_socketConnected >= 0) {
-                bus_socketCreate();
+                socketCreate();
             }
             else {
                 // Do/doing a scan?
                 if (timers_get() - s_lastScanTime >= BUS_SCAN_TIMEOUT) {
-                    bus_scanNext();
+                    scanNext();
                 }
             }
             break;
@@ -265,7 +265,7 @@ void bus_poll()
             // Wait timeout for response
             if (s >= ACK_MSG_SIZE) {
                 // Check what is received
-                bus_checkAck();
+                checkAck();
             } else {
                 // Check for timeout
                 if (timers_get() - s_lastTime >= BUS_ACK_TIMEOUT) {
@@ -281,24 +281,24 @@ void bus_poll()
             if (timers_get() - s_lastTime >= BUS_SOCKET_TIMEOUT) {
                 // Timeout. Dead bean?
                 // Drop the TCP connection and reset the channel
-                bus_disconnectSocket(SOCKET_ERR_TIMEOUT);
+                bus_prim_disconnectSocket(SOCKET_ERR_TIMEOUT);
                 prot_control_abort();
             }
             else {
-                bus_socketPoll();
+                socketPoll();
             }
             break;
     }
 }
 
 // The command starts when the bus is idle
-void bus_connectSocket(int nodeIdx)
+void bus_prim_connectSocket(int nodeIdx)
 {
     s_socketConnected = nodeIdx;
     // Next IDLE will start the connection
 }
 
-void bus_disconnectSocket(int val)
+void bus_prim_disconnectSocket(int val)
 {
     if (s_socketConnected >= 0) {
         // Send break char
@@ -307,12 +307,12 @@ void bus_disconnectSocket(int val)
         
         s_busState = BUS_PRIV_STATE_IDLE;
         
-        g_busStats.socketTimeouts++;
+        bus_prim_busStats.socketTimeouts++;
     }
     s_socketConnected = val;
 }
 
-BUS_STATE bus_getState() 
+BUS_PRIMARY_STATE bus_prim_getState() 
 {
     if (s_socketConnected >= 0)
         return BUS_STATE_SOCKET_CONNECTED;
@@ -323,7 +323,7 @@ BUS_STATE bus_getState()
     return BUS_STATE_NONE;
 }
 
-static void bus_socketCreate() 
+static void socketCreate() 
 {
     // Bus is idle. Start transmitting/receiving.
     BYTE buffer[4] = { 0x55, 0xaa };
@@ -338,7 +338,7 @@ static void bus_socketCreate()
     s_busState = BUS_PRIV_STATE_SOCKET_CONNECTED;
 }
 
-static void bus_socketPoll() 
+static void socketPoll() 
 {
     // Bus line is slow, though
     BYTE buffer[RS485_BUF_SIZE / 2];
@@ -376,7 +376,7 @@ static void bus_socketPoll()
                 // Read control char
                 switch (buffer[tx - 1]) {
                     case RS485_CCHAR_OVER:
-                        // Socket 'over'? Go back to transmit state, the client
+                        // Socket 'over'? Go back to transmit state, the secondary
                         // is about to disengage the line
                         rs485_write(0, NULL, 0);
                         rs485_master = 1;
@@ -421,14 +421,14 @@ static void bus_socketPoll()
     }
 }
 
-int bus_getChildrenMaskSize()
+int bus_prim_getChildrenMaskSize()
 {
     return BUFFER_MASK_SIZE;
 }
 
-const BYTE* bus_getChildrenMask()
+const BYTE* bus_prim_getChildrenMask()
 {
-    return bus_knownChildren;
+    return bus_prim_knownChildren;
 }
 
 #endif

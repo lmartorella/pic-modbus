@@ -1,16 +1,16 @@
 #include "pch.h"
 #include "rs485.h"
 #include "hardware/tick.h"
-#include "bus.h"
+#include "bus_secondary.h"
 #include "protocol.h"
 #include "persistence.h"
 #include "appio.h"
 
 /**
- * Wired bus communication module for bean nodes
+ * Wired bus communication module for secondary RS485 nodes
  */
 
-#ifdef HAS_RS485_BUS_CLIENT
+#ifdef HAS_RS485_BUS_SECONDARY
 
 static enum {
     STATE_HEADER_0 = 0,         // header0, 55
@@ -33,7 +33,7 @@ static BYTE s_tempAddressForAssignment;
 /**
  * Wait for the channel to be free again and skip the glitch after a TX/RX switch (server DISENGAGE_CHANNEL_TIMEOUT time)
  */
-static void bus_reinit_after_disengage()
+static void reinit_after_disengage()
 {
     rs485_waitDisengageTime();
     s_state = STATE_WAIT_TX;
@@ -42,19 +42,19 @@ static void bus_reinit_after_disengage()
 /**
  * Quickly return in listen state, without waiting for the disengage time
  */
-static void bus_reinit_quick()
+static void reinit_quick()
 {
     s_state = STATE_HEADER_0;
     // Skip bit9 = 0
     rs485_skipData = TRUE;
 }
 
-bit bus_isIdle() 
+bit bus_sec_isIdle() 
 {
     return s_state == STATE_HEADER_0;
 }
 
-void bus_init()
+void bus_sec_init()
 {
     // Prepare address
     s_availForAddressAssign = 0;
@@ -74,16 +74,16 @@ void bus_init()
     } 
 
     if (pers_data.address == UNASSIGNED_SUB_ADDRESS) {
-        // Signal unattended client, but doesn't auto-assign to avoid line clash at multiple boot
+        // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
 
     s_header[2] = pers_data.address;
 
-    bus_reinit_quick();
+    reinit_quick();
 }
 
-static void bus_storeAddress()
+static void storeAddress()
 {
     pers_data.address = s_header[2] = s_tempAddressForAssignment;
     pers_save();
@@ -92,7 +92,7 @@ static void bus_storeAddress()
     led_off();
 }
 
-static void bus_sendAck(BYTE ackCode) {
+static void sendAck(BYTE ackCode) {
     // Respond with a socket response
     rs485_write(FALSE, s_header, 3);
     rs485_write(FALSE, &ackCode, 1);
@@ -101,7 +101,7 @@ static void bus_sendAck(BYTE ackCode) {
 }
 
 // Called often
-void bus_poll()
+void bus_sec_poll()
 {
     BYTE buf;
     
@@ -112,14 +112,14 @@ void bus_poll()
 #ifdef DEBUGMODE
                 io_printChDbg('@');
 #endif
-                bus_reinit_after_disengage();
+                reinit_after_disengage();
             }
             // Else do nothing
             break;
         case STATE_WAIT_TX:
             // When in read mode again, progress
             if (rs485_state == RS485_LINE_RX) {
-                bus_reinit_quick();
+                reinit_quick();
             }
             break;
         default:
@@ -143,7 +143,7 @@ void bus_poll()
                     }
                     else {
                         // Not my address, or protocol error. Restart from 0x55 but don't try to skip glitches
-                        bus_reinit_after_disengage();
+                        reinit_after_disengage();
                     }
                 }
                 else {
@@ -157,8 +157,8 @@ void bus_poll()
                                 // Master now knows me
                                 s_known = 1;
                                 // Store the new address in memory
-                                bus_storeAddress();
-                                bus_sendAck(BUS_ACK_TYPE_HEARTBEAT);
+                                storeAddress();
+                                sendAck(BUS_ACK_TYPE_HEARTBEAT);
                                 return;
                             }
                             break;
@@ -169,7 +169,7 @@ void bus_poll()
 #endif
                             // Only respond to heartbeat if has address
                             if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
-                                bus_sendAck(s_known ? 
+                                sendAck(s_known ? 
                                     (g_resetReason == RESET_NONE ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_READ_STATUS) 
                                         : BUS_ACK_TYPE_HELLO);
                                 return;
@@ -182,7 +182,7 @@ void bus_poll()
 #endif
                             // Only respond to hello if ready to program
                             if (s_availForAddressAssign) {
-                                bus_sendAck(BUS_ACK_TYPE_HELLO);
+                                sendAck(BUS_ACK_TYPE_HELLO);
                                 return;
                             }
                             break;
@@ -207,7 +207,7 @@ void bus_poll()
 #endif
                             // Unknown command. Reset
                             // Restart from 0x55
-                            bus_reinit_after_disengage();
+                            reinit_after_disengage();
                             break;
                     }
                 
@@ -215,7 +215,7 @@ void bus_poll()
                     io_printChDbg('-');
 #endif
                     // If not managed, reinit bus for the next message
-                    bus_reinit_after_disengage();
+                    reinit_after_disengage();
                 }
             }
     }

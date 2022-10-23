@@ -28,7 +28,7 @@
         <itemPath>../../../src/nodes/protocol.h</itemPath>
         <itemPath>../../../src/nodes/rs485.h</itemPath>
         <itemPath>../../../src/nodes/appio.h</itemPath>
-        <itemPath>../../../src/nodes/bus.h</itemPath>
+        <itemPath>../../../src/nodes/bus_secondary.h</itemPath>
         <itemPath>../../../src/nodes/guid.h</itemPath>
         <itemPath>../../../src/nodes/sinks.h</itemPath>
       </logicalFolder>
@@ -64,7 +64,7 @@
         </logicalFolder>
         <itemPath>../main.c</itemPath>
         <itemPath>../../../src/nodes/appio.c</itemPath>
-        <itemPath>../../../src/nodes/bus_client.c</itemPath>
+        <itemPath>../../../src/nodes/bus_secondary.c</itemPath>
         <itemPath>../../../src/nodes/lib8.c</itemPath>
         <itemPath>../../../src/nodes/persistence.c</itemPath>
         <itemPath>../../../src/nodes/protocol.c</itemPath>

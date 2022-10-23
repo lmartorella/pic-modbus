@@ -61,7 +61,7 @@
         <itemPath>../../../src/nodes/tcpipstack/TCPIPConfig.h</itemPath>
       </logicalFolder>
       <itemPath>../../../src/nodes/appio.h</itemPath>
-      <itemPath>../../../src/nodes/bus.h</itemPath>
+      <itemPath>../../../src/nodes/bus_primary.h</itemPath>
       <itemPath>../../../src/nodes/guid.h</itemPath>
       <itemPath>../../../src/nodes/ip_client.h</itemPath>
       <itemPath>../../../src/nodes/pch.h</itemPath>
@@ -113,8 +113,7 @@
       <itemPath>../main.c</itemPath>
       <itemPath>../../../src/nodes/persistence.c</itemPath>
       <itemPath>../../../src/nodes/appio.c</itemPath>
-      <itemPath>../../../src/nodes/bus_client.c</itemPath>
-      <itemPath>../../../src/nodes/bus_server.c</itemPath>
+      <itemPath>../../../src/nodes/bus_primary.c</itemPath>
       <itemPath>../../../src/nodes/lib8.c</itemPath>
       <itemPath>../../../src/nodes/ip_client.c</itemPath>
       <itemPath>../../../src/nodes/sinks.c</itemPath>

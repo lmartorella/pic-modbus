@@ -1,8 +1,6 @@
 #ifndef PERSISTENCE_INCLUDE_
 #define PERSISTENCE_INCLUDE_
 
-#include "bus.h"
-
 #ifdef HAS_EEPROM
 #include "hardware/eeprom.h"
 #endif
@@ -17,8 +15,8 @@ typedef struct
      */
 	GUID deviceId;
     
-    // Used by bus_client
-#ifdef HAS_RS485_BUS_CLIENT
+    // Used by bus secondary
+#ifdef HAS_RS485_BUS_SECONDARY
     /**
      * The bean node bus address
      */ 
