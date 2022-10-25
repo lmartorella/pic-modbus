@@ -39,7 +39,7 @@ static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] __at
 #define ROM_ADDR 0
 #endif
 
-#if defined(_CONF_LINUX)
+#if defined(_CONF_POSIX)
 #include <unistd.h>
 #include <limits.h>
 
@@ -54,7 +54,7 @@ void pers_load()
 {
 #if defined(HAS_EEPROM)
     rom_read(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
-#elif defined(_CONF_LINUX)
+#elif defined(_CONF_POSIX)
     FILE* file = pers_fopen("rb");
     if (file) {
         if (fread(&pers_data, PERSISTENT_SIZE, 1, file) == 1) {
@@ -72,7 +72,7 @@ void pers_save()
 {
 #if defined(HAS_EEPROM)
     rom_write(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
-#elif defined(_CONF_LINUX)
+#elif defined(_CONF_POSIX)
     FILE* file = pers_fopen("wb");
     if (file) {
         if (fwrite(&pers_data, PERSISTENT_SIZE, 1, file) == 1) {

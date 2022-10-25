@@ -6,12 +6,12 @@
 #define HAS_EEPROM
 #endif
 
-#ifdef _CONF_LINUX
+#ifdef _CONF_POSIX
 typedef unsigned char __bit;
 
 #define __PACK
 // For netserver use
-#define __GNU
+#define __POSIX
 // For POSIX extension
 #define _GNU_SOURCE
 

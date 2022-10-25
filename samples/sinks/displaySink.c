@@ -3,10 +3,10 @@
 #include "../../../src/nodes/appio.h"
 #include "displaySink.h"
 
-#if defined(HAS_RS485_BUS) && (defined(HAS_CM1602) || defined(_CONF_LINUX))
+#if defined(HAS_RS485_BUS) && (defined(HAS_CM1602) || defined(_CONF_POSIX))
 
 #ifdef HAS_CM1602
-#elif defined(_CONF_LINUX)
+#elif defined(_CONF_POSIX)
 #define CM1602_COL_COUNT 80
 #define CM1602_LINE_COUNT 25
 #endif

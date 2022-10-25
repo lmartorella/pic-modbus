@@ -94,7 +94,7 @@ uint16_t prot_control_writeAvail()
 void ip_prot_init()
 {
     io_println("IP/DHCP");
-#if defined(__GNU)
+#if defined(__POSIX)
     printf("Listen port: %d\n", SERVER_CONTROL_UDP_PORT);
 #endif
     

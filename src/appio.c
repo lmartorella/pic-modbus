@@ -95,7 +95,7 @@ void io_println(const char* str)
 	_print(str, 0x40);	
 #elif defined(HAS_DEBUG_LINE)
     _stdout(str);
-#elif defined(__GNU)
+#elif defined(__POSIX)
     printf("%s\r\n", str);
     fflush(stdout);
 #endif
@@ -107,7 +107,7 @@ void io_printlnStatus(const char* str)
 	_print(str, 0x00);	
 #elif defined(HAS_DEBUG_LINE)
     _stdout(str);
-#elif defined(__GNU)
+#elif defined(__POSIX)
     printf("%s\r\n", str);
     fflush(stdout);
 #endif
@@ -120,13 +120,13 @@ void io_printChDbg(char ch)
 #elif defined(HAS_DEBUG_LINE)
     max232_buffer1[0] = ch;
     max232_send(1);
-#elif defined(__GNU)
+#elif defined(__POSIX)
     printf("%c", ch);
     fflush(stdout);
 #endif
 }
 
-#ifdef __GNU
+#ifdef __POSIX
 void flog(const char* format, ...) {
     va_list args;
     va_start(args, format);

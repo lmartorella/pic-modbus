@@ -33,7 +33,7 @@ __bit sys_read();
  */
 __bit sys_write();
 
-// Returns 1 if more data should be read or writter, 0 if done and the socket can  be freed.
+// Returns 1 if more data should be read or written, 0 if done and the socket can  be freed.
 // The 'write' function sends data to master. The 'read' function receives data from master.
 typedef __bit (*SinkFunction)();
 

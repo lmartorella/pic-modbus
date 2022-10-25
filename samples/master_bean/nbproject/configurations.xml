@@ -10,7 +10,6 @@
         </logicalFolder>
         <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
         <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/linux/ip.h</itemPath>
         <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
         <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
         <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
