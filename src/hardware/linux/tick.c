@@ -2,7 +2,7 @@
 #include "../tick.h"
 #include <sys/time.h>
 
-DWORD TickGet() {
+uint32_t TickGet() {
     struct timeval tv;
     if (gettimeofday(&tv, NULL) != 0) {
         fatal("gettimeofday");

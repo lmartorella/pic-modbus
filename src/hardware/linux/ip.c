@@ -23,8 +23,8 @@ static TICK_TYPE listenSocketAccepted;
 static TICK_TYPE statsTimer;
 
 #define TCP_BUFSIZE 1024
-static BYTE tcp_buffer[TCP_BUFSIZE];
-static BYTE* tcp_bufPtr = &tcp_buffer[0];
+static uint8_t tcp_buffer[TCP_BUFSIZE];
+static uint8_t* tcp_bufPtr = &tcp_buffer[0];
 
 static Stats* socketStatsMs;
 
@@ -58,7 +58,7 @@ void StackInit() {
 }
 
 // Open listen socket
-TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vSocketPurpose) {
+TCP_SOCKET TCPOpen(uint32_t dwRemoteHost, uint8_t vRemoteHostType, uint16_t wPort, uint8_t vSocketPurpose) {
     if (dwRemoteHost != 0 || vRemoteHostType != TCP_OPEN_SERVER || vSocketPurpose != TCP_PURPOSE_GENERIC_TCP_SERVER) {
         fatal("Not supported");
     }
@@ -102,7 +102,7 @@ void TCPDiscard(TCP_SOCKET socket) {
     //recv(listen_socket, tcp_buffer, TCP_BUFSIZE, MSG_DONTWAIT);
 }
 
-WORD TCPIsGetReady(TCP_SOCKET socket) {
+uint16_t TCPIsGetReady(TCP_SOCKET socket) {
     if (listen_socket >= 0) {
         struct pollfd pfd;
         pfd.fd = listen_socket;
@@ -120,7 +120,7 @@ WORD TCPIsGetReady(TCP_SOCKET socket) {
             }
             if (pfd.revents & POLLIN) {
                 // Data avail!
-                BYTE buf[256];
+                uint8_t buf[256];
                 int ret = recv(listen_socket, buf, 256, MSG_PEEK | MSG_DONTWAIT);
                 if (ret < 0) ret = 0;
                 return ret;
@@ -130,11 +130,11 @@ WORD TCPIsGetReady(TCP_SOCKET socket) {
     return 0;
 }
 
-WORD TCPIsPutReady(TCP_SOCKET socket) {
+uint16_t TCPIsPutReady(TCP_SOCKET socket) {
     return 0x7fff;
 }
 
-BOOL TCPIsConnected(TCP_SOCKET socket) {
+_Bool TCPIsConnected(TCP_SOCKET socket) {
     return (listen_socket >= 0);
 }
 
@@ -224,7 +224,7 @@ void StackTask() {
                 fatal("Error in fcntl set");
             }
             
-            // 1 byte enough for sending (e.g. close), low water 
+            // 1 uint8_t enough for sending (e.g. close), low water 
             /*
              * NOT CHANGEABLE IN LINUX
             int sndlowat = 1;
@@ -269,11 +269,11 @@ void StackTask() {
     }
 }
 
-WORD TCPGetArray(TCP_SOCKET socket, BYTE* buf, WORD size) {
+uint16_t TCPGetArray(TCP_SOCKET socket, uint8_t* buf, uint16_t size) {
     return recv(listen_socket, buf, size, MSG_DONTWAIT);
 }
 
-void TCPPutArray(TCP_SOCKET socket, const BYTE* cData, WORD size) {
+void TCPPutArray(TCP_SOCKET socket, const uint8_t* cData, uint16_t size) {
     memcpy(tcp_bufPtr, cData, size);
     tcp_bufPtr += size;
 }
@@ -289,10 +289,10 @@ void TCPFlush(TCP_SOCKET socket) {
 static int udp_sock;
 static struct sockaddr_in udp_broadcastAddr;
 #define UDP_BUFSIZE 1024
-static BYTE udp_buffer[UDP_BUFSIZE];
-static BYTE* udp_bufPtr = &udp_buffer[0];
+static uint8_t udp_buffer[UDP_BUFSIZE];
+static uint8_t* udp_bufPtr = &udp_buffer[0];
 
-UDP_SOCKET UDPOpenEx(DWORD remoteHost, BYTE remoteHostType, UDP_PORT localPort, UDP_PORT remotePort) {
+UDP_SOCKET UDPOpenEx(uint32_t remoteHost, uint8_t remoteHostType, UDP_PORT localPort, UDP_PORT remotePort) {
     if (remoteHost != 0 || remoteHostType != UDP_OPEN_NODE_INFO || localPort != 0) {
         fatal("Not supported");
     }
@@ -312,20 +312,20 @@ UDP_SOCKET UDPOpenEx(DWORD remoteHost, BYTE remoteHostType, UDP_PORT localPort, 
     return udp_sock;
 }
 
-WORD UDPIsPutReady(UDP_SOCKET sock) {
+uint16_t UDPIsPutReady(UDP_SOCKET sock) {
     return UDP_BUFSIZE - (udp_bufPtr - &udp_buffer[0]); 
 }
 
 void UDPPutString(const char *strData) {
-    UDPPutArray((const BYTE *)strData, strlen(strData));
+    UDPPutArray((const uint8_t *)strData, strlen(strData));
 }
 
-void UDPPutArray(const BYTE *cData, WORD wDataLen) {
+void UDPPutArray(const uint8_t *cData, uint16_t wDataLen) {
     memcpy(udp_bufPtr, cData, wDataLen);
     udp_bufPtr += wDataLen;
 }
 
-void UDPPutW(WORD w) {
+void UDPPutW(uint16_t w) {
     memcpy(udp_bufPtr, &w, 2);
     udp_bufPtr += 2;
 }

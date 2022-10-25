@@ -97,10 +97,10 @@ static Mmap* mmap_create(uint32_t base, uint32_t len) {
     Mmap* ret = (Mmap*)malloc(sizeof(Mmap));
     uint32_t page_size = 0x4000;//getpagesize();
     
-    // Round first byte to page boundary
+    // Round first uint8_t to page boundary
     uint32_t addr0 = (base / page_size) * page_size;
     uint32_t offs = base - addr0;
-    // Round last byte to page boundary
+    // Round last uint8_t to page boundary
     uint32_t addr1 = ((base + len - 1) / page_size) * page_size;
     ret->size = (addr1 - addr0) + page_size;
  
@@ -157,11 +157,11 @@ static uint32_t ibrd, fbrd;
 static Mmap* uartMap;
 static Mmap* gpioMap;
 
-static BOOL s_rc9;
-static BOOL s_txEn;
-static BOOL s_rxEn;
-static BOOL s_txFifoMask;
-static BOOL s_rxFifoMask;
+static _Bool s_rc9;
+static _Bool s_txEn;
+static _Bool s_rxEn;
+static _Bool s_txFifoMask;
+static _Bool s_rxFifoMask;
 
 // Sometimes the PL011 gets stuck in busy mode.
 static const TICK_TYPE MAX_WAIT_TICKS = TICKS_PER_SECOND / 4;
@@ -230,28 +230,28 @@ void uart_receive() {
     gpio_write(gpioMap, 2, EN_RECEIVE);
 }
 
-void uart_set_9b(BOOL b) {
+void uart_set_9b(_Bool b) {
     if (b != s_rc9) {
         s_rc9 = b;
         uart_reset();
     }
 }
 
-void uart_write(BYTE b) {
+void uart_write(uint8_t b) {
     mmap_wr(uartMap, UART_REG_DR, b);
 #ifdef DEBUGMODE
     printf(" T%c%02x ", s_rc9 ? '1' : '0', b);
 #endif
 }
 
-void uart_read(BYTE* data, UART_RX_MD* md) {
+void uart_read(uint8_t* data, UART_RX_MD* md) {
     // Read data
     uint32_t rx = mmap_rd(uartMap, UART_REG_DR);
     *data = rx & 0xff;
-    // And then read ERRORS associated to that byte
+    // And then read ERRORS associated to that uint8_t
     md->oerr = (rx & UART_REG_DR_OE) != 0;
     md->ferr = (rx & UART_REG_DR_FE) != 0;
-    BOOL perr = (rx & UART_REG_DR_PE) != 0;
+    _Bool perr = (rx & UART_REG_DR_PE) != 0;
     md->rc9 = s_rc9 ? !perr : perr;
 
 #ifdef DEBUGMODE
@@ -266,47 +266,47 @@ void uart_read(BYTE* data, UART_RX_MD* md) {
     mmap_wr(uartMap, UART_REG_RSRECR, 0);
 }
 
-BOOL uart_tx_fifo_empty() {
+_Bool uart_tx_fifo_empty() {
     return s_txEn && (mmap_rd(uartMap, UART_REG_FR) & UART_REG_FR_TXFE);
 }
 
-BOOL uart_rx_fifo_empty() {
+_Bool uart_rx_fifo_empty() {
     return s_rxEn && (mmap_rd(uartMap, UART_REG_FR) & UART_REG_FR_RXFE);
 }
 
-BOOL uart_tx_fifo_empty_get_mask() {
+_Bool uart_tx_fifo_empty_get_mask() {
     return s_txFifoMask;    
 }
 
-BOOL uart_rx_fifo_empty_get_mask() {
+_Bool uart_rx_fifo_empty_get_mask() {
     return s_rxFifoMask;    
 }
 
-void uart_tx_fifo_empty_set_mask(BOOL b) {
+void uart_tx_fifo_empty_set_mask(_Bool b) {
     s_txFifoMask = b;
 }
 
-void uart_rx_fifo_empty_set_mask(BOOL b) {
+void uart_rx_fifo_empty_set_mask(_Bool b) {
     s_rxFifoMask = b;
 }
 
 void uart_enable_tx() {
-    s_txEn = TRUE;
+    s_txEn = true;
     uart_reset();
 }
 
 void uart_disable_tx() {
-    s_txEn = FALSE;
+    s_txEn = false;
     uart_reset();
 }
 
 void uart_enable_rx() {
-    s_rxEn = TRUE;
+    s_rxEn = true;
     uart_reset();
 }
 
 void uart_disable_rx() {
-    s_rxEn = FALSE;
+    s_rxEn = false;
     uart_reset();
 }
 
