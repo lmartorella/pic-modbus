@@ -5,12 +5,12 @@
 #ifdef HAS_DIGITAL_COUNTER
 
 static DCNT_DATA s_data;
-static bit s_counterDirty;
-static DWORD s_lastCounter;
+static __bit s_counterDirty;
+static uint32_t s_lastCounter;
 
 // Only save once every 255 seconds (4 minutes), a good balance between EEPROM data endurance and potential data 
 // loss due to reset. Obviously no flow -> no write
-static BYTE s_persTimer;
+static uint8_t s_persTimer;
 
 void dcnt_interrupt() {
     if (DCNT_IF) {
@@ -45,7 +45,7 @@ void dcnt_poll() {
     if (s_counterDirty) {
         
         DCNT_IE = 0;
-        DWORD currCounter = s_data.counter;
+        uint32_t currCounter = s_data.counter;
         DCNT_IE = 1;
         
         s_data.flow = currCounter - s_lastCounter;

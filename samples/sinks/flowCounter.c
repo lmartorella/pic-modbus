@@ -5,7 +5,7 @@
 
 #ifdef HAS_DIGITAL_COUNTER
 
-bit flow_write() {
+__bit flow_write() {
     // Write counter
     if (prot_control_writeAvail() < sizeof(DCNT_DATA)) {
         fatal("FL_U");
@@ -16,7 +16,7 @@ bit flow_write() {
     prot_control_write(&data, sizeof(DCNT_DATA));
 
     // Done
-    return FALSE;
+    return false;
 }
 
 #endif

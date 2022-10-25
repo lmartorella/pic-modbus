@@ -87,11 +87,11 @@ static struct arp_app_callbacks reg_apps[MAX_REG_APPS]; // Call-Backs storage fo
 // ARP packet structure
 typedef struct __attribute__((aligned(2), packed))
 {
-    WORD        HardwareType;
-    WORD        Protocol;
-    BYTE        MACAddrLen;
-    BYTE        ProtocolLen;
-    WORD        Operation;
+    uint16_t        HardwareType;
+    uint16_t        Protocol;
+    uint8_t        MACAddrLen;
+    uint8_t        ProtocolLen;
+    uint16_t        Operation;
     MAC_ADDR    SenderMACAddr;
     IP_ADDR     SenderIPAddr;
     MAC_ADDR    TargetMACAddr;
@@ -106,7 +106,7 @@ typedef struct __attribute__((aligned(2), packed))
 	Helper Function Prototypes
   ***************************************************************************/
 
-static BOOL ARPPut(ARP_PACKET* packet);
+static _Bool ARPPut(ARP_PACKET* packet);
 
 
 /****************************************************************************
@@ -145,7 +145,7 @@ static BOOL ARPPut(ARP_PACKET* packet);
   ***************************************************************************/
 CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app)
 {
-    BYTE i;
+    uint8_t i;
     for(i=0; i<MAX_REG_APPS; i++)
     {
         if(!reg_apps[i].used)
@@ -160,7 +160,7 @@ CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app)
 
 /*****************************************************************************
   Function:
-	BOOL ARPDeRegisterCallbacks(CHAR reg_id)
+	_Bool ARPDeRegisterCallbacks(CHAR reg_id)
 
   Summary:
 	De-Registering callbacks with ARP module that are registered previously.
@@ -179,16 +179,16 @@ CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app)
 	reg_id - Registration-id returned in ARPRegisterCallbacks call
 
   Returns:
-    TRUE  - On success
-    FALSE - Failure to indicate invalid reg_id
+    true  - On success
+    false - Failure to indicate invalid reg_id
   ***************************************************************************/
-BOOL ARPDeRegisterCallbacks(CHAR reg_id)
+_Bool ARPDeRegisterCallbacks(CHAR reg_id)
 {
     if(reg_id <= 0 || reg_id > MAX_REG_APPS)
-        return FALSE;
+        return false;
 
     reg_apps[reg_id-1].used = 0; // To indicate free slot for registration
-	return TRUE;
+	return true;
 }
 
 /*****************************************************************************
@@ -213,8 +213,8 @@ BOOL ARPDeRegisterCallbacks(CHAR reg_id)
   ***************************************************************************/
 void ARPProcessRxPkt(ARP_PACKET* packet)
 {
-    BYTE pass_on = 0; // Flag to indicate whether need to be forwarded
-    BYTE i;
+    uint8_t pass_on = 0; // Flag to indicate whether need to be forwarded
+    uint8_t i;
 
     // Probing Stage
     if(AppConfig.MyIPAddr.Val == 0x00)
@@ -268,13 +268,13 @@ void ARPProcessRxPkt(ARP_PACKET* packet)
     op_req     - Operation Request (ARP_REQ/ARP_RESP)
 
   Returns:
-    TRUE - The ARP packet was generated properly
-  	FALSE - Not possible return value
+    true - The ARP packet was generated properly
+  	false - Not possible return value
 
   Remarks:
   	This API is to give control over AR-packet to external modules.
   ***************************************************************************/
-BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req )
+_Bool ARPSendPkt(uint32_t SrcIPAddr, uint32_t DestIPAddr, uint8_t op_req )
 {
     ARP_PACKET packet;
 
@@ -295,7 +295,7 @@ BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req )
 
 		Cache.IPAddr.Val = DestAddr->Val;
 
-		return TRUE;
+		return true;
 	}
 #endif
 #endif
@@ -317,7 +317,7 @@ BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req )
 
 /*****************************************************************************
   Function:
-	static BOOL ARPPut(ARP_PACKET* packet)
+	static _Bool ARPPut(ARP_PACKET* packet)
 
   Description:
 	Writes an ARP packet to the MAC.
@@ -330,10 +330,10 @@ BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req )
 				and target preconfigured.
 
   Return Values:
-  	TRUE - The ARP packet was generated properly
-  	FALSE - Not a possible return value
+  	true - The ARP packet was generated properly
+  	false - Not a possible return value
   ***************************************************************************/
-static BOOL ARPPut(ARP_PACKET* packet)
+static _Bool ARPPut(ARP_PACKET* packet)
 {
 	while(!MACIsTxReady());
 	MACSetWritePtr((ETH_POINTER)BASE_TX_ADDR);
@@ -354,10 +354,10 @@ static BOOL ARPPut(ARP_PACKET* packet)
     SwapARPPacket(packet);
 
     MACPutHeader(&packet->TargetMACAddr, MAC_ARP, sizeof(*packet));
-    MACPutArray((BYTE*)packet, sizeof(*packet));
+    MACPutArray((uint8_t*)packet, sizeof(*packet));
     MACFlush();
 
-	return TRUE;
+	return true;
 }
 
 
@@ -404,7 +404,7 @@ void ARPInit(void)
 
 /*****************************************************************************
   Function:
-	BOOL ARPProcess(void)
+	_Bool ARPProcess(void)
 
   Summary:
 	Processes an incoming ARP packet.
@@ -421,17 +421,17 @@ void ARPInit(void)
 	None
 
   Return Values:
-  	TRUE - All processing of this ARP packet is complete.  Do not call
+  	true - All processing of this ARP packet is complete.  Do not call
   			again until a new ARP packet is waiting in the RX buffer.
-  	FALSE - This function must be called again.  More time is needed to
+  	false - This function must be called again.  More time is needed to
   			send an ARP response.
   ***************************************************************************/
-BOOL ARPProcess(void)
+_Bool ARPProcess(void)
 {
 	ARP_PACKET packet;
 	static NODE_INFO Target;
     #if defined(STACK_USE_AUTO_IP)
-        BYTE i;
+        uint8_t i;
     #endif
 	static enum
 	{
@@ -443,7 +443,7 @@ BOOL ARPProcess(void)
     {
 	    case SM_ARP_IDLE:
 			// Obtain the incoming ARP packet
-		    MACGetArray((BYTE*)&packet, sizeof(packet));
+		    MACGetArray((uint8_t*)&packet, sizeof(packet));
 		    MACDiscardRx();
 		    SwapARPPacket(&packet);
 
@@ -452,7 +452,7 @@ BOOL ARPProcess(void)
 		         packet.MACAddrLen != sizeof(MAC_ADDR)  ||
 		         packet.ProtocolLen != sizeof(IP_ADDR) )
 		    {
-		         return TRUE;
+		         return true;
 		    }
 #ifdef STACK_USE_ZEROCONF_LINK_LOCAL
 			ARPProcessRxPkt(&packet);
@@ -462,7 +462,7 @@ BOOL ARPProcess(void)
             if (packet.SenderIPAddr.Val == AppConfig.MyIPAddr.Val)
             {
                 AutoIPConflict(0);
-                return TRUE;
+                return true;
             }
 #endif
 
@@ -477,7 +477,7 @@ BOOL ARPProcess(void)
                 #endif*/
 				Cache.MACAddr = packet.SenderMACAddr;
 				Cache.IPAddr = packet.SenderIPAddr;
-				return TRUE;
+				return true;
 			}
 #endif
 
@@ -486,7 +486,7 @@ BOOL ARPProcess(void)
 			{
 				if(packet.TargetIPAddr.Val != AppConfig.MyIPAddr.Val)
 				{
-					return TRUE;
+					return true;
 				}
 #ifdef STACK_USE_ZEROCONF_LINK_LOCAL
                                /* Fix for Loop-Back suppression:
@@ -497,7 +497,7 @@ BOOL ARPProcess(void)
                                 if(!memcmp (&packet.SenderMACAddr, &AppConfig.MyMACAddr, 6))
                                 {
                                      putsUART("Loopback answer suppressed \r\n");
-                                     return TRUE;
+                                     return true;
                                 }
 #endif
                 #if defined(STACK_USE_AUTO_IP)
@@ -505,7 +505,7 @@ BOOL ARPProcess(void)
                     if (AutoIPConfigIsInProgress(i))
                     {
                         AutoIPConflict(i);
-                        return TRUE;
+                        return true;
                     }
                 #endif
 				Target.IPAddr = packet.SenderIPAddr;
@@ -538,7 +538,7 @@ BOOL ARPProcess(void)
 			// Send an ARP response to a previously received request
 			if(!ARPPut(&packet))
 			{
-	           return FALSE;
+	           return false;
 			}
 
 			// Begin listening for ARP requests again
@@ -546,7 +546,7 @@ BOOL ARPProcess(void)
 	        break;
 	}
 
-    return TRUE;
+    return true;
 }
 
 /*****************************************************************************
@@ -627,7 +627,7 @@ void ARPResolve(IP_ADDR* IPAddr)
 
 /*****************************************************************************
   Function:
-	BOOL ARPIsResolved(IP_ADDR* IPAddr, MAC_ADDR* MACAddr)
+	_Bool ARPIsResolved(IP_ADDR* IPAddr, MAC_ADDR* MACAddr)
 
   Summary:
 	Determines if an ARP request has been resolved yet.
@@ -646,9 +646,9 @@ void ARPResolve(IP_ADDR* IPAddr)
 			 the ARP query.
 
   Return Values:
-  	TRUE - The IP address has been resolved and MACAddr MAC address field
+  	true - The IP address has been resolved and MACAddr MAC address field
 		   indicates the response.
-  	FALSE -	The IP address is not yet resolved.  Try calling ARPIsResolved()
+  	false -	The IP address is not yet resolved.  Try calling ARPIsResolved()
 		   again at a later time.  If you don't get a response after a
 		   application specific timeout period, you may want to call
 		   ARPResolve() again to transmit another ARP query (in case if the
@@ -661,15 +661,15 @@ void ARPResolve(IP_ADDR* IPAddr)
   	is only enabled when STACK_CLIENT_MODE is enabled.
   ***************************************************************************/
 #ifdef STACK_CLIENT_MODE
-BOOL ARPIsResolved(IP_ADDR* IPAddr, MAC_ADDR* MACAddr)
+_Bool ARPIsResolved(IP_ADDR* IPAddr, MAC_ADDR* MACAddr)
 {
     if((Cache.IPAddr.Val == IPAddr->Val) ||
 	  ((Cache.IPAddr.Val == AppConfig.MyGateway.Val) && ((AppConfig.MyIPAddr.Val ^ IPAddr->Val) & AppConfig.MyMask.Val)))
     {
         *MACAddr = Cache.MACAddr;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 #endif
 

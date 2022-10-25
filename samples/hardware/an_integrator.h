@@ -5,9 +5,9 @@
 
 typedef struct {
     // The integrated A/D value for the last period. Single reading is unsigned 10bits.
-    DWORD value;
+    uint32_t value;
     // The count of samles part of the reading
-    WORD count;
+    uint16_t count;
 } ANALOG_INTEGRATOR_DATA;
 
 void anint_init();

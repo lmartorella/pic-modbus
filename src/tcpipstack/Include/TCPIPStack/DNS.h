@@ -57,16 +57,16 @@
 #define DNS_TYPE_A				(1u)		// Constant for record type in DNSResolve.  Indicates an A (standard address) record.
 #define DNS_TYPE_MX				(15u)		// Constant for record type in DNSResolve.  Indicates an MX (mail exchanger) record.
 
-BOOL DNSBeginUsage(void);
-void DNSResolve(BYTE* HostName, BYTE Type);
-BOOL DNSIsResolved(IP_ADDR* HostIP);
-BOOL DNSEndUsage(void);
+_Bool DNSBeginUsage(void);
+void DNSResolve(uint8_t* HostName, uint8_t Type);
+_Bool DNSIsResolved(IP_ADDR* HostIP);
+_Bool DNSEndUsage(void);
 
 #if defined(__18CXX)
-	void DNSResolveROM(ROM BYTE* Hostname, BYTE Type);
+	void DNSResolveROM(ROM uint8_t* Hostname, uint8_t Type);
 #else
 	// Non-ROM variant for C30/C32
-	#define DNSResolveROM(a,b)	DNSResolve((BYTE*)a,b)
+	#define DNSResolveROM(a,b)	DNSResolve((uint8_t*)a,b)
 #endif
 
 

@@ -57,8 +57,8 @@
 	Type Definitions
   ***************************************************************************/
 
-// A TCP_SOCKET is stored as a single BYTE
-typedef BYTE TCP_SOCKET;
+// A TCP_SOCKET is stored as a single uint8_t
+typedef uint8_t TCP_SOCKET;
 
 #define INVALID_SOCKET      (0xFE)	// The socket is invalid or could not be opened
 #define UNKNOWN_SOCKET      (0xFF)	// The socket is not known
@@ -115,12 +115,12 @@ typedef struct
 	ETH_POINTER txTail;			// Tail pointer for TX
 	ETH_POINTER rxHead;			// Head pointer for RX
 	ETH_POINTER rxTail;			// Tail pointer for RX
-    DWORD eventTime;			// Packet retransmissions, state changes
-	WORD eventTime2;			// Window updates, automatic transmission
+    uint32_t eventTime;			// Packet retransmissions, state changes
+	uint16_t eventTime2;			// Window updates, automatic transmission
 	union
 	{
-		WORD delayedACKTime;	// Delayed Acknowledgement timer
-		WORD closeWaitTime;		// TCP_CLOSE_WAIT timeout timer
+		uint16_t delayedACKTime;	// Delayed Acknowledgement timer
+		uint16_t closeWaitTime;		// TCP_CLOSE_WAIT timeout timer
 	} OverlappedTimers;
     TCP_STATE smState;			// State of this socket
     struct
@@ -145,11 +145,11 @@ typedef struct
     PTR_BASE sslTxHead;		// Position of data being written in next SSL application record
     						//   Also serves as cache of localSSLPort when smState = TCP_LISTENING
     PTR_BASE sslRxHead;		// Position of incoming data not yet handled by SSL
-    BYTE sslStubID;			// Which sslStub is associated with this connection
-    BYTE sslReqMessage;		// Currently requested SSL message
+    uint8_t sslStubID;			// Which sslStub is associated with this connection
+    uint8_t sslReqMessage;		// Currently requested SSL message
     #endif
 
-	//BYTE vMemoryMedium;		// Which memory medium the TCB is actually stored
+	//uint8_t vMemoryMedium;		// Which memory medium the TCB is actually stored
 	
 } TCB_STUB;
 
@@ -158,20 +158,20 @@ typedef struct
 // Current size is 41 (PIC18), 42 (PIC24/dsPIC), or 48 bytes (PIC32)
 typedef struct
 {
-	DWORD		retryInterval;			// How long to wait before retrying transmission
-	DWORD		MySEQ;					// Local sequence number
-	DWORD		RemoteSEQ;				// Remote sequence number
+	uint32_t		retryInterval;			// How long to wait before retrying transmission
+	uint32_t		MySEQ;					// Local sequence number
+	uint32_t		RemoteSEQ;				// Remote sequence number
 	ETH_POINTER	txUnackedTail;			// TX tail pointer for data that is not yet acked
     WORD_VAL	remotePort;				// Remote port number
     WORD_VAL	localPort;				// Local port number
-	WORD		remoteWindow;			// Remote window size
-	WORD		wFutureDataSize;		// How much out-of-order data has been received
+	uint16_t		remoteWindow;			// Remote window size
+	uint16_t		wFutureDataSize;		// How much out-of-order data has been received
 	union
 	{
 		NODE_INFO	niRemoteMACIP;		// 10 bytes for MAC and IP address
-		DWORD		dwRemoteHost;		// RAM or ROM pointer to a hostname string (ex: "www.microchip.com")
+		uint32_t		dwRemoteHost;		// RAM or ROM pointer to a hostname string (ex: "www.microchip.com")
 	} remote;
-	SHORT		sHoleSize;				// Size of the hole, or -1 for none exists.  (0 indicates hole has just been filled)
+	int16_t		sHoleSize;				// Size of the hole, or -1 for none exists.  (0 indicates hole has just been filled)
     struct
     {
         unsigned char bFINSent : 1;		// A FIN has been sent
@@ -181,12 +181,12 @@ typedef struct
 		unsigned char bRXNoneACKed2 : 1;	// A second duplicate ACK was likely received
 		unsigned char filler : 3;		// future use
     } flags;
-	WORD		wRemoteMSS;				// Maximum Segment Size option advirtised by the remote node during initial handshaking
+	uint16_t		wRemoteMSS;				// Maximum Segment Size option advirtised by the remote node during initial handshaking
     #if defined(STACK_USE_SSL)
     WORD_VAL	localSSLPort;			// Local SSL port number (for listening sockets)
     #endif
-	BYTE		retryCount;				// Counter for transmission retries
-	BYTE		vSocketPurpose;			// Purpose of socket (as defined in TCPIPConfig.h)
+	uint8_t		retryCount;				// Counter for transmission retries
+	uint8_t		vSocketPurpose;			// Purpose of socket (as defined in TCPIPConfig.h)
 } TCB;
 
 // Information about a socket
@@ -203,25 +203,25 @@ typedef struct
 
 void TCPInit(void);
 SOCKET_INFO* TCPGetRemoteInfo(TCP_SOCKET hTCP);
-BOOL TCPWasReset(TCP_SOCKET hTCP);
-BOOL TCPIsConnected(TCP_SOCKET hTCP);
+_Bool TCPWasReset(TCP_SOCKET hTCP);
+_Bool TCPIsConnected(TCP_SOCKET hTCP);
 void TCPDisconnect(TCP_SOCKET hTCP);
 void TCPClose(TCP_SOCKET hTCP);
-WORD TCPIsPutReady(TCP_SOCKET hTCP);
-BOOL TCPPut(TCP_SOCKET hTCP, BYTE byte);
-//BOOL TCPPutW(TCP_SOCKET hTCP, WORD data);
-WORD TCPPutArray(TCP_SOCKET hTCP, const BYTE* Data, WORD Len);
-const BYTE* TCPPutString(TCP_SOCKET hTCP, const BYTE* Data);
-WORD TCPIsGetReady(TCP_SOCKET hTCP);
-WORD TCPGetRxFIFOFree(TCP_SOCKET hTCP);
-BOOL TCPGet(TCP_SOCKET hTCP, BYTE* byte);
-WORD TCPGetArray(TCP_SOCKET hTCP, BYTE* buffer, WORD count);
-BYTE TCPPeek(TCP_SOCKET hTCP, WORD wStart);
-WORD TCPPeekArray(TCP_SOCKET hTCP, BYTE *vBuffer, WORD wLen, WORD wStart);
-WORD TCPFindEx(TCP_SOCKET hTCP, BYTE cFind, WORD wStart, WORD wSearchLen, BOOL bTextCompare);
-WORD TCPFindArrayEx(TCP_SOCKET hTCP, BYTE* cFindArray, WORD wLen, WORD wStart, WORD wSearchLen, BOOL bTextCompare);
+uint16_t TCPIsPutReady(TCP_SOCKET hTCP);
+_Bool TCPPut(TCP_SOCKET hTCP, uint8_t byte);
+//_Bool TCPPutW(TCP_SOCKET hTCP, uint16_t data);
+uint16_t TCPPutArray(TCP_SOCKET hTCP, const uint8_t* Data, uint16_t Len);
+const uint8_t* TCPPutString(TCP_SOCKET hTCP, const uint8_t* Data);
+uint16_t TCPIsGetReady(TCP_SOCKET hTCP);
+uint16_t TCPGetRxFIFOFree(TCP_SOCKET hTCP);
+_Bool TCPGet(TCP_SOCKET hTCP, uint8_t* byte);
+uint16_t TCPGetArray(TCP_SOCKET hTCP, uint8_t* buffer, uint16_t count);
+uint8_t TCPPeek(TCP_SOCKET hTCP, uint16_t wStart);
+uint16_t TCPPeekArray(TCP_SOCKET hTCP, uint8_t *vBuffer, uint16_t wLen, uint16_t wStart);
+uint16_t TCPFindEx(TCP_SOCKET hTCP, uint8_t cFind, uint16_t wStart, uint16_t wSearchLen, _Bool bTextCompare);
+uint16_t TCPFindArrayEx(TCP_SOCKET hTCP, uint8_t* cFindArray, uint16_t wLen, uint16_t wStart, uint16_t wSearchLen, _Bool bTextCompare);
 void TCPDiscard(TCP_SOCKET hTCP);
-BOOL TCPProcess(NODE_INFO* remote, IP_ADDR* localIP, WORD len);
+_Bool TCPProcess(NODE_INFO* remote, IP_ADDR* localIP, uint16_t len);
 void TCPTick(void);
 void TCPFlush(TCP_SOCKET hTCP);
 
@@ -253,10 +253,10 @@ void TCPFlush(TCP_SOCKET hTCP);
 	// Emit an undeclared identifier diagnostic if code tries to use TCP_OPEN_NODE_INFO while STACK_CLIENT_MODE feature is not enabled. 
 	#define TCP_OPEN_NODE_INFO	You_need_to_enable_STACK_CLIENT_MODE_to_use_TCP_OPEN_NODE_INFO
 #endif
-TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vSocketPurpose);
+TCP_SOCKET TCPOpen(uint32_t dwRemoteHost, uint8_t vRemoteHostType, uint16_t wPort, uint8_t vSocketPurpose);
 
 #if defined(__18CXX)
-	WORD TCPFindROMArrayEx(TCP_SOCKET hTCP, ROM BYTE* cFindArray, WORD wLen, WORD wStart, WORD wSearchLen, BOOL bTextCompare);
+	uint16_t TCPFindROMArrayEx(TCP_SOCKET hTCP, ROM uint8_t* cFindArray, uint16_t wLen, uint16_t wStart, uint16_t wSearchLen, _Bool bTextCompare);
 
 	/*****************************************************************************
 	  Summary:
@@ -268,16 +268,16 @@ TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vS
 	  ***************************************************************************/
 	#define TCPFindROMArray(a,b,c,d,e)		TCPFindROMArrayEx(a,b,c,d,0,e)
 	
-	WORD TCPPutROMArray(TCP_SOCKET hTCP, ROM BYTE* Data, WORD Len);
-	ROM BYTE* TCPPutROMString(TCP_SOCKET hTCP, ROM BYTE* Data);
+	uint16_t TCPPutROMArray(TCP_SOCKET hTCP, ROM uint8_t* Data, uint16_t Len);
+	ROM uint8_t* TCPPutROMString(TCP_SOCKET hTCP, ROM uint8_t* Data);
 #else
-	#define TCPFindROMArray(a,b,c,d,e) 		TCPFindArray(a,(BYTE*)b,c,d,e)
-	#define TCPFindROMArrayEx(a,b,c,d,e,f) 	TCPFindArrayEx(a,(BYTE*)b,c,d,e,f)
-	#define TCPPutROMArray(a,b,c)			TCPPutArray(a,(BYTE*)b,c)
-	#define TCPPutROMString(a,b)			TCPPutString(a,(BYTE*)b)
+	#define TCPFindROMArray(a,b,c,d,e) 		TCPFindArray(a,(uint8_t*)b,c,d,e)
+	#define TCPFindROMArrayEx(a,b,c,d,e,f) 	TCPFindArrayEx(a,(uint8_t*)b,c,d,e,f)
+	#define TCPPutROMArray(a,b,c)			TCPPutArray(a,(uint8_t*)b,c)
+	#define TCPPutROMString(a,b)			TCPPutString(a,(uint8_t*)b)
 #endif
 
-WORD TCPGetTxFIFOFull(TCP_SOCKET hTCP);
+uint16_t TCPGetTxFIFOFull(TCP_SOCKET hTCP);
 // Alias to TCPIsGetReady provided for API completeness
 #define TCPGetRxFIFOFull(a)					TCPIsGetReady(a)
 // Alias to TCPIsPutReady provided for API completeness
@@ -287,21 +287,21 @@ WORD TCPGetTxFIFOFull(TCP_SOCKET hTCP);
 #define TCP_ADJUST_GIVE_REST_TO_TX	0x02u	// Resize flag: extra bytes go to TX
 #define TCP_ADJUST_PRESERVE_RX		0x04u	// Resize flag: attempt to preserve RX buffer
 #define TCP_ADJUST_PRESERVE_TX		0x08u	// Resize flag: attempt to preserve TX buffer
-BOOL TCPAdjustFIFOSize(TCP_SOCKET hTCP, WORD wMinRXSize, WORD wMinTXSize, BYTE vFlags);
+_Bool TCPAdjustFIFOSize(TCP_SOCKET hTCP, uint16_t wMinRXSize, uint16_t wMinTXSize, uint8_t vFlags);
 
 #if defined(STACK_USE_SSL)
-BOOL TCPStartSSLClient(TCP_SOCKET hTCP, BYTE* host);
-BOOL TCPStartSSLClientEx(TCP_SOCKET hTCP, BYTE* host, void * buffer, BYTE suppDataType);
-BOOL TCPStartSSLServer(TCP_SOCKET hTCP);
-BOOL TCPAddSSLListener(TCP_SOCKET hTCP, WORD port);
-BOOL TCPRequestSSLMessage(TCP_SOCKET hTCP, BYTE msg);
-BOOL TCPSSLIsHandshaking(TCP_SOCKET hTCP);
-BOOL TCPIsSSL(TCP_SOCKET hTCP);
+_Bool TCPStartSSLClient(TCP_SOCKET hTCP, uint8_t* host);
+_Bool TCPStartSSLClientEx(TCP_SOCKET hTCP, uint8_t* host, void * buffer, uint8_t suppDataType);
+_Bool TCPStartSSLServer(TCP_SOCKET hTCP);
+_Bool TCPAddSSLListener(TCP_SOCKET hTCP, uint16_t port);
+_Bool TCPRequestSSLMessage(TCP_SOCKET hTCP, uint8_t msg);
+_Bool TCPSSLIsHandshaking(TCP_SOCKET hTCP);
+_Bool TCPIsSSL(TCP_SOCKET hTCP);
 void TCPSSLHandshakeComplete(TCP_SOCKET hTCP);
-void TCPSSLDecryptMAC(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, WORD len);
-void TCPSSLInPlaceMACEncrypt(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, BYTE* MACSecret, WORD len);
-void TCPSSLPutRecordHeader(TCP_SOCKET hTCP, BYTE* hdr, BOOL recDone);
-WORD TCPSSLGetPendingTxSize(TCP_SOCKET hTCP);
+void TCPSSLDecryptMAC(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, uint16_t len);
+void TCPSSLInPlaceMACEncrypt(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, uint8_t* MACSecret, uint16_t len);
+void TCPSSLPutRecordHeader(TCP_SOCKET hTCP, uint8_t* hdr, _Bool recDone);
+uint16_t TCPSSLGetPendingTxSize(TCP_SOCKET hTCP);
 void TCPSSLHandleIncoming(TCP_SOCKET hTCP);
 #endif
 
@@ -346,7 +346,7 @@ void TCPSSLHandleIncoming(TCP_SOCKET hTCP);
 	for backwards compatibility with older versions of the stack.  New
 	applications should use the TCPOpen API instead.
   ***************************************************************************/
-#define TCPConnect(remote,port)	TCPOpen((DWORD)remote, TCP_OPEN_NODE_INFO, port, TCP_PURPOSE_DEFAULT)
+#define TCPConnect(remote,port)	TCPOpen((uint32_t)remote, TCP_OPEN_NODE_INFO, port, TCP_PURPOSE_DEFAULT)
 
 
 #endif

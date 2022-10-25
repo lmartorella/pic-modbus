@@ -93,7 +93,7 @@ void sys_storeResetReason();
 void flog(const char* format, ...);
 #else
 // Not implemented in MCUs
-#define flog() 
+#define flog(...) 
 #endif
 
 #endif

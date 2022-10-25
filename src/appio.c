@@ -68,7 +68,7 @@ void io_init()
 }
 
 #ifdef HAS_CM1602
-static void _clr(BYTE addr)
+static void _clr(uint8_t addr)
 {
 	char i;
 	cm1602_setDdramAddr(addr);
@@ -81,7 +81,7 @@ static void _clr(BYTE addr)
 #endif
 
 #ifdef HAS_CM1602
-static void _print(const char* str, BYTE addr)
+static void _print(const char* str, uint8_t addr)
 {
 	_clr(addr);
 	cm1602_writeStr(str);

@@ -47,34 +47,34 @@ typedef enum {
 
 #ifdef HAS_RS485_BUS_SECONDARY
 // Directly with define in order to minimize stack usage
-#define prot_control_readW(w) rs485_read((BYTE*)w, 2) 
-#define prot_control_read(data, size) rs485_read((BYTE*)data, size)
-#define prot_control_writeW(w) rs485_write(FALSE, (BYTE*)&w, 2)
-#define prot_control_write(data, size) rs485_write(FALSE, (BYTE*)data, size)
+#define prot_control_readW(w) rs485_read((uint8_t*)w, 2) 
+#define prot_control_read(data, size) rs485_read((uint8_t*)data, size)
+#define prot_control_writeW(w) rs485_write(false, (uint8_t*)&w, 2)
+#define prot_control_write(data, size) rs485_write(false, (uint8_t*)data, size)
 #define prot_control_over() set_rs485_over()
-#define prot_control_idle(buf) rs485_write(TRUE, buf, 1)
+#define prot_control_idle(buf) rs485_write(true, buf, 1)
 #define prot_control_readAvail() rs485_readAvail()
 #define prot_control_writeAvail() rs485_writeAvail()
 #else
-bit prot_control_readW(WORD* w);
-bit prot_control_read(void* data, WORD size);
-void prot_control_writeW(WORD w);
-void prot_control_write(const void* data, WORD size);
+__bit prot_control_readW(uint16_t* w);
+__bit prot_control_read(void* data, uint16_t size);
+void prot_control_writeW(uint16_t w);
+void prot_control_write(const void* data, uint16_t size);
 void prot_control_over();
 #define prot_control_idle()
-WORD prot_control_readAvail();
-WORD prot_control_writeAvail();
-extern bit prot_registered;
+uint16_t prot_control_readAvail();
+uint16_t prot_control_writeAvail();
+extern __bit prot_registered;
 #endif
 
 void prot_control_close();
 void prot_control_abort();
-bit prot_control_isConnected();
+__bit prot_control_isConnected();
 
 void prot_init();
 void prot_poll();
 // Has the slow timer ticked?
-extern bit prot_slowTimer;
+extern __bit prot_slowTimer;
 
 #endif
 

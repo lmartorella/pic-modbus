@@ -4,9 +4,9 @@
 #ifdef HAS_I2C
 
 // I2C status bytes
-static BYTE s_addr;
-static BYTE* s_dest;
-static BYTE* s_buf;
+static uint8_t s_addr;
+static uint8_t* s_dest;
+static uint8_t* s_buf;
 typedef enum {
     DIR_SEND = 0,
     DIR_RECEIVE = 1,
@@ -44,7 +44,7 @@ void i2c_init() {
      
     I2C_PORT_SDA = 1; // SDA = 1 
     // Produce 8 bits + 1 NACK
-    for (BYTE i = 0; i < 8; i++) {
+    for (uint8_t i = 0; i < 8; i++) {
         wait40us();
         I2C_PORT_SCL = 1;
         wait40us();
@@ -78,7 +78,7 @@ void i2c_init() {
     s_istate = STATE_IDLE;
 }
 
-void i2c_sendReceive7(BYTE addr, BYTE size, BYTE* buf) {
+void i2c_sendReceive7(uint8_t addr, uint8_t size, uint8_t* buf) {
     // Check if MSSP module is in use
     if ((I2C_SSPCON2 & I2C_SSPCON2_BUSY_MASK) || s_istate != STATE_IDLE) {
         fatal("I2.U");
@@ -96,15 +96,15 @@ void i2c_sendReceive7(BYTE addr, BYTE size, BYTE* buf) {
     s_istate = STATE_START;
 }
 
-bit i2c_poll() {
+__bit i2c_poll() {
 loop:
     if (s_istate == STATE_IDLE) {
-        return TRUE; 
+        return true; 
     }
 
     // Something happened?
     if (!I2C_PIR_SSP1IF) {
-        return FALSE;
+        return false;
     }
     
     I2C_PIR_SSP1IF = 0;

@@ -83,11 +83,11 @@
 #if defined(STACK_USE_MD5) || defined(STACK_USE_SHA1)
 
 // Stores a copy of the last block with the required padding
-BYTE lastBlock[64];
+uint8_t lastBlock[64];
 
 /*****************************************************************************
   Function:
-	void HashAddData(HASH_SUM* theSum, BYTE* data, WORD len)
+	void HashAddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to the hash sum.
@@ -107,7 +107,7 @@ BYTE lastBlock[64];
 	This function calls the appropriate hashing function based on the
 	hash typed defined in theSum.
   ***************************************************************************/
-void HashAddData(HASH_SUM* theSum, BYTE* data, WORD len)
+void HashAddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 {
 	#if defined(STACK_USE_MD5)
 	if(theSum->hashType == HASH_MD5)
@@ -121,7 +121,7 @@ void HashAddData(HASH_SUM* theSum, BYTE* data, WORD len)
 
 /*****************************************************************************
   Function:
-	void HashAddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+	void HashAddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to the hash sum.
@@ -144,7 +144,7 @@ void HashAddData(HASH_SUM* theSum, BYTE* data, WORD len)
 	This function is aliased to HashAddData on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-void HashAddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+void HashAddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 {
 	#if defined(STACK_USE_MD5)
 	if(theSum->hashType == HASH_MD5)
@@ -168,13 +168,13 @@ void HashAddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
 #if defined(STACK_USE_MD5)
 
 // Array of pre-defined R vales for MD5
-static ROM BYTE _MD5_r[64] = {7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
+static ROM uint8_t _MD5_r[64] = {7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
 				  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
 				  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
 				  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21};
 
 // Array of pre-defined K values for MD5
-static ROM DWORD _MD5_k[64] = { 0xD76AA478, 0xE8C7B756, 0x242070DB, 0xC1BDCEEE, 0xF57C0FAF, 0x4787C62A, 0xA8304613, 0xFD469501,
+static ROM uint32_t _MD5_k[64] = { 0xD76AA478, 0xE8C7B756, 0x242070DB, 0xC1BDCEEE, 0xF57C0FAF, 0x4787C62A, 0xA8304613, 0xFD469501,
 							0x698098D8, 0x8B44F7AF, 0xFFFF5BB1, 0x895CD7BE, 0x6B901122, 0xFD987193, 0xA679438E, 0x49B40821,
 							0xF61E2562, 0xC040B340, 0x265E5A51, 0xE9B6C7AA, 0xD62F105D, 0x02441453, 0xD8A1E681, 0xE7D3FBC8,
 							0x21E1CDE6, 0xC33707D6, 0xF4D50D87, 0x455A14ED, 0xA9E3E905, 0xFCEFA3F8, 0x676F02D9, 0x8D2A4C8A,
@@ -183,7 +183,7 @@ static ROM DWORD _MD5_k[64] = { 0xD76AA478, 0xE8C7B756, 0x242070DB, 0xC1BDCEEE, 
 							0xF4292244, 0x432AFF97, 0xAB9423A7, 0xFC93A039, 0x655B59C3, 0x8F0CCC92, 0xFFEFF47D, 0x85845DD1,
 							0x6FA87E4F, 0xFE2CE6E0, 0xA3014314, 0x4E0811A1, 0xF7537E82, 0xBD3AF235, 0x2AD7D2BB, 0xEB86D391 };
 
-static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3);
+static void MD5HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1, uint32_t* h2, uint32_t* h3);
 
 /*****************************************************************************
   Function:
@@ -213,7 +213,7 @@ void MD5Initialize(HASH_SUM* theSum)
 
 /*****************************************************************************
   Function:
-	void MD5AddData(HASH_SUM* theSum, BYTE* data, WORD len)
+	void MD5AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to an MD5 hash calculation.
@@ -229,9 +229,9 @@ void MD5Initialize(HASH_SUM* theSum)
   Returns:
   	None
   ***************************************************************************/
-void MD5AddData(HASH_SUM* theSum, BYTE* data, WORD len)
+void MD5AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 {
-	BYTE *blockPtr;
+	uint8_t *blockPtr;
 
 	// Seek to the first free byte
 	blockPtr = theSum->partialBlock + ( theSum->bytesSoFar & 0x3f );
@@ -258,7 +258,7 @@ void MD5AddData(HASH_SUM* theSum, BYTE* data, WORD len)
 
 /*****************************************************************************
   Function:
-	void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+	void MD5AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to an MD5 hash calculation.
@@ -278,9 +278,9 @@ void MD5AddData(HASH_SUM* theSum, BYTE* data, WORD len)
   	This function is aliased to MD5AddData on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+void MD5AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 {
-	BYTE *blockPtr;
+	uint8_t *blockPtr;
 
 	// Seek to the first free byte
 	blockPtr = theSum->partialBlock + ( theSum->bytesSoFar & 0x3f );
@@ -308,8 +308,8 @@ void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
 
 /*****************************************************************************
   Function:
-	static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1,
-								DWORD* h2, DWORD* h3)
+	static void MD5HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1,
+								uint32_t* h2, uint32_t* h3)
 
   Summary:
 	Calculates the MD5 hash sum of a block.
@@ -319,7 +319,7 @@ void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
 	the values of h0-h3 with the next context.
 
   Precondition:
-	The data pointer must be WORD aligned on 16-bit parts and DWORD
+	The data pointer must be uint16_t aligned on 16-bit parts and uint32_t
 	aligned on 32-bit PICs.  If alignment is not correct, a memory alignment
 	exception will occur.
 
@@ -334,10 +334,10 @@ void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
   	None
 
   ***************************************************************************/
-static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3)
+static void MD5HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1, uint32_t* h2, uint32_t* h3)
 {
-	DWORD a, b, c, d, f, temp;
-	BYTE i, j;
+	uint32_t a, b, c, d, f, temp;
+	uint8_t i, j;
 
 	// Set up a, b, c, d
 	a = *h0;
@@ -374,7 +374,7 @@ static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3)
 		d = c;
 		c = b;
 		j *= 4;
-		b = leftRotateDWORD(a+f+_MD5_k[i]+(*(DWORD*)&data[j]),_MD5_r[i]) + b;
+		b = leftRotateDWORD(a+f+_MD5_k[i]+(*(uint32_t*)&data[j]),_MD5_r[i]) + b;
 		a = temp;
 	}
 
@@ -388,7 +388,7 @@ static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3)
 
 /*****************************************************************************
   Function:
-	void MD5Calculate(HASH_SUM* theSum, BYTE* result)
+	void MD5Calculate(HASH_SUM* theSum, uint8_t* result)
 
   Summary:
 	Calculates an MD5 hash
@@ -408,10 +408,10 @@ static void MD5HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3)
   Returns:
   	None
   ***************************************************************************/
-void MD5Calculate(HASH_SUM* theSum, BYTE* result)
+void MD5Calculate(HASH_SUM* theSum, uint8_t* result)
 {
-	DWORD h0, h1, h2, h3;
-	BYTE i, *partPtr, *endPtr;
+	uint32_t h0, h1, h2, h3;
+	uint8_t i, *partPtr, *endPtr;
 
 	// Initialize the hash variables
 	h0 = theSum->h0;
@@ -475,7 +475,7 @@ void MD5Calculate(HASH_SUM* theSum, BYTE* result)
 
 #if defined(STACK_USE_SHA1)
 
-static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2, DWORD* h3, DWORD* h4);
+static void SHA1HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4);
 
 /*****************************************************************************
   Function:
@@ -506,7 +506,7 @@ void SHA1Initialize(HASH_SUM* theSum)
 
 /*****************************************************************************
   Function:
-	void SHA1AddData(HASH_SUM* theSum, BYTE* data, WORD len)
+	void SHA1AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to a SHA-1 hash calculation.
@@ -522,9 +522,9 @@ void SHA1Initialize(HASH_SUM* theSum)
   Returns:
   	None
   ***************************************************************************/
-void SHA1AddData(HASH_SUM* theSum, BYTE* data, WORD len)
+void SHA1AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len)
 {
-	BYTE *blockPtr;
+	uint8_t *blockPtr;
 
 	// Seek to the first free byte
 	blockPtr = theSum->partialBlock + ( theSum->bytesSoFar & 0x3f );
@@ -552,7 +552,7 @@ void SHA1AddData(HASH_SUM* theSum, BYTE* data, WORD len)
 
 /*****************************************************************************
   Function:
-	void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+	void SHA1AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 
   Description:
 	Adds data to a SHA-1 hash calculation.
@@ -572,9 +572,9 @@ void SHA1AddData(HASH_SUM* theSum, BYTE* data, WORD len)
   	This function is aliased to SHA1AddData on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
+void SHA1AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len)
 {
-	BYTE *blockPtr;
+	uint8_t *blockPtr;
 
 	// Seek to the first free byte
 	blockPtr = theSum->partialBlock + ( theSum->bytesSoFar & 0x3f );
@@ -603,8 +603,8 @@ void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
 
 /*****************************************************************************
   Function:
-	static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1,
-								DWORD* h2, DWORD* h3, DWORD* h4)
+	static void SHA1HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1,
+								uint32_t* h2, uint32_t* h3, uint32_t* h4)
 
   Summary:
 	Calculates the SHA-1 hash sum of a block.
@@ -614,7 +614,7 @@ void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
 	the values of h0-h3 with the next context.
 
   Precondition:
-	The data pointer must be WORD aligned on 16-bit parts and DWORD
+	The data pointer must be uint16_t aligned on 16-bit parts and uint32_t
 	aligned on 32-bit PICs.  If alignment is not correct, a memory alignment
 	exception will occur.
 
@@ -630,12 +630,12 @@ void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len)
   	None
 
   ***************************************************************************/
-static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
-							DWORD* h3, DWORD* h4)
+static void SHA1HashBlock(uint8_t* data, uint32_t* h0, uint32_t* h1, uint32_t* h2,
+							uint32_t* h3, uint32_t* h4)
 {
-	DWORD a, b, c, d, e, f, k, temp;
+	uint32_t a, b, c, d, e, f, k, temp;
 	DWORD_VAL *w = (DWORD_VAL*)lastBlock;
-	BYTE i, back3, back8, back14;
+	uint8_t i, back3, back8, back14;
 
 	// Set up a, b, c, d, e
 	a = *h0;
@@ -702,7 +702,7 @@ static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
 			#if defined(HI_TECH_C)
 			// This section is unrolled for HI_TECH_C because it cannot parse
 			// the expression used by the other compilers
-			DWORD temp2;
+			uint32_t temp2;
 			temp = w[back3].Val;
 			temp2 = w[back8].Val;
 			temp ^= temp2;
@@ -743,7 +743,7 @@ static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
 
 /*****************************************************************************
   Function:
-	void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
+	void SHA1Calculate(HASH_SUM* theSum, uint8_t* result)
 
   Summary:
 	Calculates a SHA-1 hash
@@ -763,10 +763,10 @@ static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
   Returns:
   	None
   ***************************************************************************/
-void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
+void SHA1Calculate(HASH_SUM* theSum, uint8_t* result)
 {
-	DWORD h0, h1, h2, h3, h4;
-	BYTE i, *partPtr, *endPtr;
+	uint32_t h0, h1, h2, h3, h4;
+	uint8_t i, *partPtr, *endPtr;
 
 	// Initialize the hash variables
 	h0 = theSum->h0;
@@ -816,26 +816,26 @@ void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
 	SHA1HashBlock(lastBlock, &h0, &h1, &h2, &h3, &h4);
 
 	// Format the result in big-endian format
-	*result++ = ((BYTE*)&h0)[3];
-	*result++ = ((BYTE*)&h0)[2];
-	*result++ = ((BYTE*)&h0)[1];
-	*result++ = ((BYTE*)&h0)[0];
-	*result++ = ((BYTE*)&h1)[3];
-	*result++ = ((BYTE*)&h1)[2];
-	*result++ = ((BYTE*)&h1)[1];
-	*result++ = ((BYTE*)&h1)[0];
-	*result++ = ((BYTE*)&h2)[3];
-	*result++ = ((BYTE*)&h2)[2];
-	*result++ = ((BYTE*)&h2)[1];
-	*result++ = ((BYTE*)&h2)[0];
-	*result++ = ((BYTE*)&h3)[3];
-	*result++ = ((BYTE*)&h3)[2];
-	*result++ = ((BYTE*)&h3)[1];
-	*result++ = ((BYTE*)&h3)[0];
-	*result++ = ((BYTE*)&h4)[3];
-	*result++ = ((BYTE*)&h4)[2];
-	*result++ = ((BYTE*)&h4)[1];
-	*result++ = ((BYTE*)&h4)[0];
+	*result++ = ((uint8_t*)&h0)[3];
+	*result++ = ((uint8_t*)&h0)[2];
+	*result++ = ((uint8_t*)&h0)[1];
+	*result++ = ((uint8_t*)&h0)[0];
+	*result++ = ((uint8_t*)&h1)[3];
+	*result++ = ((uint8_t*)&h1)[2];
+	*result++ = ((uint8_t*)&h1)[1];
+	*result++ = ((uint8_t*)&h1)[0];
+	*result++ = ((uint8_t*)&h2)[3];
+	*result++ = ((uint8_t*)&h2)[2];
+	*result++ = ((uint8_t*)&h2)[1];
+	*result++ = ((uint8_t*)&h2)[0];
+	*result++ = ((uint8_t*)&h3)[3];
+	*result++ = ((uint8_t*)&h3)[2];
+	*result++ = ((uint8_t*)&h3)[1];
+	*result++ = ((uint8_t*)&h3)[0];
+	*result++ = ((uint8_t*)&h4)[3];
+	*result++ = ((uint8_t*)&h4)[2];
+	*result++ = ((uint8_t*)&h4)[1];
+	*result++ = ((uint8_t*)&h4)[0];
 }
 
 #endif	//#end SHA-1

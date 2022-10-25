@@ -51,7 +51,7 @@
 #ifndef _BERKELEY_API_HEADER_FILE
 #define _BERKELEY_API_HEADER_FILE
 
-typedef BYTE SOCKET;   //Socket descriptor
+typedef uint8_t SOCKET;   //Socket descriptor
 
 #define AF_INET         2			// Internet Address Family - UDP, TCP, etc.
 
@@ -86,11 +86,11 @@ struct BSDSocket
 {
     int            SocketType; // Socket type
     BSD_SCK_STATE  bsdState; //Socket state
-    WORD           localPort; //local port
-    WORD           remotePort; //remote port
-    DWORD          remoteIP; //remote IP
+    uint16_t           localPort; //local port
+    uint16_t           remotePort; //remote port
+    uint32_t          remoteIP; //remote IP
     int            backlog; // maximum number or client connection
-    BOOL           isServer; // server/client check
+    _Bool           isServer; // server/client check
     TCP_SOCKET     SocketID; // Socket ID
 }; // Berkeley Socket structure
 
@@ -100,9 +100,9 @@ struct in_addr
 {
     union
    {
-       struct { BYTE s_b1,s_b2,s_b3,s_b4; } S_un_b; // IP address in Byte
-       struct { WORD s_w1,s_w2; } S_un_w; //IP address in Word
-       DWORD S_addr; //IP address
+       struct { uint8_t s_b1,s_b2,s_b3,s_b4; } S_un_b; // IP address in Byte
+       struct { uint16_t s_w1,s_w2; } S_un_w; //IP address in Word
+       uint32_t S_addr; //IP address
    }S_un; //union of IP address
     
 #define s_addr  S_un.S_addr //can be used for most tcp & ip code
@@ -122,7 +122,7 @@ __PACK struct sockaddr
 __PACK struct sockaddr_in
 {
     short   sin_family; //Address family; must be AF_INET.
-    WORD    sin_port;  //Internet Protocol (IP) port.
+    uint16_t    sin_port;  //Internet Protocol (IP) port.
     struct  in_addr sin_addr; //IP address in network byte order.
     char    sin_zero[8];  //Padding to make structure the same size as SOCKADDR. 
 }; //In the Internet address family

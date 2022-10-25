@@ -15,11 +15,11 @@ typedef union
 {
 	struct
 	{
-		BYTE lower;
-		BYTE higher;
-		BYTE upper;
+		uint8_t lower;
+		uint8_t higher;
+		uint8_t upper;
 	} bytes;
-	UINT32 ptr;
+	uint32_t ptr;
 } POINTER;
 
 //----------------------------------------------- 
@@ -35,12 +35,12 @@ static void setWTablePtr(POINTER* ptr)
 } 
 
 //----------------------------------------------- 
-// Prototype: void loadWData(const ram BYTE* pData, BYTE nLen) 
+// Prototype: void loadWData(const ram uint8_t* pData, uint8_t nLen) 
 // Scope: Load the data into the 64 bytes registers 
 //----------------------------------------------- 
-static void loadWData(BYTE* pData, BYTE nLen) 
+static void loadWData(uint8_t* pData, uint8_t nLen) 
 { 
-	BYTE i; 
+	uint8_t i; 
 	for (i = 0; i < nLen; i++) 
 	{ 
 		 TABLAT = *pData; 
@@ -96,10 +96,10 @@ static void rowErase(void)
 
 // Erase the entire row (destination should be multiple of ROW_SIZE = 1Kb)
 // and then copy the source bytes to the start of row, length should be at max 1Kb
-void rom_write(const void* destination, const void* source, WORD length)
+void rom_write(const void* destination, const void* source, uint16_t length)
 {
 	POINTER ptr;
-	ptr.ptr = (UINT32)(void*)destination;
+	ptr.ptr = (uint32_t)(void*)destination;
 
         // The destination pointer should be row aligned
         if ((ptr.ptr & 0x3FF) != 0)
@@ -124,7 +124,7 @@ void rom_write(const void* destination, const void* source, WORD length)
 
 #elif defined(_IS_PIC16F628_CARD) || defined(_IS_PIC16F1827_CARD) || defined(_IS_PIC16F887_CARD)
 
-void rom_read(BYTE sourceAddress, BYTE* destination, BYTE length)
+void rom_read(uint8_t sourceAddress, uint8_t* destination, uint8_t length)
 {
 #ifdef _IS_PIC16F887_CARD
     EECON1bits.EEPGD = 0;
@@ -140,9 +140,9 @@ void rom_read(BYTE sourceAddress, BYTE* destination, BYTE length)
 }
 
 // Data still to write
-static BYTE s_length;
-static BYTE s_destinationAddr;
-static const BYTE* s_source;
+static uint8_t s_length;
+static uint8_t s_destinationAddr;
+static const uint8_t* s_source;
 
 // Since writing is slow, cannot lose protocol data. Hence polling
 void rom_poll() 
@@ -166,7 +166,7 @@ void rom_poll()
     }
 }
 
-void rom_write(BYTE destinationAddr, const BYTE* source, BYTE length)
+void rom_write(uint8_t destinationAddr, const uint8_t* source, uint8_t length)
 {
     s_length = length;
     s_destinationAddr = destinationAddr;

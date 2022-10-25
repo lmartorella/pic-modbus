@@ -42,32 +42,32 @@ void rs485_poll();
 
 // Enqueue bytes to send. Use 9-bit address. Buffer is copied (max. 32 bytes)
 // Warning: the address bit is used immediately and not enqueued to the buffer
-void rs485_write(BOOL address, const BYTE* data, BYTE size);
+void rs485_write(_Bool address, const uint8_t* data, uint8_t size);
 // Send a special OVER token to the bus when the transmission ends (if there are 
 // data in TX queue)
-extern bit rs485_over;
+extern __bit rs485_over;
 // When rs485_over is set, close will determine with char to send
-extern bit rs485_close;
+extern __bit rs485_close;
 // When set after a write operation, remain in TX state when data finishes until next write operation
-extern bit rs485_master;
+extern __bit rs485_master;
 
 // Read data, if available.
-bit rs485_read(BYTE* data, BYTE size);
+__bit rs485_read(uint8_t* data, uint8_t size);
 
 /**
  * Get count of available bytes in the read buffer
  */
-BYTE rs485_readAvail();
+uint8_t rs485_readAvail();
 
 /**
  * Get count of available bytes in the write buffer
  */
-BYTE rs485_writeAvail();
+uint8_t rs485_writeAvail();
 
 // Get the last bit9 received
-extern bit rs485_lastRc9;
+extern __bit rs485_lastRc9;
 // Get/set the skip flag. If set, rc9 = 0 bytes are skipped by receiver
-extern bit rs485_skipData;
+extern __bit rs485_skipData;
 
 // Don't change the line status, but simulate a TX time for disengage
 void rs485_waitDisengageTime();
@@ -76,7 +76,7 @@ void rs485_waitDisengageTime();
 // TICKS_PER_SECOND = 3906 on PIC16 @4MHz
 // TICKS_PER_SECOND = 24414 on PIC18 @25MHz
 // BYTES_PER_SECONDS = (BAUD / 11 (9+1+1)) = 1744 (round down) = 0.57ms
-#define BYTES_PER_SECONDS (DWORD)((RS485_BAUD - 11) / 11)
+#define BYTES_PER_SECONDS (uint32_t)((RS485_BAUD - 11) / 11)
 // 2 ticks per byte, but let's do 3 (round up) for PIC16 @4MHz
 // 14 ticks per byte (round up) on PIC18 @25MHz
 #define TICKS_PER_BYTE (TICK_TYPE)((TICKS_PER_SECOND + BYTES_PER_SECONDS) / BYTES_PER_SECONDS)

@@ -60,11 +60,11 @@
 #include "../Include/TCPIPStack/TCPIP.h"
 
 // Default Random Number Generator seed. 0x41FE9F9E corresponds to calling LFSRSeedRand(1)
-static DWORD dwLFSRRandSeed = 0x41FE9F9E;
+static uint32_t dwLFSRRandSeed = 0x41FE9F9E;
 
 /*****************************************************************************
   Function:
-	DWORD LFSRSeedRand(DWORD dwSeed)
+	uint32_t LFSRSeedRand(uint32_t dwSeed)
 
   Summary:
 	Seeds the LFSR random number generator invoked by the LFSRRand() function.
@@ -97,10 +97,10 @@ static DWORD dwLFSRRandSeed = 0x41FE9F9E;
 	dwSeed value of 0x0 will return the same sequence of random numbers as
 	using the seed of 0x1.
   ***************************************************************************/
-DWORD LFSRSeedRand(DWORD dwSeed)
+uint32_t LFSRSeedRand(uint32_t dwSeed)
 {
-	DWORD dwOldSeed;
-	BYTE i;
+	uint32_t dwOldSeed;
+	uint8_t i;
 
 	// Save original seed to be returned later
 	dwOldSeed = dwLFSRRandSeed;
@@ -124,7 +124,7 @@ DWORD LFSRSeedRand(DWORD dwSeed)
 
 /*****************************************************************************
   Function:
-	WORD LFSRRand(void)
+	uint16_t LFSRRand(void)
 
   Summary:
 	Returns a pseudo-random 16-bit unsigned integer in the range from 0
@@ -155,9 +155,9 @@ DWORD LFSRSeedRand(DWORD dwSeed)
   Remarks:
 	None
   ***************************************************************************/
-WORD LFSRRand(void)
+uint16_t LFSRRand(void)
 {
-	BYTE i;
+	uint8_t i;
 
 	// Taps: 32 31 29 1
 	// Characteristic polynomial: x^32 + x^31 + x^29 + x + 1
@@ -166,16 +166,16 @@ WORD LFSRRand(void)
 		dwLFSRRandSeed = (dwLFSRRandSeed >> 1) ^ ((0ul - (dwLFSRRandSeed & 1ul)) & 0xD0000001ul);
 
 	// Return 16-bits as pseudo-random number
-	return (WORD)dwLFSRRandSeed;
+	return (uint16_t)dwLFSRRandSeed;
 }
 
 
 /*****************************************************************************
   Function:
-	DWORD GenerateRandomDWORD(void)
+	uint32_t GenerateRandomDWORD(void)
 
   Summary:
-	Generates a random DWORD.
+	Generates a random uint32_t.
 
   Description:
 	This function generates a random 32-bit integer.  It collects
@@ -202,28 +202,28 @@ WORD LFSRRand(void)
 
   Remarks:
 	This function times out after 1 second of attempting to generate the
-	random DWORD.  In such a case, the output may not be truly random.
+	random uint32_t.  In such a case, the output may not be truly random.
 	Typically, this function executes in around 500,000 instruction cycles.
 
 	The intent of this function is to produce statistically random and
 	cryptographically secure random number.  Whether or not this is true on
 	all (or any) devices/voltages/temperatures is not tested.
   ***************************************************************************/
-DWORD GenerateRandomDWORD(void)
+uint32_t GenerateRandomDWORD(void)
 {
-	BYTE vBitCount;
-	WORD w, wTime, wLastValue;
-	DWORD dwTotalTime;
+	uint8_t vBitCount;
+	uint16_t w, wTime, wLastValue;
+	uint32_t dwTotalTime;
 	union
 	{
-		DWORD	dw;
-		WORD	w[2];
+		uint32_t	dw;
+		uint16_t	w[2];
 	} randomResult;
 
 #if defined(__18CXX) || defined(__XC8)
 {
-	BYTE ADCON0Save, ADCON2Save;
-	BYTE T0CONSave, TMR0HSave, TMR0LSave;
+	uint8_t ADCON0Save, ADCON2Save;
+	uint8_t T0CONSave, TMR0HSave, TMR0LSave;
 
 	// Save hardware SFRs
 	ADCON0Save = ADCON0;
@@ -248,8 +248,8 @@ DWORD GenerateRandomDWORD(void)
 		ADCON0bits.GO = 1;
 		ClrWdt();
 		while(ADCON0bits.GO);
-		((BYTE*)&wTime)[0] = TMR0L;
-		((BYTE*)&wTime)[1] = TMR0H;
+		((uint8_t*)&wTime)[0] = TMR0L;
+		((uint8_t*)&wTime)[1] = TMR0H;
 		w = LFSRRand();
 
 		// Wait no longer than 1 second obtaining entropy
@@ -288,8 +288,8 @@ DWORD GenerateRandomDWORD(void)
 }
 #else
 {
-	WORD AD1CON1Save, AD1CON2Save, AD1CON3Save;
-	WORD T1CONSave, PR1Save;
+	uint16_t AD1CON1Save, AD1CON2Save, AD1CON3Save;
+	uint16_t T1CONSave, PR1Save;
 
 	// Save hardware SFRs
 	AD1CON1Save = AD1CON1;
@@ -372,7 +372,7 @@ DWORD GenerateRandomDWORD(void)
 #if defined(STACK_USE_HTTP_SERVER)
 /*****************************************************************************
   Function:
-	void UnencodeURL(BYTE* URL)
+	void UnencodeURL(uint8_t* URL)
 
   Summary:
 	Decodes a URL-encoded string.
@@ -392,12 +392,12 @@ DWORD GenerateRandomDWORD(void)
   Returns:
   	None
   ***************************************************************************/
-void UnencodeURL(BYTE* URL)
+void UnencodeURL(uint8_t* URL)
 {
-	BYTE *Right, *Copy;
+	uint8_t *Right, *Copy;
 	WORD_VAL Number;
 
-	while((Right = (BYTE*)strchr((char*)URL, '%')))
+	while((Right = (uint8_t*)strchr((char*)URL, '%')))
 	{
 		// Make sure the string is long enough
 		if(Right[1] == '\0')
@@ -421,7 +421,7 @@ void UnencodeURL(BYTE* URL)
 
 /*****************************************************************************
   Function:
-	BOOL StringToIPAddress(BYTE* str, IP_ADDR* IPAddress)
+	_Bool StringToIPAddress(uint8_t* str, IP_ADDR* IPAddress)
 
   Summary:
 	Converts a string to an IP address
@@ -438,13 +438,13 @@ void UnencodeURL(BYTE* URL)
 	IPAddress - Pointer to IP_ADDR in which to store the result
 
   Return Values:
-  	TRUE - an IP address was successfully decoded
-  	FALSE - no IP address could be found, or the format was incorrect
+  	true - an IP address was successfully decoded
+  	false - no IP address could be found, or the format was incorrect
   ***************************************************************************/
-BOOL StringToIPAddress(BYTE* str, IP_ADDR* IPAddress)
+_Bool StringToIPAddress(uint8_t* str, IP_ADDR* IPAddress)
 {
 	DWORD_VAL dwVal;
-	BYTE i, charLen, currentOctet;
+	uint8_t i, charLen, currentOctet;
 
 	charLen = 0;
 	currentOctet = 0;
@@ -461,35 +461,35 @@ BOOL StringToIPAddress(BYTE* str, IP_ADDR* IPAddress)
 		if(charLen == 0u)
 		{
 			if(i > 9u)
-				return FALSE;
+				return false;
 		}
 		else if(charLen == 3u)
 		{
-			if(i != (BYTE)('.' - '0'))
-				return FALSE;
+			if(i != (uint8_t)('.' - '0'))
+				return false;
 
 			if(dwVal.Val > 0x00020505ul)
-				return FALSE;
+				return false;
 
-			IPAddress->v[currentOctet++] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+			IPAddress->v[currentOctet++] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 			charLen = 0;
 			dwVal.Val = 0;
 			continue;
 		}
 		else
 		{
-			if(i == (BYTE)('.' - '0'))
+			if(i == (uint8_t)('.' - '0'))
 			{
 				if(dwVal.Val > 0x00020505ul)
-					return FALSE;
+					return false;
 
-				IPAddress->v[currentOctet++] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+				IPAddress->v[currentOctet++] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 				charLen = 0;
 				dwVal.Val = 0;
 				continue;
 			}
 			if(i > 9u)
-				return FALSE;
+				return false;
 		}
 
 		charLen++;
@@ -501,20 +501,20 @@ BOOL StringToIPAddress(BYTE* str, IP_ADDR* IPAddress)
 	// (i.e., not more hostname, which could be legal and not an IP
 	// address as in "10.5.13.233.picsaregood.com"
 	if(i != 0u && i != '/' && i != '\r' && i != '\n' && i != ' ' && i != '\t' && i != ':')
-		return FALSE;
+		return false;
 
 	// Verify and convert the last octet and return the result
 	if(dwVal.Val > 0x00020505ul)
-		return FALSE;
+		return false;
 
-	IPAddress->v[3] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+	IPAddress->v[3] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 
-	return TRUE;
+	return true;
 }
 
 /*****************************************************************************
   Function:
-	BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
+	_Bool ROMStringToIPAddress(ROM uint8_t* str, IP_ADDR* IPAddress)
 
   Summary:
 	Converts a string to an IP address
@@ -531,17 +531,17 @@ BOOL StringToIPAddress(BYTE* str, IP_ADDR* IPAddress)
 	IPAddress - Pointer to IP_ADDR in which to store the result
 
   Return Values:
-  	TRUE - an IP address was successfully decoded
-  	FALSE - no IP address could be found, or the format was incorrect
+  	true - an IP address was successfully decoded
+  	false - no IP address could be found, or the format was incorrect
 
   Remarks:
 	This function is aliased to StringToIPAddress on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
+_Bool ROMStringToIPAddress(ROM uint8_t* str, IP_ADDR* IPAddress)
 {
 	DWORD_VAL dwVal;
-	BYTE i, charLen, currentOctet;
+	uint8_t i, charLen, currentOctet;
 
 	charLen = 0;
 	currentOctet = 0;
@@ -558,35 +558,35 @@ BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
 		if(charLen == 0u)
 		{
 			if(i > 9u)
-				return FALSE;
+				return false;
 		}
 		else if(charLen == 3u)
 		{
-			if(i != (BYTE)('.' - '0'))
-				return FALSE;
+			if(i != (uint8_t)('.' - '0'))
+				return false;
 
 			if(dwVal.Val > 0x00020505ul)
-				return FALSE;
+				return false;
 
-			IPAddress->v[currentOctet++] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+			IPAddress->v[currentOctet++] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 			charLen = 0;
 			dwVal.Val = 0;
 			continue;
 		}
 		else
 		{
-			if(i == (BYTE)('.' - '0'))
+			if(i == (uint8_t)('.' - '0'))
 			{
 				if(dwVal.Val > 0x00020505ul)
-					return FALSE;
+					return false;
 
-				IPAddress->v[currentOctet++] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+				IPAddress->v[currentOctet++] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 				charLen = 0;
 				dwVal.Val = 0;
 				continue;
 			}
 			if(i > 9u)
-				return FALSE;
+				return false;
 		}
 
 		charLen++;
@@ -598,15 +598,15 @@ BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
 	// (i.e., not more hostname, which could be legal and not an IP
 	// address as in "10.5.13.233.picsaregood.com"
 	if(i != 0u && i != '/' && i != '\r' && i != '\n' && i != ' ' && i != '\t')
-		return FALSE;
+		return false;
 
 	// Verify and convert the last octet and return the result
 	if(dwVal.Val > 0x00020505ul)
-		return FALSE;
+		return false;
 
-	IPAddress->v[3] = dwVal.v[2]*((BYTE)100) + dwVal.v[1]*((BYTE)10) + dwVal.v[0];
+	IPAddress->v[3] = dwVal.v[2]*((uint8_t)100) + dwVal.v[1]*((uint8_t)10) + dwVal.v[0];
 
-	return TRUE;
+	return true;
 }
 #endif
 
@@ -614,8 +614,8 @@ BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
 
 /*****************************************************************************
   Function:
-	WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen,
-						BYTE* cDestData, WORD wDestLen)
+	uint16_t Base64Decode(uint8_t* cSourceData, uint16_t wSourceLen,
+						uint8_t* cDestData, uint16_t wDestLen)
 
   Description:
 	Decodes a Base-64 array to its literal representation.
@@ -641,11 +641,11 @@ BOOL ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress)
 	Decoded data is always at least 1/4 smaller than the source data.
   ***************************************************************************/
 #if defined(STACK_USE_BASE64_DECODE)
-WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDestLen)
+uint16_t Base64Decode(uint8_t* cSourceData, uint16_t wSourceLen, uint8_t* cDestData, uint16_t wDestLen)
 {
-	BYTE i;
-	BYTE vByteNumber;
-	WORD wBytesOutput;
+	uint8_t i;
+	uint8_t vByteNumber;
+	uint16_t wBytesOutput;
 
 	vByteNumber = 0;
 	wBytesOutput = 0;
@@ -710,8 +710,8 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 
 /*****************************************************************************
   Function:
-	WORD Base64Encode(BYTE* cSourceData, WORD wSourceLen,
-						BYTE* cDestData, WORD wDestLen)
+	uint16_t Base64Encode(uint8_t* cSourceData, uint16_t wSourceLen,
+						uint8_t* cDestData, uint16_t wDestLen)
 
   Description:
 	Encodes a binary array to Base-64.
@@ -737,11 +737,11 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 	be 1 or 2 bytes larger than that.
   ***************************************************************************/
 #if defined(STACK_USE_BASE64_ENCODE) || defined(STACK_USE_SMTP_CLIENT) || defined(STACK_USE_DYNAMICDNS_CLIENT)
-WORD Base64Encode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDestLen)
+uint16_t Base64Encode(uint8_t* cSourceData, uint16_t wSourceLen, uint8_t* cDestData, uint16_t wDestLen)
 {
-	BYTE i, j;
-	BYTE vOutput[4];
-	WORD wOutputLen;
+	uint8_t i, j;
+	uint8_t vOutput[4];
+	uint16_t wOutputLen;
 
 	wOutputLen = 0;
 	while(wDestLen >= 4u)
@@ -807,7 +807,7 @@ WORD Base64Encode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 
 /*****************************************************************************
   Function:
-	void uitoa(WORD Value, BYTE* Buffer)
+	void uitoa(uint16_t Value, uint8_t* Buffer)
 
   Summary:
 	Converts an unsigned integer to a decimal string.
@@ -825,12 +825,12 @@ WORD Base64Encode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
   Returns:
   	None
   ***************************************************************************/
-void uitoa(WORD Value, BYTE* Buffer)
+void uitoa(uint16_t Value, uint8_t* Buffer)
 {
-	BYTE i;
-	WORD Digit;
-	WORD Divisor;
-	BOOL Printed = FALSE;
+	uint8_t i;
+	uint16_t Digit;
+	uint16_t Divisor;
+	_Bool Printed = false;
 
 	if(Value)
 	{
@@ -841,7 +841,7 @@ void uitoa(WORD Value, BYTE* Buffer)
 			{
 				*Buffer++ = '0' + Digit;
 				Value -= Digit*Divisor;
-				Printed = TRUE;
+				Printed = true;
 			}
 			Divisor /= 10;
 		}
@@ -856,7 +856,7 @@ void uitoa(WORD Value, BYTE* Buffer)
 
 /*****************************************************************************
   Function:
-	void ultoa(DWORD Value, BYTE* Buffer)
+	void ultoa(uint32_t Value, uint8_t* Buffer)
 
   Summary:
 	Converts an unsigned integer to a decimal string.
@@ -878,12 +878,12 @@ void uitoa(WORD Value, BYTE* Buffer)
 // C18 already has a ultoa() function that more-or-less matches this one
 // C32 < 1.12 and C30 < v3.25 need this function
 #if (defined(__PIC32MX__) && (__C32_VERSION__ < 112)) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__) || defined(__C32_LEGACY_LIBC__)
-void ultoa(DWORD Value, BYTE* Buffer)
+void ultoa(uint32_t Value, uint8_t* Buffer)
 {
-	BYTE i;
-	DWORD Digit;
-	DWORD Divisor;
-	BOOL Printed = FALSE;
+	uint8_t i;
+	uint32_t Digit;
+	uint32_t Divisor;
+	_Bool Printed = false;
 
 	if(Value)
 	{
@@ -894,7 +894,7 @@ void ultoa(DWORD Value, BYTE* Buffer)
 			{
 				*Buffer++ = '0' + Digit;
 				Value -= Digit*Divisor;
-				Printed = TRUE;
+				Printed = true;
 			}
 			Divisor /= 10;
 		}
@@ -910,7 +910,7 @@ void ultoa(DWORD Value, BYTE* Buffer)
 
 /*****************************************************************************
   Function:
-	BYTE hexatob(WORD_VAL AsciiChars)
+	uint8_t hexatob(WORD_VAL AsciiChars)
 
   Summary:
 	Converts a hex string to a single byte.
@@ -929,7 +929,7 @@ void ultoa(DWORD Value, BYTE* Buffer)
   Returns:
   	Resulting packed byte 0x00 - 0xFF.
   ***************************************************************************/
-BYTE hexatob(WORD_VAL AsciiChars)
+uint8_t hexatob(WORD_VAL AsciiChars)
 {
 	// Convert lowercase to uppercase
 	if(AsciiChars.v[1] > 'F')
@@ -954,7 +954,7 @@ BYTE hexatob(WORD_VAL AsciiChars)
 
 /*****************************************************************************
   Function:
-	BYTE btohexa_high(BYTE b)
+	uint8_t btohexa_high(uint8_t b)
 
   Summary:
 	Converts the upper nibble of a binary value to a hexadecimal ASCII byte.
@@ -972,7 +972,7 @@ BYTE hexatob(WORD_VAL AsciiChars)
   Returns:
   	The upper hexadecimal ASCII byte '0'-'9' or 'A'-'F'.
   ***************************************************************************/
-BYTE btohexa_high(BYTE b)
+uint8_t btohexa_high(uint8_t b)
 {
 	b >>= 4;
 	return (b>0x9u) ? b+'A'-10:b+'0';
@@ -980,7 +980,7 @@ BYTE btohexa_high(BYTE b)
 
 /*****************************************************************************
   Function:
-	BYTE btohexa_high(BYTE b)
+	uint8_t btohexa_high(uint8_t b)
 
   Summary:
 	Converts the lower nibble of a binary value to a hexadecimal ASCII byte.
@@ -998,7 +998,7 @@ BYTE btohexa_high(BYTE b)
   Returns:
   	The lower hexadecimal ASCII byte '0'-'9' or 'A'-'F'.
   ***************************************************************************/
-BYTE btohexa_low(BYTE b)
+uint8_t btohexa_low(uint8_t b)
 {
 	b &= 0x0F;
 	return (b>9u) ? b+'A'-10:b+'0';
@@ -1006,7 +1006,7 @@ BYTE btohexa_low(BYTE b)
 
 /*****************************************************************************
   Function:
-	signed char stricmppgm2ram(BYTE* a, ROM BYTE* b)
+	signed char stricmppgm2ram(uint8_t* a, ROM uint8_t* b)
 
   Summary:
 	Case-insensitive comparison of a string in RAM to a string in ROM.
@@ -1028,9 +1028,9 @@ BYTE btohexa_low(BYTE b)
   	0	- a = b
   	1	- a > b
   ***************************************************************************/
-signed char stricmppgm2ram(BYTE* a, ROM BYTE* b)
+signed char stricmppgm2ram(uint8_t* a, ROM uint8_t* b)
 {
-	BYTE cA, cB;
+	uint8_t cA, cB;
 
 	// Load first two characters
 	cA = *a;
@@ -1070,24 +1070,24 @@ signed char stricmppgm2ram(BYTE* a, ROM BYTE* b)
 
 /*****************************************************************************
   Function:
-	WORD swaps(WORD v)
+	uint16_t swaps(uint16_t v)
 
   Description:
-	Swaps the endian-ness of a WORD.
+	Swaps the endian-ness of a uint16_t.
 
   Precondition:
 	None
 
   Parameters:
-	v - the WORD to swap
+	v - the uint16_t to swap
 
   Returns:
 	The swapped version of v.
   ***************************************************************************/
-WORD swaps(WORD v)
+uint16_t swaps(uint16_t v)
 {
 	WORD_VAL t;
-	BYTE b;
+	uint8_t b;
 
 	t.Val   = v;
 	b       = t.v[1];
@@ -1099,24 +1099,24 @@ WORD swaps(WORD v)
 
 /*****************************************************************************
   Function:
-	DWORD swapl(DWORD v)
+	uint32_t swapl(uint32_t v)
 
   Description:
-	Swaps the endian-ness of a DWORD.
+	Swaps the endian-ness of a uint32_t.
 
   Precondition:
 	None
 
   Parameters:
-	v - the DWORD to swap
+	v - the uint32_t to swap
 
   Returns:
 	The swapped version of v.
   ***************************************************************************/
 #if defined(__C32__)
-DWORD   __attribute__((nomips16)) swapl(DWORD v)
+uint32_t   __attribute__((nomips16)) swapl(uint32_t v)
 #else
-DWORD swapl(DWORD v)
+uint32_t swapl(uint32_t v)
 #endif
 {
 	// Swap bytes 0 and 3
@@ -1135,7 +1135,7 @@ DWORD swapl(DWORD v)
 
 /*****************************************************************************
   Function:
-	WORD CalcIPChecksum(BYTE* buffer, WORD count)
+	uint16_t CalcIPChecksum(uint8_t* buffer, uint16_t count)
 
   Summary:
 	Calculates an IP checksum value.
@@ -1147,7 +1147,7 @@ DWORD swapl(DWORD v)
 	summed).  This checksum is defined in RFC 793.
 
   Precondition:
-	buffer is WORD aligned (even memory address) on 16- and 32-bit PICs.
+	buffer is uint16_t aligned (even memory address) on 16- and 32-bit PICs.
 
   Parameters:
 	buffer - pointer to the data to be checksummed
@@ -1159,30 +1159,30 @@ DWORD swapl(DWORD v)
   Internal:
 	This function could be improved to do 32-bit sums on PIC32 platforms.
   ***************************************************************************/
-WORD CalcIPChecksum(BYTE* buffer, WORD count)
+uint16_t CalcIPChecksum(uint8_t* buffer, uint16_t count)
 {
-	WORD i;
-	WORD *val;
+	uint16_t i;
+	uint16_t *val;
 	union
 	{
-		WORD w[2];
-		DWORD dw;
+		uint16_t w[2];
+		uint32_t dw;
 	} sum;
 
 	i = count >> 1;
-	val = (WORD*)buffer;
+	val = (uint16_t*)buffer;
 
 	// Calculate the sum of all words
 	sum.dw = 0x00000000ul;
 	while(i--)
-		sum.dw += (DWORD)*val++;
+		sum.dw += (uint32_t)*val++;
 
 	// Add in the sum of the remaining byte, if present
 	if(count & 0x1)
-		sum.dw += (DWORD)*(BYTE*)val;
+		sum.dw += (uint32_t)*(uint8_t*)val;
 
 	// Do an end-around carry (one's complement arrithmatic)
-	sum.dw = (DWORD)sum.w[0] + (DWORD)sum.w[1];
+	sum.dw = (uint32_t)sum.w[0] + (uint32_t)sum.w[1];
 
 	// Do another end-around carry in case if the prior add
 	// caused a carry out
@@ -1241,24 +1241,24 @@ DWORD_VAL toRotate;
 
 /*****************************************************************************
   Function:
-	DWORD leftRotateDWORD(DWORD val, BYTE bits)
+	uint32_t leftRotateDWORD(uint32_t val, uint8_t bits)
 
   Summary:
-	Left-rotates a DWORD.
+	Left-rotates a uint32_t.
 
   Description:
-	This function rotates the bits in a 32-bit DWORD left by a specific
+	This function rotates the bits in a 32-bit uint32_t left by a specific
 	number of bits.
 
   Precondition:
 	None
 
   Parameters:
-	val		- the DWORD to be rotated
+	val		- the uint32_t to be rotated
 	bits	- the number of bits by which to shift
 
   Returns:
-	Rotated DWORD value.
+	Rotated uint32_t value.
 
   Remarks:
 	This function is only implemented on 8-bit platforms for now.  The
@@ -1267,9 +1267,9 @@ DWORD_VAL toRotate;
 	by a macro defined in Helpers.h.
   ***************************************************************************/
 #if defined(__18CXX)
-DWORD leftRotateDWORD(DWORD val, BYTE bits)
+uint32_t leftRotateDWORD(uint32_t val, uint8_t bits)
 {
-	BYTE i, t;
+	uint8_t i, t;
 	//DWORD_VAL toRotate;
 	toRotate.Val = val;
 
@@ -1319,7 +1319,7 @@ DWORD leftRotateDWORD(DWORD val, BYTE bits)
 
 /*****************************************************************************
   Function:
-	void FormatNetBIOSName(BYTE Name[])
+	void FormatNetBIOSName(uint8_t Name[])
 
   Summary:
 	Formats a string to a valid NetBIOS name.
@@ -1340,9 +1340,9 @@ DWORD leftRotateDWORD(DWORD val, BYTE bits)
   Returns:
 	None
   ***************************************************************************/
-void FormatNetBIOSName(BYTE Name[])
+void FormatNetBIOSName(uint8_t Name[])
 {
-	BYTE i;
+	uint8_t i;
 
 	Name[15] = '\0';
 	strupr((char*)Name);
@@ -1472,13 +1472,13 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 
 /*****************************************************************************
   Function:
-	BYTE ExtractURLFields(BYTE *vURL,
+	uint8_t ExtractURLFields(uint8_t *vURL,
 						  PROTOCOLS *protocol,
-						  BYTE *vUsername, WORD *wUsernameLen,
-						  BYTE *vPassword, WORD *wPasswordLen,
-						  BYTE *vHostname, WORD *wHostnameLen,
-						  WORD *wPort,
-						  BYTE *vFilePath, WORD *wFilePathLen)
+						  uint8_t *vUsername, uint16_t *wUsernameLen,
+						  uint8_t *vPassword, uint16_t *wPasswordLen,
+						  uint8_t *vHostname, uint16_t *wHostnameLen,
+						  uint16_t *wPort,
+						  uint8_t *vFilePath, uint16_t *wFilePathLen)
 
   Summary:
 	Extracts all parameters from an URL string (ex:
@@ -1527,11 +1527,11 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 		would be returned for this field.
 
 	wUsernameLen -
-		On call\: Optional pointer to a WORD specifying the maximum length of
+		On call\: Optional pointer to a uint16_t specifying the maximum length of
 		the vUsername buffer, including the null terminator character.
 
 		<p>Upon return\: If wUsernameLen and vUsername are non-NULL, the
-		*wUsernameLen WORD is updated with the actual number of characters
+		*wUsernameLen uint16_t is updated with the actual number of characters
 		written to the vUsername buffer, including the null terminator
 		character.  If vUsername is NULL but wUsernameLen is non-NULL, then no
 		characters are copied, but *wUsernameLen will return the number of
@@ -1555,11 +1555,11 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 		would be returned for this field.
 
 	wPasswordLen -
-		On call\: Optional pointer to a WORD specifying the maximum length of
+		On call\: Optional pointer to a uint16_t specifying the maximum length of
 		the vPassword buffer, including the null terminator character.
 
 		<p>Upon return\: If wPasswordLen and vPassword are non-NULL, the
-		*wPasswordLen WORD is updated with the actual number of characters
+		*wPasswordLen uint16_t is updated with the actual number of characters
 		written to the vPassword buffer, including the null terminator
 		character.  If vPassword is NULL but wPasswordLen is non-NULL, then no
 		characters are copied, but *wPasswordLen will return the number of
@@ -1583,15 +1583,15 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 		<p>For the example URL provided in the function description,
 		"www.microchip.com" would be returned for this field.  If the URL was
 		"http://192.168.0.1", then this field would be returned as
-		"192.168.0.1".	The IP address would not be decoded to a DWORD (use the
+		"192.168.0.1".	The IP address would not be decoded to a uint32_t (use the
 		StringToIPAddress() helper function to do this).
 
 	wHostnameLen -
-		On call\: Optional pointer to a WORD specifying the maximum length of
+		On call\: Optional pointer to a uint16_t specifying the maximum length of
 		the vHostname buffer, including the null terminator character.
 
 		<p>Upon return\: If wHostnameLen and vHostname are non-NULL, the
-		*wHostnameLen WORD is updated with the actual number of characters
+		*wHostnameLen uint16_t is updated with the actual number of characters
 		written to the vHostname buffer, including the null terminator
 		character.  If vHostname is NULL but wHostnameLen is non-NULL, then no
 		characters are copied, but *wHostnameLen will return the number of
@@ -1603,7 +1603,7 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 		18 (0x0012) would be returned for this field.  If the URL was
 		"http://192.168.0.1", then this field would be returned as 12 (0x000C).
 
-	wPort - Optional pointer to a WORD specifying the TCP or UDP port that the
+	wPort - Optional pointer to a uint16_t specifying the TCP or UDP port that the
 		server is listening on.  If the port field is absent from the URL, then
 		this parameter will specify the default port for the protocol.  For
 		example, "http://www.microchip.com" would result in 80 being return as
@@ -1621,11 +1621,11 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 		"/myfile.gif" would be returned for this field.
 
 	wFilePathLen -
-		On call\: Optional pointer to a WORD specifying the maximum length of
+		On call\: Optional pointer to a uint16_t specifying the maximum length of
 		the vFilePath buffer, including the null terminator character.
 
 		<p>Upon return\: If wFilePathLen and vFilePath are non-NULL, the
-		*wFilePathLen WORD is updated with the actual number of characters
+		*wFilePathLen uint16_t is updated with the actual number of characters
 		written to the vFilePath buffer, including the null terminator
 		character.  If vFilePath is NULL but wFilePathLen is non-NULL, then no
 		characters are copied, but *wFilePathLen will return the number of
@@ -1656,42 +1656,42 @@ size_t strncpy_m(char* destStr, size_t destSize, int nStrings, ...)
 	</table>
   ***************************************************************************/
 #if 0
-BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wUsernameLen, BYTE *vPassword, WORD *wPasswordLen, BYTE *vHostname, WORD *wHostnameLen, WORD *wPort, BYTE *vFilePath, WORD *wFilePathLen)
+uint8_t ExtractURLFields(uint8_t *vURL, PROTOCOLS *protocol, uint8_t *vUsername, uint16_t *wUsernameLen, uint8_t *vPassword, uint16_t *wPasswordLen, uint8_t *vHostname, uint16_t *wHostnameLen, uint16_t *wPort, uint8_t *vFilePath, uint16_t *wFilePathLen)
 {
 	// These two arrays must exactly match up each other and the PROTOCOLS enum
 	// elements.  The protocol name strings must also be specified in all
 	// lowercase.
 	static ROM char * ROM	vProtocolNames[] = {"http", "https", "mms", "rtsp"};
-	static ROM WORD 		wProtocolPorts[] = { 80,     443,     1755,  554};
-	WORD w, w2;
-	BYTE i, j;
+	static ROM uint16_t 		wProtocolPorts[] = { 80,     443,     1755,  554};
+	uint16_t w, w2;
+	uint8_t i, j;
 	PROTOCOLS prot;
-	BYTE *temp, *temp2;
-	WORD wURLLen;
-	WORD wLocalPort;
+	uint8_t *temp, *temp2;
+	uint16_t wURLLen;
+	uint16_t wLocalPort;
 
 
 	// Calculate how long this URL is
 	wURLLen = strlen((char*)vURL);
-	temp = (BYTE*)strnchr((char*)vURL, wURLLen, '\r');
+	temp = (uint8_t*)strnchr((char*)vURL, wURLLen, '\r');
 	if(temp)
 		wURLLen = temp - vURL;
-	temp = (BYTE*)strnchr((char*)vURL, wURLLen, '\n');
+	temp = (uint8_t*)strnchr((char*)vURL, wURLLen, '\n');
 	if(temp)
 		wURLLen = temp - vURL;
 
 
 	// Parse starting protocol field
 	// Find out how long the protocol name field is
-	temp = (BYTE*)strnchr((char*)vURL, wURLLen, ':');
+	temp = (uint8_t*)strnchr((char*)vURL, wURLLen, ':');
 	if(temp == NULL)
 		return 2;
 
 	// Search protocol list to see if this is a recognized protocol
-	for(prot = 0; (BYTE)prot < sizeof(wProtocolPorts)/sizeof(wProtocolPorts[0]); prot++)
+	for(prot = 0; (uint8_t)prot < sizeof(wProtocolPorts)/sizeof(wProtocolPorts[0]); prot++)
 	{
 		w = strlenpgm(vProtocolNames[prot]);
-		if((WORD)(temp - vURL) == w)
+		if((uint16_t)(temp - vURL) == w)
 		{
 			w2 = 0;
 			temp2 = vURL;
@@ -1700,7 +1700,7 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 				i = *temp2++;
 				if((i >= 'A') && (i <= 'Z'))
 					i += 'a' - 'A';
-				if(i != (BYTE)vProtocolNames[prot][w2++])
+				if(i != (uint8_t)vProtocolNames[prot][w2++])
 					break;
 				w--;
 			}
@@ -1715,7 +1715,7 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 
 	// If we've search the whole list and didn't find a match, then
 	// this protocol is unknown and this URL cannot be parsed.
-	if((BYTE)prot >= sizeof(wProtocolPorts)/sizeof(wProtocolPorts[0]))
+	if((uint8_t)prot >= sizeof(wProtocolPorts)/sizeof(wProtocolPorts[0]))
 		return 1;
 
 	w = temp - vURL + 1;
@@ -1738,7 +1738,7 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 	// Parse username and password fields
 	// See if there is a @ sign, indicating that there is at
 	// least a username and possibly a password in this URL
-	temp = (BYTE*)strnchr((char*)vURL, wURLLen, '@');
+	temp = (uint8_t*)strnchr((char*)vURL, wURLLen, '@');
 	if(temp == NULL)
 	{
 		if(wUsernameLen)
@@ -1752,7 +1752,7 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 		// see if a password is also present by searching for a
 		// colon between the current string position and the @
 		// symbol.
-		temp2 = (BYTE*)strnchr((char*)vURL, temp - vURL, ':');
+		temp2 = (uint8_t*)strnchr((char*)vURL, temp - vURL, ':');
 
 		// Calculate username length and password length, including
 		// null terminator (if the field exists)
@@ -1807,8 +1807,8 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 	// Parse hostname field
 	// Find the length of the hostname, including NULL
 	// terminator
-	temp = (BYTE*)strnchr((char*)vURL, wURLLen, ':');
-	temp2 = (BYTE*)strnchr((char*)vURL, wURLLen, '/');
+	temp = (uint8_t*)strnchr((char*)vURL, wURLLen, ':');
+	temp2 = (uint8_t*)strnchr((char*)vURL, wURLLen, '/');
 	if(temp && temp2)
 	{
 		if(temp > temp2)
@@ -1843,7 +1843,7 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 		wURLLen--;
 		wLocalPort = 0;
 		w = wURLLen;
-		temp = (BYTE*)strnchr((char*)vURL, wURLLen, '/');
+		temp = (uint8_t*)strnchr((char*)vURL, wURLLen, '/');
 		if(temp != NULL)
 			w = temp - vURL;
 		w2 = w;
@@ -1891,8 +1891,8 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 
 /*****************************************************************************
   Function:
-	SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement,
-				  WORD wMaxLen, BOOL bSearchCaseInsensitive)
+	int16_t Replace(uint8_t *vExpression, ROM uint8_t *vFind, ROM uint8_t *vReplacement,
+				  uint16_t wMaxLen, _Bool bSearchCaseInsensitive)
 
   Summary:
 	Replaces all instances of a particular substring with a new string
@@ -1920,8 +1920,8 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 		will be returned, indicating failure.  If the replacement length is
 		shorter or equal to the search length, then this parameter is ignored.
 	bSearchCaseInsensitive - Boolean indicating if the search should be
-		performed in a case insensitive manner.  Specify TRUE for case
-		insensitive searches (slower) or FALSE for case sensitive
+		performed in a case insensitive manner.  Specify true for case
+		insensitive searches (slower) or false for case sensitive
 		searching (faster).
 
   Remarks:
@@ -1944,17 +1944,17 @@ BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wU
 	made.
   ***************************************************************************/
 #if 0
-SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD wMaxLen, BOOL bSearchCaseInsensitive)
+int16_t Replace(uint8_t *vExpression, ROM uint8_t *vFind, ROM uint8_t *vReplacement, uint16_t wMaxLen, _Bool bSearchCaseInsensitive)
 {
-	WORD wExpressionLen, wFindLen, wFindLenMinusOne, wReplacementLen;
-	WORD wFindCount, wReplacementsLeft;
-	BYTE i, j;
-	BYTE vFirstFindChar;
-	WORD wBytesLeft;
-	BYTE *vDest;
-	BYTE *vExpressionCompare;
-	ROM BYTE *vFindCompare;
-	WORD w;
+	uint16_t wExpressionLen, wFindLen, wFindLenMinusOne, wReplacementLen;
+	uint16_t wFindCount, wReplacementsLeft;
+	uint8_t i, j;
+	uint8_t vFirstFindChar;
+	uint16_t wBytesLeft;
+	uint8_t *vDest;
+	uint8_t *vExpressionCompare;
+	ROM uint8_t *vFindCompare;
+	uint16_t w;
 
 	wFindLen = strlenpgm((ROM char*)vFind);
 	if(wFindLen == 0u)
@@ -1967,7 +1967,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 	wFindLenMinusOne = wFindLen - 1;
 	vFirstFindChar = *vFind++;
 	if(bSearchCaseInsensitive)	// Convert to all lowercase if needed
-		if((vFirstFindChar >= (BYTE)'A') && (vFirstFindChar <= (BYTE)'Z'))
+		if((vFirstFindChar >= (uint8_t)'A') && (vFirstFindChar <= (uint8_t)'Z'))
 			vFirstFindChar += 'a' - 'A';
 
 	// If the replacement string is the same length as the search string, then
@@ -1979,7 +1979,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 			i = *vExpression++;
 			if(bSearchCaseInsensitive)
 			{
-				if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+				if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 					i += 'a' - 'A';
 				if(i != vFirstFindChar)
 					continue;
@@ -1990,9 +1990,9 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 				{
 					i = *vExpressionCompare++;
 					j = *vFindCompare++;
-					if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+					if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 						i += 'a' - 'A';
-					if((j >= (BYTE)'A') && (j <= (BYTE)'Z'))
+					if((j >= (uint8_t)'A') && (j <= (uint8_t)'Z'))
 						j += 'a' - 'A';
 					if(i != j)
 						break;
@@ -2029,7 +2029,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 			*vDest++ = i;
 			if(bSearchCaseInsensitive)
 			{
-				if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+				if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 					i += 'a' - 'A';
 				if(i != vFirstFindChar)
 					continue;
@@ -2040,9 +2040,9 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 				{
 					i = *vExpressionCompare++;
 					j = *vFindCompare++;
-					if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+					if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 						i += 'a' - 'A';
-					if((j >= (BYTE)'A') && (j <= (BYTE)'Z'))
+					if((j >= (uint8_t)'A') && (j <= (uint8_t)'Z'))
 						j += 'a' - 'A';
 					if(i != j)
 						break;
@@ -2081,7 +2081,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 		i = *vExpression++;
 		if(bSearchCaseInsensitive)
 		{
-			if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+			if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 				i += 'a' - 'A';
 			if(i != vFirstFindChar)
 				continue;
@@ -2092,9 +2092,9 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 			{
 				i = *vExpressionCompare++;
 				j = *vFindCompare++;
-				if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+				if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 					i += 'a' - 'A';
-				if((j >= (BYTE)'A') && (j <= (BYTE)'Z'))
+				if((j >= (uint8_t)'A') && (j <= (uint8_t)'Z'))
 					j += 'a' - 'A';
 				if(i != j)
 					break;
@@ -2129,7 +2129,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 	vFind -= 1;
 	vFirstFindChar = vFind[wFindLenMinusOne];
 	if(bSearchCaseInsensitive)	// Convert to all lowercase if needed
-		if((vFirstFindChar >= (BYTE)'A') && (vFirstFindChar <= (BYTE)'Z'))
+		if((vFirstFindChar >= (uint8_t)'A') && (vFirstFindChar <= (uint8_t)'Z'))
 			vFirstFindChar += 'a' - 'A';
 	wReplacementsLeft = wFindCount;
 	while(wReplacementsLeft)
@@ -2138,7 +2138,7 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 		*vDest-- = i;
 		if(bSearchCaseInsensitive)
 		{
-			if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+			if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 				i += 'a' - 'A';
 			if(i != vFirstFindChar)
 				continue;
@@ -2149,9 +2149,9 @@ SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD w
 			{
 				i = *vExpressionCompare--;
 				j = *vFindCompare--;
-				if((i >= (BYTE)'A') && (i <= (BYTE)'Z'))
+				if((i >= (uint8_t)'A') && (i <= (uint8_t)'Z'))
 					i += 'a' - 'A';
-				if((j >= (BYTE)'A') && (j <= (BYTE)'Z'))
+				if((j >= (uint8_t)'A') && (j <= (uint8_t)'Z'))
 					j += 'a' - 'A';
 				if(i != j)
 					break;

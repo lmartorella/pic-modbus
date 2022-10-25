@@ -58,17 +58,17 @@
 
 #if defined(__18CXX)
 	#define BIGINT_DATA_SIZE	8ul	//bits
-	#define BIGINT_DATA_TYPE	BYTE
+	#define BIGINT_DATA_TYPE	uint8_t
 	#define BIGINT_DATA_MAX		0xFFu
-	#define BIGINT_DATA_TYPE_2	WORD
+	#define BIGINT_DATA_TYPE_2	uint16_t
 #elif defined(__C30__)
 	#define BIGINT_DATA_SIZE	16ul	//bits
-	#define BIGINT_DATA_TYPE	WORD
+	#define BIGINT_DATA_TYPE	uint16_t
 	#define BIGINT_DATA_MAX		0xFFFFu
-	#define BIGINT_DATA_TYPE_2	DWORD
+	#define BIGINT_DATA_TYPE_2	uint32_t
 #elif defined(__C32__)
 	#define BIGINT_DATA_SIZE	32ul	//bits
-	#define BIGINT_DATA_TYPE	DWORD
+	#define BIGINT_DATA_TYPE	uint32_t
 	#define BIGINT_DATA_MAX		0xFFFFFFFFu
 	#define BIGINT_DATA_TYPE_2	QWORD
 #endif
@@ -78,7 +78,7 @@ typedef struct
 	BIGINT_DATA_TYPE *ptrLSB;		// Pointer to the least significant byte/word (lowest memory address)
 	BIGINT_DATA_TYPE *ptrMSB;		// Pointer to the first non-zero most significant byte/word (higher memory address) if bMSBValid set
 	BIGINT_DATA_TYPE *ptrMSBMax;	// Pointer to the maximum memory address that ptrMSB could ever be (highest memory address)
-	BOOL bMSBValid; 
+	_Bool bMSBValid; 
 } BIGINT;
 
 #if defined(__18CXX)
@@ -92,7 +92,7 @@ typedef struct
 #endif
 
 
-void BigInt(BIGINT *theInt, BIGINT_DATA_TYPE *data, WORD wWordLength);
+void BigInt(BIGINT *theInt, BIGINT_DATA_TYPE *data, uint16_t wWordLength);
 void BigIntMod(BIGINT*, BIGINT*);
 void BigIntMultiply(BIGINT*, BIGINT*, BIGINT*);
 
@@ -106,7 +106,7 @@ void BigIntZero(BIGINT *theInt);
 int BigIntMagnitudeDifference(BIGINT *a, BIGINT *b);
 int BigIntMagnitudeDifferenceROM(BIGINT *a, BIGINT_ROM *b);
 CHAR BigIntCompare(BIGINT*, BIGINT*);
-WORD BigIntMagnitude(BIGINT *n);
+uint16_t BigIntMagnitude(BIGINT *n);
 
 void BigIntSwapEndianness(BIGINT *a);
 
@@ -114,13 +114,13 @@ void BigIntPrint(const BIGINT *a);
 
 
 #if defined(__18CXX)	
-	void BigIntROM(BIGINT_ROM *theInt, ROM BIGINT_DATA_TYPE *data, WORD wWordLength);
+	void BigIntROM(BIGINT_ROM *theInt, ROM BIGINT_DATA_TYPE *data, uint16_t wWordLength);
 	void BigIntModROM(BIGINT*, BIGINT_ROM*);
 	void BigIntMultiplyROM(BIGINT*, BIGINT_ROM*, BIGINT*);
 	void BigIntAddROM(BIGINT*, BIGINT_ROM*);
 	void BigIntCopyROM(BIGINT*, BIGINT_ROM*);
 	CHAR BigIntCompareROM(BIGINT*, BIGINT_ROM*);
-	WORD BigIntMagnitudeROM(BIGINT_ROM *n);
+	uint16_t BigIntMagnitudeROM(BIGINT_ROM *n);
 	
 	extern ROM BIGINT_DATA_TYPE *_iBr, *_xBr;
 	

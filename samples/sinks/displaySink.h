@@ -6,8 +6,8 @@
 #if defined(HAS_RS485_BUS) && (defined(HAS_CM1602) || defined(_CONF_LINUX))
 
 #define SINK_LINE_ID "LINE"
-bit line_read();
-bit line_write();
+__bit line_read();
+__bit line_write();
 
 #endif
 

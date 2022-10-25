@@ -13,7 +13,7 @@
 #endif
 
 static TICK_TYPE s_slowTimer;
-bit prot_slowTimer;
+__bit prot_slowTimer;
 
 static signed char s_inReadSink;
 static signed char s_inWriteSink;
@@ -29,7 +29,7 @@ static enum {
     CMD_NONE
 } s_commandToRun;
 
-bit prot_registered;
+__bit prot_registered;
 
 void prot_init()
 {
@@ -48,7 +48,7 @@ void prot_init()
     bus_sec_init();
 #endif
     
-    prot_registered = FALSE;
+    prot_registered = false;
     
     s_commandToRun = CMD_NONE;
     s_inWriteSink = s_inReadSink = -1;
@@ -74,7 +74,7 @@ static void SELE_command()
     io_printChDbg('s');
 #endif
     // Select subnode. 
-    WORD w;
+    uint16_t w;
     if (!prot_control_readW(&w)) {
         fatal("SE.u");
     }
@@ -88,7 +88,7 @@ static void SELE_command()
         bus_prim_connectSocket(w - 1);
     }
 #endif
-    prot_registered = TRUE;
+    prot_registered = true;
 }
 
 // 0 bytes to receive
@@ -103,14 +103,14 @@ static void CHIL_command()
     
 #ifdef HAS_RS485_BUS_PRIMARY
     // Propagate the request to all children to fetch their GUIDs
-    WORD count = bus_prim_getChildrenMaskSize();
+    uint16_t count = bus_prim_getChildrenMaskSize();
     prot_control_writeW(count);
     prot_control_write(bus_prim_getChildrenMask(), count);
 
     bus_prim_resetDirtyChildren();
 #else    
     // No children
-    WORD count = 0;
+    uint16_t count = 0;
     prot_control_writeW(count);
 #endif
     
@@ -151,7 +151,7 @@ static void READ_command()
 #ifdef DEBUGMODE
     io_printChDbg('r');
 #endif
-    WORD sinkId;
+    uint16_t sinkId;
     if (!prot_control_readW(&sinkId))
     {
         fatal("RD.u");
@@ -165,7 +165,7 @@ static void WRIT_command()
 #ifdef DEBUGMODE
     io_printChDbg('w');
 #endif
-    WORD sinkId;
+    uint16_t sinkId;
     if (!prot_control_readW(&sinkId))
     {
         fatal("WR.u");
@@ -174,7 +174,7 @@ static void WRIT_command()
 }
 
 // Code-memory optimized for small PIC XC8
-static bit memcmp2(char c1, char c2, char d1, char d2) {
+static __bit memcmp2(char c1, char c2, char d1, char d2) {
     return d1 == c1 && d2 == c2;
 }
 
@@ -231,7 +231,7 @@ void prot_poll()
 
     if (s_inReadSink >= 0) {
         // Tolerates empty rx buffer
-        BOOL again = sink_readHandlers[s_inReadSink]();
+        _Bool again = sink_readHandlers[s_inReadSink]();
         if (!again) {
             s_inReadSink = -1;
         }
@@ -239,7 +239,7 @@ void prot_poll()
     }
     if (s_inWriteSink >= 0) {
         // Address sink
-        BOOL again = sink_writeHandlers[s_inWriteSink]();
+        _Bool again = sink_writeHandlers[s_inWriteSink]();
         if (!again){
             s_inWriteSink = -1;
             // end of transmission, over to Master
@@ -248,9 +248,9 @@ void prot_poll()
         return;
     }
 
-    BYTE s = prot_control_readAvail();
+    uint8_t s = prot_control_readAvail();
     if (s_commandToRun != CMD_NONE) {
-        BYTE needed = 2;
+        uint8_t needed = 2;
         if (s_commandToRun <= CMD_CHIL) {
             needed = 0;
         } else if (s_commandToRun == CMD_GUID) {

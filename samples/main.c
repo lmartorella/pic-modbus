@@ -4,12 +4,14 @@
 #include "../../src/nodes/persistence.h"
 #include "../../src/nodes/protocol.h"
 #include "../../src/nodes/sinks.h"
+#include "../../src/nodes/bus_primary.h"
+#include "../../src/nodes/bus_secondary.h"
 
 #ifdef INTERRUPT_VECTOR
 extern void INTERRUPT_VECTOR();
 #endif
 
-void interrupt PRIO_TYPE low_isr()
+void __interrupt(PRIO_TYPE) low_isr()
 {
     // Update tick timers at ~Khz freq
     timers_poll();
@@ -58,8 +60,11 @@ void main()
     while (1) {   
         CLRWDT();
 
-#if defined(HAS_RS485_BUS_SECONDARY) || defined(HAS_RS485_BUS_PRIMARY)
-        bus_poll();
+#if defined(HAS_RS485_BUS_SECONDARY)
+        bus_sec_poll();
+#endif
+#if defined(HAS_RS485_BUS_PRIMARY)
+        bus_prim_poll();
 #endif
 #ifdef HAS_RS485_BUS
         prot_poll();

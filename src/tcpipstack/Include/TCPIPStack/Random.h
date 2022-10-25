@@ -69,8 +69,8 @@
 //		generated upon future calls to RandomGet().
 
 void RandomInit(void);
-BYTE RandomGet(void);
-void RandomAdd(BYTE data);
+uint8_t RandomGet(void);
+void RandomAdd(uint8_t data);
 
 #endif
 

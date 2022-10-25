@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../appio.h"
+#include "../../pch.h"
+#include "../../appio.h"
 
 // CONFIG1
 #pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
@@ -39,12 +39,12 @@ void enableInterrupts()
 }
 
 // Get a copy version of STATUS
-extern unsigned char __resetbits;
+extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-persistent LAST_EXC_TYPE g_exceptionPtr;
+__persistent LAST_EXC_TYPE g_exceptionPtr;
 
 void sys_storeResetReason()
 {

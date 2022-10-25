@@ -71,14 +71,14 @@ typedef enum _SM_AUTOIP
 
 
 // Function prototypes
-void AutoIPInit(BYTE vInterface);
+void AutoIPInit(uint8_t vInterface);
 void AutoIPTasks(void);
-void AutoIPConflict(BYTE vInterface);
-BOOL AutoIPIsConfigured(BYTE vInterface);
-BOOL AutoIPConfigIsInProgress (BYTE vInterface);
-BOOL AutoIPIsDisabled(BYTE vInterface);
-void AutoIPDisable(BYTE vInterface);
-void AutoIPEnable(BYTE vInterface);
+void AutoIPConflict(uint8_t vInterface);
+_Bool AutoIPIsConfigured(uint8_t vInterface);
+_Bool AutoIPConfigIsInProgress (uint8_t vInterface);
+_Bool AutoIPIsDisabled(uint8_t vInterface);
+void AutoIPDisable(uint8_t vInterface);
+void AutoIPEnable(uint8_t vInterface);
 
 
 #endif

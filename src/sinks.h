@@ -27,15 +27,15 @@ void sinks_poll();
 /**
  * The system sink read function
  */
-bit sys_read();
+__bit sys_read();
 /**
  * The system sink write function
  */
-bit sys_write();
+__bit sys_write();
 
 // Returns 1 if more data should be read or writter, 0 if done and the socket can  be freed.
 // The 'write' function sends data to master. The 'read' function receives data from master.
-typedef bit (*SinkFunction)();
+typedef __bit (*SinkFunction)();
 
 /**
  * The concatenation of all sink IDS

@@ -7,8 +7,8 @@
 // Debug when RS232 RX line is sampled
 #undef TIMING_DEBUG
 
-BYTE max232_buffer1[MAX232_BUFSIZE1];
-BYTE max232_buffer2[MAX232_BUFSIZE2];
+uint8_t max232_buffer1[MAX232_BUFSIZE1];
+uint8_t max232_buffer2[MAX232_BUFSIZE2];
 
 void max232_init() {
 #ifdef HAS_MAX232_SOFTWARE
@@ -34,12 +34,12 @@ void max232_init() {
 #define FRAME_ERROR -2
 #define OVERFLOW_ERROR -1
 
-static void send(BYTE b) {
+static void send(uint8_t b) {
     // Write a idle bit
     WAITBIT()
     // Write a START bit
     RS232_TX_PORT = 0;
-    for (BYTE j = 0; j < 8; j++) {
+    for (uint8_t j = 0; j < 8; j++) {
         // Cycle bits
         WAITBIT()
         RS232_TX_PORT = b & 0x1;
@@ -63,7 +63,7 @@ void max232_send(signed char size) {
     RS232_TCON = RS232_TCON_ON;
     WAITBIT()
     
-    BYTE* ptr = max232_buffer1;
+    uint8_t* ptr = max232_buffer1;
     for (signed char i = 0; i < size; i++) {
         send(*ptr);
         if (i == MAX232_BUFSIZE1 - 1) {
@@ -88,7 +88,7 @@ signed char max232_sendReceive(signed char size) {
     INTCONbits.GIE = 0;
 
     // Now receive
-    BYTE* ptr = max232_buffer1;
+    uint8_t* ptr = max232_buffer1;
     signed char i = 0;
 
     // Set the timeout of the first byte
@@ -112,7 +112,7 @@ signed char max232_sendReceive(signed char size) {
         WAITBIT()
         RESETTIMER(RS232_TCON_VALUE)
 
-        BYTE b = 0;
+        uint8_t b = 0;
         for (char j = 0; j < 8; j++) {
             WAITBIT()
             b >>= 1;

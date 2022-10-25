@@ -120,10 +120,10 @@
 		#define TCP_CONFIGURATION
 		ROM struct
 		{
-			BYTE vSocketPurpose;
-			//BYTE vMemoryMedium;
-			WORD wTXBufferSize;
-			WORD wRXBufferSize;
+			uint8_t vSocketPurpose;
+			//uint8_t vMemoryMedium;
+			uint16_t wTXBufferSize;
+			uint16_t wRXBufferSize;
 		} TCPSocketInitializer[] =
 		{
             // Control port

@@ -66,18 +66,18 @@
 // ICMP Packet Structure
 typedef struct
 {
-	BYTE vType;
-	BYTE vCode;
-	WORD wChecksum;
-	WORD wIdentifier;
-	WORD wSequenceNumber;
-	WORD wData;
+	uint8_t vType;
+	uint8_t vCode;
+	uint16_t wChecksum;
+	uint16_t wIdentifier;
+	uint16_t wSequenceNumber;
+	uint16_t wData;
 } ICMP_PACKET;
 
 // ICMP Sequence Number
-static WORD wICMPSequenceNumber;
+static uint16_t wICMPSequenceNumber;
 // ICMP tick timer variable
-static DWORD ICMPTimer;
+static uint32_t ICMPTimer;
 
 // ICMP Flag structure
 static struct
@@ -92,8 +92,8 @@ static union
 {
 	union
 	{
-		ROM BYTE *szROM;
-		BYTE *szRAM;
+		ROM uint8_t *szROM;
+		uint8_t *szRAM;
 	} RemoteHost;
 	NODE_INFO ICMPRemote;
 } StaticVars;
@@ -132,12 +132,12 @@ static enum
  *
  * Note:            None
  ********************************************************************/
-void ICMPProcess(NODE_INFO *remote, WORD len)
+void ICMPProcess(NODE_INFO *remote, uint16_t len)
 {
 	DWORD_VAL dwVal;
 
     // Obtain the ICMP header Type, Code, and Checksum fields
-    MACGetArray((BYTE*)&dwVal, sizeof(dwVal));
+    MACGetArray((uint8_t*)&dwVal, sizeof(dwVal));
 
 	// See if this is an ICMP echo (ping) request
 	if(dwVal.w[0] == 0x0008u)
@@ -171,7 +171,7 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
 		IPPutHeader(remote, IP_PROT_ICMP, len);
 
 		// Copy ICMP response into the TX memory
-		MACPutArray((BYTE*)&dwVal, sizeof(dwVal));
+		MACPutArray((uint8_t*)&dwVal, sizeof(dwVal));
 		MACMemCopyAsync((ETH_POINTER)-1, (ETH_POINTER)-1, len-4);
 		while(!MACIsMemCopyDone());
 
@@ -182,7 +182,7 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
 	else if(dwVal.w[0] == 0x0000u)	// See if this an ICMP Echo reply to our request
 	{
 		// Get the sequence number and identifier fields
-		MACGetArray((BYTE*)&dwVal, sizeof(dwVal));
+		MACGetArray((uint8_t*)&dwVal, sizeof(dwVal));
 
 		// See if the identifier matches the one we sent
 		if(dwVal.w[0] != 0xEFBE)
@@ -205,9 +205,9 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
 
 #if defined(STACK_USE_ICMP_CLIENT)
 /*********************************************************************
- * Function:        void ICMPSendPing(DWORD dwRemoteIP)
+ * Function:        void ICMPSendPing(uint32_t dwRemoteIP)
  *
- * PreCondition:    ICMPBeginUsage() returned TRUE
+ * PreCondition:    ICMPBeginUsage() returned true
  *
  * Input:           dwRemoteIP: IP Address to ping.  Must be stored
  *								big endian.  Ex. 192.168.0.1 should be
@@ -223,7 +223,7 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
  *
  * Note:            None
  ********************************************************************/
-void ICMPSendPing(DWORD dwRemoteIP)
+void ICMPSendPing(uint32_t dwRemoteIP)
 {
 	ICMPFlags.bReplyValid = 0;
 	ICMPTimer = TickGet();
@@ -233,9 +233,9 @@ void ICMPSendPing(DWORD dwRemoteIP)
 
 #if defined(STACK_USE_DNS)
 /*********************************************************************
- * Function:        void ICMPSendPingToHost (BYTE * szRemoteHost)
+ * Function:        void ICMPSendPingToHost (uint8_t * szRemoteHost)
  *
- * PreCondition:    ICMPBeginUsage() returned TRUE
+ * PreCondition:    ICMPBeginUsage() returned true
  *
  * Input:           szRemoteHost: Host name to ping.  Must be stored
  *								  in RAM if being called by PIC18.
@@ -251,7 +251,7 @@ void ICMPSendPing(DWORD dwRemoteIP)
  *
  * Note:            None
  ********************************************************************/
-void ICMPSendPingToHost(BYTE * szRemoteHost)
+void ICMPSendPingToHost(uint8_t * szRemoteHost)
 {
 	ICMPFlags.bReplyValid = 0;
 	ICMPTimer = TickGet();
@@ -263,9 +263,9 @@ void ICMPSendPingToHost(BYTE * szRemoteHost)
 #if defined(__18CXX)
 
 /*********************************************************************
- * Function:        void ICMPSendPingToHostROM (ROM BYTE * szRemoteHost)
+ * Function:        void ICMPSendPingToHostROM (ROM uint8_t * szRemoteHost)
  *
- * PreCondition:    ICMPBeginUsage() returned TRUE
+ * PreCondition:    ICMPBeginUsage() returned true
  *
  * Input:           szRemoteHost: Host name to ping.  Must be stored
  *								  in ROM. Should only be called by PIC18.
@@ -281,7 +281,7 @@ void ICMPSendPingToHost(BYTE * szRemoteHost)
  *
  * Note:            None
  ********************************************************************/
-void ICMPSendPingToHostROM(ROM BYTE * szRemoteHost)
+void ICMPSendPingToHostROM(ROM uint8_t * szRemoteHost)
 {
 	ICMPFlags.bReplyValid = 0;
 	ICMPTimer = TickGet();
@@ -294,9 +294,9 @@ void ICMPSendPingToHostROM(ROM BYTE * szRemoteHost)
 #endif
 
 /*********************************************************************
- * Function:        LONG ICMPGetReply(void)
+ * Function:        int32_t ICMPGetReply(void)
  *
- * PreCondition:    ICMPBeginUsage() returned TRUE and ICMPSendPing()
+ * PreCondition:    ICMPBeginUsage() returned true and ICMPSendPing()
  *					was called
  *
  * Input:           None
@@ -316,7 +316,7 @@ void ICMPSendPingToHostROM(ROM BYTE * szRemoteHost)
  *
  * Note:            None
  ********************************************************************/
-LONG ICMPGetReply(void)
+int32_t ICMPGetReply(void)
 {
 	ICMP_PACKET ICMPPacket;
 
@@ -381,7 +381,7 @@ LONG ICMPGetReply(void)
 			wICMPSequenceNumber++;
 			ICMPPacket.wSequenceNumber = wICMPSequenceNumber;
 			ICMPPacket.wData = 0x2860;
-			ICMPPacket.wChecksum = CalcIPChecksum((BYTE*)&ICMPPacket, sizeof(ICMPPacket));
+			ICMPPacket.wChecksum = CalcIPChecksum((uint8_t*)&ICMPPacket, sizeof(ICMPPacket));
 
 			// Record the current time.  This will be used as a basis for
 			// finding the echo response time, which exludes the ARP and DNS
@@ -393,7 +393,7 @@ LONG ICMPGetReply(void)
 
 			// Create IP header in TX memory
 			IPPutHeader(&StaticVars.ICMPRemote, IP_PROT_ICMP, sizeof(ICMPPacket));
-			MACPutArray((BYTE*)&ICMPPacket, sizeof(ICMPPacket));
+			MACPutArray((uint8_t*)&ICMPPacket, sizeof(ICMPPacket));
 			MACFlush();
 
 			// Echo sent, advance state
@@ -403,7 +403,7 @@ LONG ICMPGetReply(void)
 		case SM_ICMP_GET_ECHO_RESPONSE:
 			// See if the echo was successfully received
 			if(ICMPFlags.bReplyValid)
-				return (LONG)ICMPTimer;
+				return (int32_t)ICMPTimer;
 
 			break;
 
@@ -432,16 +432,16 @@ LONG ICMPGetReply(void)
 
 
 /*********************************************************************
- * Function:        BOOL ICMPBeginUsage(void)
+ * Function:        _Bool ICMPBeginUsage(void)
  *
  * PreCondition:    None
  *
  * Input:           None
  *
- * Output:          TRUE: You have successfully gained ownership of
+ * Output:          true: You have successfully gained ownership of
  *						  the ICMP client module and can now use the
  *						  ICMPSendPing() and ICMPGetReply() functions.
- *					FALSE: Some other application is using the ICMP
+ *					false: Some other application is using the ICMP
  *						   client module.  Calling ICMPSendPing()
  *						   will corrupt the other application's ping
  *						   result.
@@ -452,13 +452,13 @@ LONG ICMPGetReply(void)
  *
  * Note:            None
  ********************************************************************/
-BOOL ICMPBeginUsage(void)
+_Bool ICMPBeginUsage(void)
 {
 	if(ICMPFlags.bICMPInUse)
-		return FALSE;
+		return false;
 
-	ICMPFlags.bICMPInUse = TRUE;
-	return TRUE;
+	ICMPFlags.bICMPInUse = true;
+	return true;
 }
 
 
@@ -466,7 +466,7 @@ BOOL ICMPBeginUsage(void)
  * Function:        void ICMPEndUsage(void)
  *
  * PreCondition:    ICMPBeginUsage() was called by you and it
- *					returned TRUE.
+ *					returned true.
  *
  * Input:           None
  *
@@ -481,7 +481,7 @@ BOOL ICMPBeginUsage(void)
  ********************************************************************/
 void ICMPEndUsage(void)
 {
-	ICMPFlags.bICMPInUse = FALSE;
+	ICMPFlags.bICMPInUse = false;
 }
 
 #endif //#if defined(STACK_USE_ICMP_CLIENT)

@@ -18,13 +18,13 @@ enum SYSSINK_CMD {
     SYSSINK_CMD_CLRRST = 2,
 };
 
-bit sys_read()
+__bit sys_read()
 {
     if (prot_control_readAvail() < 1) {
         // Wait cmd
         return 1;
     }
-    BYTE cmd;
+    uint8_t cmd;
     prot_control_read(&cmd, 1);
     switch (cmd) {
         case SYSSINK_CMD_RESET:
@@ -37,12 +37,12 @@ bit sys_read()
             break;
     }
     // No more data
-    return FALSE;
+    return false;
 }
 
-bit sys_write()
+__bit sys_write()
 {
-    WORD l = g_resetReason;
+    uint16_t l = g_resetReason;
     // Write reset reason
     prot_control_write(&ResetCode, sizeof(TWOCC));
     prot_control_writeW(l);
@@ -68,7 +68,7 @@ bit sys_write()
 
     prot_control_write(&EndOfMetadataText, sizeof(TWOCC));
     // Finish
-    return FALSE;
+    return false;
 }
 
 #endif

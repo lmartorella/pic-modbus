@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "persistence.h"
+#include "protocol.h"
 #include "appio.h"
 
 /**
@@ -8,7 +9,7 @@
 PersistentData pers_data;
 
 #ifdef _IS_ETH_CARD
-#   define __ADDRESS @ 0x1F800
+#   define __ADDRESS __at(0x1F800)
 #   define PERSISTENT_SIZE 0x10
 #else
 #   define __ADDRESS
@@ -32,7 +33,7 @@ static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = {
 
 
 #ifdef _IS_ETH_CARD
-static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] @ (0x1F800 + PERSISTENT_SIZE);
+static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] __at(0x1F800 + PERSISTENT_SIZE);
 #define ROM_ADDR ((const void*)&s_persistentData)
 #elif defined(_IS_PIC16F628_CARD) || defined(_IS_PIC16F1827_CARD) || defined(_IS_PIC16F887_CARD)
 #define ROM_ADDR 0
@@ -52,7 +53,7 @@ static FILE* pers_fopen(const char* mode) {
 void pers_load()
 {
 #if defined(HAS_EEPROM)
-    rom_read(ROM_ADDR, (BYTE*)&pers_data, PERSISTENT_SIZE);
+    rom_read(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
 #elif defined(_CONF_LINUX)
     FILE* file = pers_fopen("rb");
     if (file) {
@@ -70,7 +71,7 @@ void pers_load()
 void pers_save()
 {
 #if defined(HAS_EEPROM)
-    rom_write(ROM_ADDR, (BYTE*)&pers_data, PERSISTENT_SIZE);
+    rom_write(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
 #elif defined(_CONF_LINUX)
     FILE* file = pers_fopen("wb");
     if (file) {

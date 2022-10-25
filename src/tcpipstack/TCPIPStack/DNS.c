@@ -70,15 +70,15 @@
 #define DNS_TIMEOUT		(TICK_SECOND*1)		// Elapsed time after which a DNS resolution is considered to have timed out
 
 static UDP_SOCKET MySocket = INVALID_UDP_SOCKET;	// UDP socket to use for DNS queries
-static BYTE *DNSHostName;							// Host name in RAM to look up
-static ROM BYTE *DNSHostNameROM;					// Host name in ROM to look up
-static BYTE RecordType;								// Record type being queried
+static uint8_t *DNSHostName;							// Host name in RAM to look up
+static ROM uint8_t *DNSHostNameROM;					// Host name in ROM to look up
+static uint8_t RecordType;								// Record type being queried
 static NODE_INFO ResolvedInfo;						// Node information about the resolved node
 
 // Semaphore flags for the DNS module
 static union
 {
-	BYTE Val;
+	uint8_t Val;
 	struct
 	{
 		unsigned char DNSInUse 		: 1;	// Indicates the DNS module is in use
@@ -126,27 +126,27 @@ typedef struct
 	Function Prototypes
   ***************************************************************************/
 
-static void DNSPutString(BYTE* String);
+static void DNSPutString(uint8_t* String);
 static void DNSDiscardName(void);
 
 #if defined(__18CXX)
-	static void DNSPutROMString(ROM BYTE* String);
+	static void DNSPutROMString(ROM uint8_t* String);
 #else
 	// Non-ROM alias for C30/C32
-	#define DNSPutROMString(a)	DNSPutString((BYTE*)a)
+	#define DNSPutROMString(a)	DNSPutString((uint8_t*)a)
 #endif
 
 
 /*****************************************************************************
   Function:
-	BOOL DNSBeginUsage(void)
+	_Bool DNSBeginUsage(void)
 
   Summary:
 	Claims access to the DNS module.
 
   Description:
 	This function acts as a semaphore to obtain usage of the DNS module.
-	Call this function and ensure that it returns TRUE before calling any
+	Call this function and ensure that it returns true before calling any
 	other DNS APIs.  Call DNSEndUsage when this application no longer
 	needs the DNS module so that other applications may make use of it.
 
@@ -157,9 +157,9 @@ static void DNSDiscardName(void);
 	None
 
   Return Values:
-  	TRUE - No other DNS resolutions are in progress and the calling
+  	true - No other DNS resolutions are in progress and the calling
   			application has sucessfully taken ownership of the DNS module
-  	FALSE - The DNS module is currently in use.  Yield to the stack and
+  	false - The DNS module is currently in use.  Yield to the stack and
   			attempt this call again later.
 
   Remarks:
@@ -167,19 +167,19 @@ static void DNSDiscardName(void);
 	obtained control of the DNS module.  If this is not done, the stack
 	will hang for all future applications requiring DNS access.
   ***************************************************************************/
-BOOL DNSBeginUsage(void)
+_Bool DNSBeginUsage(void)
 {
 	if(Flags.bits.DNSInUse)
-		return FALSE;
+		return false;
 
-	Flags.bits.DNSInUse = TRUE;
-	return TRUE;
+	Flags.bits.DNSInUse = true;
+	return true;
 }
 
 
 /*****************************************************************************
   Function:
-	BOOL DNSEndUsage(void)
+	_Bool DNSEndUsage(void)
 
   Summary:
 	Releases control of the DNS module.
@@ -190,21 +190,21 @@ BOOL DNSBeginUsage(void)
 	module so that other applications may make use of it.
 
   Precondition:
-	DNSBeginUsage returned TRUE on a previous call.
+	DNSBeginUsage returned true on a previous call.
 
   Parameters:
 	None
 
   Return Values:
-  	TRUE - The address to the host name was successfully resolved.
-  	FALSE - The DNS failed or the address does not exist.
+  	true - The address to the host name was successfully resolved.
+  	false - The DNS failed or the address does not exist.
 
   Remarks:
 	Ensure that DNSEndUsage is always called once your application has
 	obtained control of the DNS module.  If this is not done, the stack
 	will hang for all future applications requiring DNS access.
   ***************************************************************************/
-BOOL DNSEndUsage(void)
+_Bool DNSEndUsage(void)
 {
 	if(MySocket != INVALID_UDP_SOCKET)
 	{
@@ -212,7 +212,7 @@ BOOL DNSEndUsage(void)
 		MySocket = INVALID_UDP_SOCKET;
 	}
 	smDNS = DNS_DONE;
-	Flags.bits.DNSInUse = FALSE;
+	Flags.bits.DNSInUse = false;
 
 	return Flags.bits.AddressValid;
 }
@@ -220,7 +220,7 @@ BOOL DNSEndUsage(void)
 
 /*****************************************************************************
   Function:
-	void DNSResolve(BYTE* Hostname, BYTE Type)
+	void DNSResolve(uint8_t* Hostname, uint8_t Type)
 
   Summary:
 	Begins resolution of an address.
@@ -234,7 +234,7 @@ BOOL DNSEndUsage(void)
 	not be modified in memory until the resolution is complete.
 
   Precondition:
-	DNSBeginUsage returned TRUE on a previous call.
+	DNSBeginUsage returned true on a previous call.
 
   Parameters:
 	Hostname - A pointer to the null terminated string specifiying the
@@ -249,11 +249,11 @@ BOOL DNSEndUsage(void)
 	This function requires access to one UDP socket.  If none are available,
 	MAX_UDP_SOCKETS may need to be increased.
   ***************************************************************************/
-void DNSResolve(BYTE* Hostname, BYTE Type)
+void DNSResolve(uint8_t* Hostname, uint8_t Type)
 {
 	if(StringToIPAddress(Hostname, &ResolvedInfo.IPAddr))
 	{
-		Flags.bits.AddressValid = TRUE;
+		Flags.bits.AddressValid = true;
 		smDNS = DNS_DONE;
 	}
 	else
@@ -262,14 +262,14 @@ void DNSResolve(BYTE* Hostname, BYTE Type)
 		DNSHostNameROM = NULL;
 		smDNS = DNS_START;
 		RecordType = Type;
-		Flags.bits.AddressValid = FALSE;
+		Flags.bits.AddressValid = false;
 	}
 }
 
 
 /*****************************************************************************
   Function:
-	void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
+	void DNSResolveROM(ROM uint8_t* Hostname, uint8_t Type)
 
   Summary:
 	Begins resolution of an address.
@@ -283,7 +283,7 @@ void DNSResolve(BYTE* Hostname, BYTE Type)
 	not be modified in memory until the resolution is complete.
 
   Precondition:
-	DNSBeginUsage returned TRUE on a previous call.
+	DNSBeginUsage returned true on a previous call.
 
   Parameters:
 	Hostname - A pointer to the null terminated string specifiying the
@@ -301,11 +301,11 @@ void DNSResolve(BYTE* Hostname, BYTE Type)
 	This function is aliased to DNSResolve on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
+void DNSResolveROM(ROM uint8_t* Hostname, uint8_t Type)
 {
 	if(ROMStringToIPAddress(Hostname, &ResolvedInfo.IPAddr))
 	{
-		Flags.bits.AddressValid = TRUE;
+		Flags.bits.AddressValid = true;
 		smDNS = DNS_DONE;
 	}
 	else
@@ -314,7 +314,7 @@ void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
 		DNSHostNameROM = Hostname;
 		smDNS = DNS_START;
 		RecordType = Type;
-		Flags.bits.AddressValid = FALSE;
+		Flags.bits.AddressValid = false;
 	}
 }
 #endif
@@ -322,7 +322,7 @@ void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
 
 /*****************************************************************************
   Function:
-	BOOL DNSIsResolved(IP_ADDR* HostIP)
+	_Bool DNSIsResolved(IP_ADDR* HostIP)
 
   Summary:
 	Determines if the DNS resolution is complete and provides the IP.
@@ -339,19 +339,19 @@ void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
 		resolved IP address once resolution is complete.
 
   Return Values:
-  	TRUE - The DNS client has obtained an IP, or the DNS process
+  	true - The DNS client has obtained an IP, or the DNS process
   		has encountered an error.  HostIP will be 0.0.0.0 on error.  Possible
   		errors include server timeout (i.e. DNS server not available), hostname
   		not in the DNS, or DNS server errors.
-  	FALSE - The resolution process is still in progress.
+  	false - The resolution process is still in progress.
   ***************************************************************************/
-BOOL DNSIsResolved(IP_ADDR* HostIP)
+_Bool DNSIsResolved(IP_ADDR* HostIP)
 {
-	static DWORD		StartTime;
+	static uint32_t		StartTime;
 	static WORD_VAL		SentTransactionID __attribute__((persistent));
-	static BYTE			vARPAttemptCount;
-	static BYTE			vDNSAttemptCount;
-	BYTE 				i;
+	static uint8_t			vARPAttemptCount;
+	static uint8_t			vDNSAttemptCount;
+	uint8_t 				i;
 	WORD_VAL			w;
 	DNS_HEADER			DNSHeader;
 	DNS_ANSWER_HEADER	DNSAnswerHeader;
@@ -384,7 +384,7 @@ BOOL DNSIsResolved(IP_ADDR* HostIP)
 		case DNS_OPEN_SOCKET:
 			//MySocket = UDPOpen(0, &ResolvedInfo, DNS_PORT);
 
-			MySocket = UDPOpenEx((DWORD)(PTR_BASE)&ResolvedInfo,UDP_OPEN_NODE_INFO,0, DNS_PORT);
+			MySocket = UDPOpenEx((uint32_t)(PTR_BASE)&ResolvedInfo,UDP_OPEN_NODE_INFO,0, DNS_PORT);
 			if(MySocket == INVALID_UDP_SOCKET)
 				break;
 
@@ -487,7 +487,7 @@ BOOL DNSIsResolved(IP_ADDR* HostIP)
 					DNSAnswerHeader.ResponseClass.Val	== 0x0001u && // Internet class
 					DNSAnswerHeader.ResponseLen.Val		== 0x0004u)
 				{
-					Flags.bits.AddressValid = TRUE;
+					Flags.bits.AddressValid = true;
 					UDPGet(&ResolvedInfo.IPAddr.v[0]);
 					UDPGet(&ResolvedInfo.IPAddr.v[1]);
 					UDPGet(&ResolvedInfo.IPAddr.v[2]);
@@ -524,7 +524,7 @@ BOOL DNSIsResolved(IP_ADDR* HostIP)
 					DNSAnswerHeader.ResponseClass.Val	== 0x0001u && // Internet class
 					DNSAnswerHeader.ResponseLen.Val		== 0x0004u)
 				{
-					Flags.bits.AddressValid = TRUE;
+					Flags.bits.AddressValid = true;
 					UDPGet(&ResolvedInfo.IPAddr.v[0]);
 					UDPGet(&ResolvedInfo.IPAddr.v[1]);
 					UDPGet(&ResolvedInfo.IPAddr.v[2]);
@@ -561,7 +561,7 @@ BOOL DNSIsResolved(IP_ADDR* HostIP)
 					DNSAnswerHeader.ResponseClass.Val	== 0x0001u && // Internet class
 					DNSAnswerHeader.ResponseLen.Val		== 0x0004u)
 				{
-					Flags.bits.AddressValid = TRUE;
+					Flags.bits.AddressValid = true;
 					UDPGet(&ResolvedInfo.IPAddr.v[0]);
 					UDPGet(&ResolvedInfo.IPAddr.v[1]);
 					UDPGet(&ResolvedInfo.IPAddr.v[2]);
@@ -591,7 +591,7 @@ DoneSearchingRecords:
 			if(!Flags.bits.AddressValid)
 				ResolvedInfo.IPAddr.Val = 0;
 			HostIP->Val = ResolvedInfo.IPAddr.Val;
-			return TRUE;
+			return true;
 
 		case DNS_FAIL:
 			// If 3 attempts or more, quit
@@ -599,7 +599,7 @@ DoneSearchingRecords:
 			{
 				// Return an invalid IP address 0.0.0.0 if we can't finish ARP or DNS query step
 				HostIP->Val = 0x00000000;
-				return TRUE;
+				return true;
 			}
 			vDNSAttemptCount++;
 
@@ -624,12 +624,12 @@ DoneSearchingRecords:
 
 	}
 
-	return FALSE;
+	return false;
 }
 
 /*****************************************************************************
   Function:
-	static void DNSPutString(BYTE* String)
+	static void DNSPutString(uint8_t* String)
 
   Summary:
 	Writes a string to the DNS socket.
@@ -647,11 +647,11 @@ DoneSearchingRecords:
   Returns:
   	None
   ***************************************************************************/
-static void DNSPutString(BYTE* String)
+static void DNSPutString(uint8_t* String)
 {
-	BYTE *RightPtr;
-	BYTE i;
-	BYTE Len;
+	uint8_t *RightPtr;
+	uint8_t i;
+	uint8_t Len;
 
 	RightPtr = String;
 
@@ -664,7 +664,7 @@ static void DNSPutString(BYTE* String)
 
 		// Put the length and data
 		// Also, skip over the '.' in the input string
-		Len = (BYTE)(RightPtr-String-1);
+		Len = (uint8_t)(RightPtr-String-1);
 		UDPPut(Len);
 		String += UDPPutArray(String, Len) + 1;
 
@@ -678,7 +678,7 @@ static void DNSPutString(BYTE* String)
 
 /*****************************************************************************
   Function:
-	static void DNSPutROMString(ROM BYTE* String)
+	static void DNSPutROMString(ROM uint8_t* String)
 
   Summary:
 	Writes a ROM string to the DNS socket.
@@ -700,11 +700,11 @@ static void DNSPutString(BYTE* String)
   	This function is aliased to DNSPutString on non-PIC18 platforms.
   ***************************************************************************/
 #if defined(__18CXX)
-static void DNSPutROMString(ROM BYTE* String)
+static void DNSPutROMString(ROM uint8_t* String)
 {
-	ROM BYTE *RightPtr;
-	BYTE i;
-	BYTE Len;
+	ROM uint8_t *RightPtr;
+	uint8_t i;
+	uint8_t Len;
 
 	RightPtr = String;
 
@@ -717,7 +717,7 @@ static void DNSPutROMString(ROM BYTE* String)
 
 		// Put the length and data
 		// Also, skip over the '.' in the input string
-		Len = (BYTE)(RightPtr-String-1);
+		Len = (uint8_t)(RightPtr-String-1);
 		UDPPut(Len);
 		String += UDPPutROMArray(String, Len) + 1;
 
@@ -756,7 +756,7 @@ static void DNSPutROMString(ROM BYTE* String)
   ***************************************************************************/
 static void DNSDiscardName(void)
 {
-	BYTE i;
+	uint8_t i;
 
 	while(1)
 	{

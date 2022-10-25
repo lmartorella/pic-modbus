@@ -7,7 +7,7 @@
 // therefore must be marked volatile to prevent the compiler optimizer from
 // reordering code to use this value in the main context while interrupts are
 // disabled.
-static volatile BYTE s_ticksH = 0;
+static volatile uint8_t s_ticksH = 0;
 
 /*****************************************************************************
   Function:
@@ -69,11 +69,11 @@ void timers_init(void)
   Returns:
   	Lower 16 bits of the current Tick value.
   ***************************************************************************/
-WORD TickGet()
+uint16_t TickGet()
 {
     CLRWDT();
     // 2-byte value to store Ticks.  
-    WORD vTickReading;
+    uint16_t vTickReading;
 
 	// Perform an Interrupt safe and synchronized read of the 48-bit
 	// tick value
@@ -82,8 +82,8 @@ WORD TickGet()
 		TICK_INTCON_IE = 1;		// Enable interrupt
 		NOP();                  // Manage TMR interrupts, if IF = 1
 		TICK_INTCON_IE = 0;		// Disable interrupt
-		((BYTE*)(&vTickReading))[0] = TICK_TMR;
-        ((BYTE*)(&vTickReading))[1] = s_ticksH;
+		((uint8_t*)(&vTickReading))[0] = TICK_TMR;
+        ((uint8_t*)(&vTickReading))[1] = s_ticksH;
 	} while (TICK_INTCON_IF);
 	TICK_INTCON_IE = 1;			// Enable interrupt
 	return vTickReading;

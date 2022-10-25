@@ -52,7 +52,7 @@
 #define __SNTP_H
 
 void SNTPClient(void);
-DWORD SNTPGetUTCSeconds(void);
+uint32_t SNTPGetUTCSeconds(void);
 
 #endif
 

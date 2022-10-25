@@ -59,7 +59,7 @@
 // Implement consistent ultoa() function
 #if (defined(__PIC32MX__) && (__C32_VERSION__ < 112)) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__) || defined(__C32_LEGACY_LIBC__)
 	// C32 < 1.12 and C30 < v3.25 need this 2 parameter stack implemented function
-	void ultoa(DWORD Value, BYTE* Buffer);
+	void ultoa(uint32_t Value, uint8_t* Buffer);
 #elif defined(__18CXX) && !defined(HI_TECH_C)
 	// C18 already has a 2 parameter ultoa() function
 	#include <stdlib.h>
@@ -78,49 +78,49 @@
 	#define DebugPrint(a)
 #endif
 
-DWORD	LFSRSeedRand(DWORD dwSeed);
-WORD	LFSRRand(void);
-DWORD	GenerateRandomDWORD(void);
-void 	uitoa(WORD Value, BYTE* Buffer);
-void 	UnencodeURL(BYTE* URL);
-WORD 	Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDestLen);
-WORD	Base64Encode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDestLen);
-BOOL	StringToIPAddress(BYTE* str, IP_ADDR* IPAddress);
-BYTE 	ReadStringUART(BYTE* Dest, BYTE BufferLen);
-BYTE	hexatob(WORD_VAL AsciiChars);
-BYTE	btohexa_high(BYTE b);
-BYTE	btohexa_low(BYTE b);
-signed char stricmppgm2ram(BYTE* a, ROM BYTE* b);
+uint32_t	LFSRSeedRand(uint32_t dwSeed);
+uint16_t	LFSRRand(void);
+uint32_t	GenerateRandomDWORD(void);
+void 	uitoa(uint16_t Value, uint8_t* Buffer);
+void 	UnencodeURL(uint8_t* URL);
+uint16_t 	Base64Decode(uint8_t* cSourceData, uint16_t wSourceLen, uint8_t* cDestData, uint16_t wDestLen);
+uint16_t	Base64Encode(uint8_t* cSourceData, uint16_t wSourceLen, uint8_t* cDestData, uint16_t wDestLen);
+_Bool	StringToIPAddress(uint8_t* str, IP_ADDR* IPAddress);
+uint8_t 	ReadStringUART(uint8_t* Dest, uint8_t BufferLen);
+uint8_t	hexatob(WORD_VAL AsciiChars);
+uint8_t	btohexa_high(uint8_t b);
+uint8_t	btohexa_low(uint8_t b);
+signed char stricmppgm2ram(uint8_t* a, ROM uint8_t* b);
 char * 	strnchr(const char *searchString, size_t count, char c);
 size_t  strncpy_m(char* destStr, size_t destSize, int nStrings, ...);
 
 #if defined(__18CXX)
-	BOOL	ROMStringToIPAddress(ROM BYTE* str, IP_ADDR* IPAddress);
+	_Bool	ROMStringToIPAddress(ROM uint8_t* str, IP_ADDR* IPAddress);
 #else
 	// Non-ROM variant for C30 and C32
-	#define ROMStringToIPAddress(a,b)	StringToIPAddress((BYTE*)a,b)
+	#define ROMStringToIPAddress(a,b)	StringToIPAddress((uint8_t*)a,b)
 #endif
 
 
-WORD    swaps(WORD v);
+uint16_t    swaps(uint16_t v);
 
 #if defined(__C32__)
-DWORD   __attribute__((nomips16)) swapl(DWORD v);
+uint32_t   __attribute__((nomips16)) swapl(uint32_t v);
 #else
-DWORD   swapl(DWORD v);
+uint32_t   swapl(uint32_t v);
 #endif
 
-WORD    CalcIPChecksum(BYTE* buffer, WORD len);
+uint16_t    CalcIPChecksum(uint8_t* buffer, uint16_t len);
 
 
 #if defined(__18CXX)
-	DWORD leftRotateDWORD(DWORD val, BYTE bits);
+	uint32_t leftRotateDWORD(uint32_t val, uint8_t bits);
 #else
 	// Rotations are more efficient in C30 and C32
 	#define leftRotateDWORD(x, n) (((x) << (n)) | ((x) >> (32-(n))))
 #endif
 
-void FormatNetBIOSName(BYTE Name[16]);
+void FormatNetBIOSName(uint8_t Name[16]);
 
 
 // Protocols understood by the ExtractURLFields() function.  IMPORTANT: If you 
@@ -134,7 +134,7 @@ typedef enum
 	PROTOCOL_RTSP
 } PROTOCOLS;
 
-BYTE ExtractURLFields(BYTE *vURL, PROTOCOLS *protocol, BYTE *vUsername, WORD *wUsernameLen, BYTE *vPassword, WORD *wPasswordLen, BYTE *vHostname, WORD *wHostnameLen, WORD *wPort, BYTE *vFilePath, WORD *wFilePathLen);
-SHORT Replace(BYTE *vExpression, ROM BYTE *vFind, ROM BYTE *vReplacement, WORD wMaxLen, BOOL bSearchCaseInsensitive);
+uint8_t ExtractURLFields(uint8_t *vURL, PROTOCOLS *protocol, uint8_t *vUsername, uint16_t *wUsernameLen, uint8_t *vPassword, uint16_t *wPasswordLen, uint8_t *vHostname, uint16_t *wHostnameLen, uint16_t *wPort, uint8_t *vFilePath, uint16_t *wFilePathLen);
+int16_t Replace(uint8_t *vExpression, ROM uint8_t *vFind, ROM uint8_t *vReplacement, uint16_t wMaxLen, _Bool bSearchCaseInsensitive);
 
 #endif

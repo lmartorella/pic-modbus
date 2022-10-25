@@ -81,7 +81,7 @@ static SM_STACK smStack;
 NODE_INFO remoteNode;
 
 #if defined (WF_CS_TRIS) && defined (STACK_USE_DHCP_CLIENT)
-BOOL g_DhcpRenew = FALSE;
+_Bool g_DhcpRenew = false;
 extern void SetDhcpProgressState(void);
 UINT32 g_DhcpRetryTimer = 0;
 #endif
@@ -104,7 +104,7 @@ UINT32 g_DhcpRetryTimer = 0;
  ********************************************************************/
 void StackInit(void)
 {
-	static BOOL once = FALSE;
+	static _Bool once = false;
     smStack                     = SM_STACK_IDLE;
 
 #if defined(STACK_USE_IP_GLEANING) || defined(STACK_USE_DHCP_CLIENT)
@@ -112,19 +112,19 @@ void StackInit(void)
      * If DHCP or IP Gleaning is enabled,
      * startup in Config Mode.
      */
-    AppConfig.Flags.bInConfigMode = TRUE;
+    AppConfig.Flags.bInConfigMode = true;
 
 #endif
 
 #if defined (WF_CS_TRIS) && defined (STACK_USE_DHCP_CLIENT)
-	g_DhcpRenew = FALSE;
+	g_DhcpRenew = false;
 	g_DhcpRetryTimer = 0;
 #endif
 
 	if (!once) {
 		// Seed the LFSRRand() function
 		LFSRSeedRand(GenerateRandomDWORD());
-		once = TRUE;
+		once = true;
 	}
 
     MACInit();
@@ -214,10 +214,10 @@ void StackInit(void)
  ********************************************************************/
 void StackTask(void)
 {
-    WORD dataCount;
+    uint16_t dataCount;
     IP_ADDR tempLocalIP;
-	BYTE cFrameType;
-	BYTE cIPFrameType;
+	uint8_t cFrameType;
+	uint8_t cIPFrameType;
 
 
     #if defined( WF_CS_TRIS )
@@ -234,12 +234,12 @@ void StackTask(void)
         	// address if link is removed.
         	if(AppConfig.Flags.bIsDHCPEnabled)
         	{
-        		if(g_DhcpRenew == TRUE)
+        		if(g_DhcpRenew == true)
         		{
-        			g_DhcpRenew = FALSE;
+        			g_DhcpRenew = false;
             		AppConfig.MyIPAddr.Val = AppConfig.DefaultIPAddr.Val;
         			AppConfig.MyMask.Val = AppConfig.DefaultMask.Val;
-        			AppConfig.Flags.bInConfigMode = TRUE;
+        			AppConfig.Flags.bInConfigMode = true;
         			DHCPInit(0);
 					g_DhcpRetryTimer = (UINT32)TickGet();
         		} else {
@@ -256,7 +256,7 @@ void StackTask(void)
         		DHCPTask();
 
         		if(DHCPIsBound(0)) {
-        			AppConfig.Flags.bInConfigMode = FALSE;
+        			AppConfig.Flags.bInConfigMode = false;
 					g_DhcpRetryTimer = 0;
         		}
         	}
@@ -272,8 +272,8 @@ void StackTask(void)
 	// address if link is removed.
 	if(AppConfig.Flags.bIsDHCPEnabled)
 	{
-		static BOOL bLastLinkState = FALSE;
-		BOOL bCurrentLinkState;
+		static _Bool bLastLinkState = false;
+		_Bool bCurrentLinkState;
 
 		bCurrentLinkState = MACIsLinked();
 		if(bCurrentLinkState != bLastLinkState)
@@ -283,7 +283,7 @@ void StackTask(void)
 			{
 				AppConfig.MyIPAddr.Val = AppConfig.DefaultIPAddr.Val;
 				AppConfig.MyMask.Val = AppConfig.DefaultMask.Val;
-				AppConfig.Flags.bInConfigMode = TRUE;
+				AppConfig.Flags.bInConfigMode = true;
 				DHCPInit(0);
 			}
 		}
@@ -295,7 +295,7 @@ void StackTask(void)
 		DHCPTask();
 
 		if(DHCPIsBound(0))
-			AppConfig.Flags.bInConfigMode = FALSE;
+			AppConfig.Flags.bInConfigMode = false;
 	}
 	#endif
 
@@ -368,7 +368,7 @@ void StackTask(void)
 						// configuration mode.
 						if(tempLocalIP.Val != 0xffffffff)
 						{
-							AppConfig.Flags.bInConfigMode = FALSE;
+							AppConfig.Flags.bInConfigMode = false;
 							AppConfig.MyIPAddr = tempLocalIP;
 						}
 					}
@@ -492,7 +492,7 @@ void StackApplications(void)
 #if defined(WF_CS_TRIS) && defined(STACK_USE_DHCP_CLIENT)
 void RenewDhcp(void)
 {
-    g_DhcpRenew = TRUE;
+    g_DhcpRenew = true;
     SetDhcpProgressState();
 }
 

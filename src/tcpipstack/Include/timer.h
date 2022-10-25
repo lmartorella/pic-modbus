@@ -63,8 +63,8 @@
 		}                           \
 	}
 #elif defined(__PIC32MX__)
-void Delay10us(DWORD dwCount);
-void DelayMs(WORD ms);
+void Delay10us(uint32_t dwCount);
+void DelayMs(uint16_t ms);
 #endif
 
 

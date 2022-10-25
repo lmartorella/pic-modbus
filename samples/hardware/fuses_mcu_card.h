@@ -19,9 +19,11 @@
 // PORTG: 4: 1/2 used by USART2 + 0 used by MAX485 enable logic
 
 #define SYSTEM_CLOCK 25000000ull
+#define _XTAL_FREQ (SYSTEM_CLOCK)
 #define PRIO_TYPE low_priority
 
 #define HAS_RS485_BUS
+#define HAS_RS485_BUS_PRIMARY
 #define MASTER_MAX_CHILDREN 4
 
 // ******* 
@@ -180,7 +182,7 @@
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK/4ull)
 #define TICK_PRESCALER 256ull
 
-#define TICK_TYPE DWORD
+#define TICK_TYPE uint32_t
 
 #ifdef HAS_IO
 #ifdef HAS_SPI

@@ -99,8 +99,8 @@
 
 
 
-static WORD _Identifier = 0;
-static BYTE IPHeaderLen;
+static uint16_t _Identifier = 0;
+static uint8_t IPHeaderLen;
 
 
 static void SwapIPHeader(IP_HEADER* h);
@@ -109,12 +109,12 @@ static void SwapIPHeader(IP_HEADER* h);
 
 
 /*********************************************************************
- * Function:        BOOL IPGetHeader( IP_ADDR    *localIP,
+ * Function:        _Bool IPGetHeader( IP_ADDR    *localIP,
  *                                    NODE_INFO  *remote,
- *                                    BYTE        *Protocol,
- *                                    WORD        *len)
+ *                                    uint8_t        *Protocol,
+ *                                    uint16_t        *len)
  *
- * PreCondition:    MACGetHeader() == TRUE
+ * PreCondition:    MACGetHeader() == true
  *
  * Input:           localIP     - Local node IP Address as received
  *                                in current IP header.
@@ -124,8 +124,8 @@ static void SwapIPHeader(IP_HEADER* h);
  *                  Protocol    - Current packet protocol
  *                  len         - Current packet data length
  *
- * Output:          TRUE, if valid packet was received
- *                  FALSE otherwise
+ * Output:          true, if valid packet was received
+ *                  false otherwise
  *
  * Side Effects:    None
  *
@@ -134,33 +134,33 @@ static void SwapIPHeader(IP_HEADER* h);
  *                  at the same time.
  *
  ********************************************************************/
-BOOL IPGetHeader(IP_ADDR *localIP,
+_Bool IPGetHeader(IP_ADDR *localIP,
                  NODE_INFO *remote,
-                 BYTE *protocol,
-                 WORD *len)
+                 uint8_t *protocol,
+                 uint16_t *len)
 {
     WORD_VAL    CalcChecksum;
     IP_HEADER   header;
 
 #if defined(NON_MCHP_MAC)
     WORD_VAL    ReceivedChecksum;
-    WORD        checksums[2];
-    BYTE        optionsLen;
+    uint16_t        checksums[2];
+    uint8_t        optionsLen;
 	#define MAX_OPTIONS_LEN     (40u)            // As per RFC 791.
-    BYTE        options[MAX_OPTIONS_LEN];
+    uint8_t        options[MAX_OPTIONS_LEN];
 #endif
 
     // Read IP header.
-    MACGetArray((BYTE*)&header, sizeof(header));
+    MACGetArray((uint8_t*)&header, sizeof(header));
 
     // Make sure that this is an IPv4 packet.
     if((header.VersionIHL & 0xf0) != IP_VERSION)
-    	return FALSE;
+    	return false;
 
 	// Throw this packet away if it is a fragment.
 	// We don't have enough RAM for IP fragment reconstruction.
 	if(header.FragmentInfo & 0xFF1F)
-		return FALSE;
+		return false;
 
 	IPHeaderLen = (header.VersionIHL & 0x0f) << 2;
 
@@ -184,7 +184,7 @@ BOOL IPGetHeader(IP_ADDR *localIP,
     // If there is any option(s), read it so that we can include them
     // in checksum calculation.
     if ( optionsLen > MAX_OPTIONS_LEN )
-        return FALSE;
+        return false;
 
     if ( optionsLen > 0u )
         MACGetArray(options, optionsLen);
@@ -194,24 +194,24 @@ BOOL IPGetHeader(IP_ADDR *localIP,
     header.HeaderChecksum = 0;
 
     // Calculate checksum of header including options bytes.
-    checksums[0] = ~CalcIPChecksum((BYTE*)&header, sizeof(header));
+    checksums[0] = ~CalcIPChecksum((uint8_t*)&header, sizeof(header));
 
     // Calculate Options checksum too, if they are present.
     if ( optionsLen > 0u )
-        checksums[1] = ~CalcIPChecksum((BYTE*)options, optionsLen);
+        checksums[1] = ~CalcIPChecksum((uint8_t*)options, optionsLen);
     else
         checksums[1] = 0;
 
-    CalcChecksum.Val  = CalcIPChecksum((BYTE*)checksums,
-                                            2 * sizeof(WORD));
+    CalcChecksum.Val  = CalcIPChecksum((uint8_t*)checksums,
+                                            2 * sizeof(uint16_t));
 
     // Make sure that checksum is correct
     if ( ReceivedChecksum.Val != CalcChecksum.Val )
 #endif
     {
-        // Bad packet. The function caller will be notified by means of the FALSE
+        // Bad packet. The function caller will be notified by means of the false
         // return value and it should discard the packet.
-        return FALSE;
+        return false;
     }
 
     // Network to host conversion.
@@ -226,33 +226,33 @@ BOOL IPGetHeader(IP_ADDR *localIP,
     *protocol           = header.Protocol;
     *len 				= header.TotalLength - IPHeaderLen;
 
-    return TRUE;
+    return true;
 }
 
 
 
 
 /*********************************************************************
- * Function: WORD IPPutHeader(NODE_INFO *remote,
- *           				  BYTE protocol,
- *                			  WORD len)
+ * Function: uint16_t IPPutHeader(NODE_INFO *remote,
+ *           				  uint8_t protocol,
+ *                			  uint16_t len)
  *
- * PreCondition:    IPIsTxReady() == TRUE
+ * PreCondition:    IPIsTxReady() == true
  *
  * Input:           *remote     - Destination node address
  *                  protocol    - Current packet protocol
  *                  len         - Current packet data length
  *
- * Output:          (WORD)0
+ * Output:          (uint16_t)0
  *
  * Side Effects:    None
  *
  * Note:            Only one IP message can be transmitted at any
  *                  time.
  ********************************************************************/
-WORD IPPutHeader(NODE_INFO *remote,
-                 BYTE protocol,
-                 WORD len)
+uint16_t IPPutHeader(NODE_INFO *remote,
+                 uint8_t protocol,
+                 uint16_t len)
 {
     IP_HEADER   header;
 
@@ -272,17 +272,17 @@ WORD IPPutHeader(NODE_INFO *remote,
 
     SwapIPHeader(&header);
 
-    header.HeaderChecksum   = CalcIPChecksum((BYTE*)&header, sizeof(header));
+    header.HeaderChecksum   = CalcIPChecksum((uint8_t*)&header, sizeof(header));
 
     MACPutHeader(&remote->MACAddr, MAC_IP, (sizeof(header)+len));
-    MACPutArray((BYTE*)&header, sizeof(header));
+    MACPutArray((uint8_t*)&header, sizeof(header));
 
     return 0x0000;
 
 }
 
 /*********************************************************************
- * Function:        IPSetRxBuffer(WORD Offset)
+ * Function:        IPSetRxBuffer(uint16_t Offset)
  *
  * PreCondition:    IPHeaderLen must have been intialized by
  *					IPGetHeader() or IPPutHeader()
@@ -297,7 +297,7 @@ WORD IPPutHeader(NODE_INFO *remote,
  * Note:            None
  *
  ********************************************************************/
-void IPSetRxBuffer(WORD Offset)
+void IPSetRxBuffer(uint16_t Offset)
 {
 	MACSetReadPtrInRx(Offset+IPHeaderLen);
 }

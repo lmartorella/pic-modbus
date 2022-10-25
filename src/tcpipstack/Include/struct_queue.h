@@ -345,7 +345,7 @@
  *
  * Output:          None
  *
- * Returns:         TRUE if the queue is full, FALSE otherwise.
+ * Returns:         true if the queue is full, false otherwise.
  *
  * Side Effects:    None
  *
@@ -368,7 +368,7 @@
  *
  * Output:          None
  *
- * Returns:         FALSE if the queue is full, TRUE otherwise.
+ * Returns:         false if the queue is full, true otherwise.
  *
  * Side Effects:    None
  *
@@ -391,7 +391,7 @@
  *
  * Output:          None
  *
- * Returns:         TRUE if the queue is empty, FALSE otherwise.
+ * Returns:         true if the queue is empty, false otherwise.
  *
  * Side Effects:    None
  *
@@ -414,7 +414,7 @@
  *
  * Output:          None
  *
- * Returns:         FALSE if the queue is empty, TRUE otherwise.
+ * Returns:         false if the queue is empty, true otherwise.
  *
  * Side Effects:    None
  *
@@ -437,8 +437,8 @@
  *
  * Output:          None
  *
- * Returns:         TRUE if the queue has the indicated number of slots
-                    available, FALSE otherwise.
+ * Returns:         true if the queue has the indicated number of slots
+                    available, false otherwise.
  *
  * Side Effects:    None
  *

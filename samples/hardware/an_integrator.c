@@ -44,7 +44,7 @@ void anint_poll() {
             // Check if sample is done
             // if done, read it and 
             if (!ADCON0bits.GO) {
-                WORD value = (ADRESH << 8) + ADRESL;
+                uint16_t value = (ADRESH << 8) + ADRESL;
                 _accumulator += value;
                 _count++;
                 if (_accumulator < 0 || _count < 0) {

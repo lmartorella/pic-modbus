@@ -67,17 +67,17 @@ typedef struct {
 void uart_init();
 void uart_trasmit();
 void uart_receive();
-void uart_set_9b(BOOL b);
-void uart_write(BYTE b);
-void uart_read(BYTE* data, UART_RX_MD* md);
+void uart_set_9b(_Bool b);
+void uart_write(uint8_t b);
+void uart_read(uint8_t* data, UART_RX_MD* md);
 
-BOOL uart_tx_fifo_empty();
-BOOL uart_tx_fifo_empty_get_mask();
-void uart_tx_fifo_empty_set_mask(BOOL b);
+_Bool uart_tx_fifo_empty();
+_Bool uart_tx_fifo_empty_get_mask();
+void uart_tx_fifo_empty_set_mask(_Bool b);
 
-BOOL uart_rx_fifo_empty();
-BOOL uart_rx_fifo_empty_get_mask();
-void uart_rx_fifo_empty_set_mask(BOOL b);
+_Bool uart_rx_fifo_empty();
+_Bool uart_rx_fifo_empty_get_mask();
+void uart_rx_fifo_empty_set_mask(_Bool b);
 
 void uart_enable_tx();
 void uart_disable_tx();

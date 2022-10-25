@@ -74,8 +74,8 @@
 	} while(0)
 
 #elif defined(__C30__) || defined(__C32__)
-	void Delay10us(DWORD dwCount);
-	void DelayMs(WORD ms);
+	void Delay10us(uint32_t dwCount);
+	void DelayMs(uint16_t ms);
 
 #else
 	#define Delay10us(x)			\
@@ -85,7 +85,7 @@
 		_dcnt=x*((unsigned long)(0.00001/(1.0/GetInstructionClock())/6));	\
 		while(_dcnt--);				\
 	} while(0)
-	void DelayMs(WORD ms);
+	void DelayMs(uint16_t ms);
 #endif
 
 

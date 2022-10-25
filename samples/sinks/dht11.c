@@ -24,7 +24,7 @@ typedef enum {
     ERR_AT_BYTE = 0x10,         // Err at byte 0x10 + N
 } ERR_BYTE;
 
-ERR_BYTE dht11_read(BYTE* buffer)
+ERR_BYTE dht11_read(uint8_t* buffer)
 {   
     DHT11_PORT = 0;     // low
     
@@ -57,7 +57,7 @@ ERR_BYTE dht11_read(BYTE* buffer)
 
     for (char i = 0; i < 5; i++, buffer++) {
         CLRWDT();
-        BYTE res = 0;
+        uint8_t res = 0;
         for (char j = 0; j < 8; j++)
         {
             res <<= 1;
@@ -82,8 +82,8 @@ ERR_BYTE dht11_read(BYTE* buffer)
     return ERR_OK;
 }
 
-bit dht11_write() {
-    BYTE data[6];
+__bit dht11_write() {
+    uint8_t data[6];
     di();    
     data[0] = dht11_read(data + 1);
     ei();
@@ -93,7 +93,7 @@ bit dht11_write() {
     prot_control_write(data, 6);
 
     // Finish data
-    return FALSE;
+    return false;
 }
 
 #endif

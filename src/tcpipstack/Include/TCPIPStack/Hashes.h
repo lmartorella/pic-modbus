@@ -72,13 +72,13 @@ typedef enum
 // Context storage for a hash operation
 typedef struct
 {
-	DWORD h0;				// Hash state h0
-	DWORD h1;				// Hash state h1
-	DWORD h2;				// Hash state h2
-	DWORD h3;				// Hash state h3
-	DWORD h4;				// Hash state h4
-	DWORD bytesSoFar;		// Total number of bytes hashed so far
-	BYTE partialBlock[64];	// Beginning of next 64 byte block
+	uint32_t h0;				// Hash state h0
+	uint32_t h1;				// Hash state h1
+	uint32_t h2;				// Hash state h2
+	uint32_t h3;				// Hash state h3
+	uint32_t h4;				// Hash state h4
+	uint32_t bytesSoFar;		// Total number of bytes hashed so far
+	uint8_t partialBlock[64];	// Beginning of next 64 byte block
 	HASH_TYPE hashType;		// Type of hash being calculated
 } HASH_SUM;
 
@@ -90,34 +90,34 @@ typedef struct
 
 #if defined(STACK_USE_SHA1)
 	void SHA1Initialize(HASH_SUM* theSum);
-	void SHA1AddData(HASH_SUM* theSum, BYTE* data, WORD len);
-	void SHA1Calculate(HASH_SUM* theSum, BYTE* result);
+	void SHA1AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len);
+	void SHA1Calculate(HASH_SUM* theSum, uint8_t* result);
 	#if defined(__18CXX)
-		void SHA1AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len);
+		void SHA1AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len);
 	#else
 		// Non-ROM variant for C30 / C32
-		#define SHA1AddROMData(a,b,c)	SHA1AddData(a,(BYTE*)b,c)
+		#define SHA1AddROMData(a,b,c)	SHA1AddData(a,(uint8_t*)b,c)
 	#endif
 #endif
 
 #if defined(STACK_USE_MD5)
 	void MD5Initialize(HASH_SUM* theSum);
-	void MD5AddData(HASH_SUM* theSum, BYTE* data, WORD len);
-	void MD5Calculate(HASH_SUM* theSum, BYTE* result);
+	void MD5AddData(HASH_SUM* theSum, uint8_t* data, uint16_t len);
+	void MD5Calculate(HASH_SUM* theSum, uint8_t* result);
 	#if defined(__18CXX)
-		void MD5AddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len);
+		void MD5AddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len);
 	#else
 		// Non-ROM variant for C30 / C32
-		#define MD5AddROMData(a,b,c)	MD5AddData(a,(BYTE*)b,c)
+		#define MD5AddROMData(a,b,c)	MD5AddData(a,(uint8_t*)b,c)
 	#endif
 #endif
 
-void HashAddData(HASH_SUM* theSum, BYTE* data, WORD len);
+void HashAddData(HASH_SUM* theSum, uint8_t* data, uint16_t len);
 #if defined(__18CXX)
-	void HashAddROMData(HASH_SUM* theSum, ROM BYTE* data, WORD len);
+	void HashAddROMData(HASH_SUM* theSum, ROM uint8_t* data, uint16_t len);
 #else
 	// Non-ROM variant for C30 / C32
-	#define HashAddROMData(a,b,c)	HashAddData(a,(BYTE*)b,c)
+	#define HashAddROMData(a,b,c)	HashAddData(a,(uint8_t*)b,c)
 #endif
 
 #endif

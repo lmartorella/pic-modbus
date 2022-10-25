@@ -5,7 +5,7 @@
 
 #define SINK_ANALOG_INTEGRATOR_ID "ANIN"
 
-bit anint_sinkWrite();
+__bit anint_sinkWrite();
 
 #endif
 

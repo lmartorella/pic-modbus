@@ -53,10 +53,10 @@
 #define __UDP_H
 
 // Stores a UDP Port Number
-typedef WORD UDP_PORT;
+typedef uint16_t UDP_PORT;
 
 // Provides a handle to a UDP Socket
-typedef BYTE UDP_SOCKET;
+typedef uint8_t UDP_SOCKET;
 
 // UDP States 
 typedef enum
@@ -76,19 +76,19 @@ typedef struct
 	union
 	{
 		NODE_INFO	remoteNode;		// 10 bytes for MAC and IP address
-		DWORD		remoteHost;		// RAM or ROM pointer to a hostname string (ex: "www.microchip.com")
+		uint32_t		remoteHost;		// RAM or ROM pointer to a hostname string (ex: "www.microchip.com")
 	} remote;
     //NODE_INFO   remoteNode;		// IP and MAC of remote node
     UDP_PORT    remotePort;		// Remote node's UDP port number
     UDP_PORT    localPort;		// Local UDP port number, or INVALID_UDP_PORT when free
     UDP_STATE smState;			// State of this socket
-    DWORD retryInterval;
-	BYTE retryCount;
+    uint32_t retryInterval;
+	uint8_t retryCount;
 	struct
 	{
 		unsigned char bRemoteHostIsROM : 1;	// Remote host is stored in ROM
 	}flags;
-	WORD eventTime;
+	uint16_t eventTime;
 } UDP_SOCKET_INFO;
 
 
@@ -102,8 +102,8 @@ typedef struct
 #if !defined(__UDP_C)
     extern UDP_SOCKET activeUDPSocket;
     extern UDP_SOCKET_INFO  UDPSocketInfo[MAX_UDP_SOCKETS];
-	extern WORD UDPTxCount;
-	extern WORD UDPRxCount;
+	extern uint16_t UDPTxCount;
+	extern uint16_t UDPRxCount;
 #endif
 
 // Stores the header of a UDP packet
@@ -111,8 +111,8 @@ typedef struct
 {
     UDP_PORT    SourcePort;				// Source UDP port
     UDP_PORT    DestinationPort;		// Destination UDP port
-    WORD        Length;					// Length of data
-    WORD        Checksum;				// UDP checksum of the data
+    uint16_t        Length;					// Length of data
+    uint16_t        Checksum;				// UDP checksum of the data
 } UDP_HEADER;
 
 
@@ -144,35 +144,35 @@ typedef struct
   ***************************************************************************/
 void UDPInit(void);
 void UDPTask(void);
-UDP_SOCKET UDPOpenEx(DWORD remoteHost, BYTE remoteHostType, UDP_PORT localPort,UDP_PORT remotePort);
+UDP_SOCKET UDPOpenEx(uint32_t remoteHost, uint8_t remoteHostType, UDP_PORT localPort,UDP_PORT remotePort);
 
 //UDP_SOCKET UDPOpen(UDP_PORT localPort, NODE_INFO *remoteNode, UDP_PORT remotePort);
 void UDPClose(UDP_SOCKET s);
-BOOL UDPProcess(NODE_INFO *remoteNode, IP_ADDR *localIP, WORD len);
+_Bool UDPProcess(NODE_INFO *remoteNode, IP_ADDR *localIP, uint16_t len);
 
-void UDPSetTxBuffer(WORD wOffset);
-void UDPSetRxBuffer(WORD wOffset);
-WORD UDPIsPutReady(UDP_SOCKET s);
-BOOL UDPPut(BYTE v);
-BOOL UDPPutW(WORD w);
-WORD UDPPutArray(const BYTE *cData, WORD wDataLen);
-BYTE* UDPPutString(const BYTE *strData);
+void UDPSetTxBuffer(uint16_t wOffset);
+void UDPSetRxBuffer(uint16_t wOffset);
+uint16_t UDPIsPutReady(UDP_SOCKET s);
+_Bool UDPPut(uint8_t v);
+_Bool UDPPutW(uint16_t w);
+uint16_t UDPPutArray(const uint8_t *cData, uint16_t wDataLen);
+uint8_t* UDPPutString(const uint8_t *strData);
 void UDPFlush(void);
 
 // ROM function variants for PIC18
 #if defined(__18CXX)
-	WORD UDPPutROMArray(ROM BYTE *cData, WORD wDataLen);
+	uint16_t UDPPutROMArray(ROM uint8_t *cData, uint16_t wDataLen);
 	rom char* UDPPutROMString(rom const char* strData);
 #else
-	#define UDPPutROMArray(a,b)	UDPPutArray((BYTE*)a,b)
-	#define UDPPutROMString(a)	UDPPutString((BYTE*)a)
+	#define UDPPutROMArray(a,b)	UDPPutArray((uint8_t*)a,b)
+	#define UDPPutROMString(a)	UDPPutString((uint8_t*)a)
 #endif
 
-WORD UDPIsGetReady(UDP_SOCKET s);
-BOOL UDPGet(BYTE *v);
-WORD UDPGetArray(BYTE *cData, WORD wDataLen);
+uint16_t UDPIsGetReady(UDP_SOCKET s);
+_Bool UDPGet(uint8_t *v);
+uint16_t UDPGetArray(uint8_t *cData, uint16_t wDataLen);
 void UDPDiscard(void);
-BOOL UDPIsOpened(UDP_SOCKET socket);
+_Bool UDPIsOpened(UDP_SOCKET socket);
 
 /*****************************************************************************
   Function:
@@ -211,6 +211,6 @@ BOOL UDPIsOpened(UDP_SOCKET socket);
     When finished using the UDP socket handle, call the UDPClose() function 
     to free the socket and delete the handle.
   ***************************************************************************/
-#define UDPOpen(localPort,remoteNode,remotePort)  UDPOpenEx((DWORD)remoteNode,UDP_OPEN_NODE_INFO,localPort,remotePort)
+#define UDPOpen(localPort,remoteNode,remotePort)  UDPOpenEx((uint32_t)remoteNode,UDP_OPEN_NODE_INFO,localPort,remotePort)
 
 #endif

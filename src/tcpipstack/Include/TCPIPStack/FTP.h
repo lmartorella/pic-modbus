@@ -57,20 +57,20 @@
 
 
 /*********************************************************************
- * Function:        BOOL FTPVerify(char *login, char *password)
+ * Function:        _Bool FTPVerify(char *login, char *password)
  *
  * PreCondition:    None
  *
  * Input:           login       - Telnet User login name
  *                  password    - Telnet User password
  *
- * Output:          TRUE if login and password verfies
- *                  FALSE if login and password does not match.
+ * Output:          true if login and password verfies
+ *                  false if login and password does not match.
  *
  * Side Effects:    None
  *
  * Overview:        Compare given login and password with internal
- *                  values and return TRUE or FALSE.
+ *                  values and return true or false.
  *
  * Note:            This is a callback from Telnet Server to
  *                  user application.  User application must
@@ -79,7 +79,7 @@
  *                  login and password information.
  ********************************************************************/
 #ifdef __FTP_C
-extern BOOL FTPVerify(BYTE *login, BYTE *password);
+extern _Bool FTPVerify(uint8_t *login, uint8_t *password);
 #endif
 
 
@@ -120,7 +120,7 @@ void FTPInit(void);
  *                  this function repeatdly to ensure all open
  *                  or new connections are served on time.
  ********************************************************************/
-BOOL FTPServer(void);
+_Bool FTPServer(void);
 
 
 #endif

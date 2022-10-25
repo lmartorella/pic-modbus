@@ -93,13 +93,13 @@
 // DHCP or BOOTP Header structure
 __ALIGN2PACK typedef struct 
 {
-	BYTE		MessageType;	// Message type for this message
-	BYTE		HardwareType;	// Hardware type for this message
-	BYTE		HardwareLen;	// Length of hardware type
-	BYTE		Hops;			// Number of hops
-	DWORD		TransactionID;	// DHCP Transaction ID
-	WORD		SecondsElapsed;	// Number of elapsed seconds
-	WORD		BootpFlags;		// BOOTP Flags
+	uint8_t		MessageType;	// Message type for this message
+	uint8_t		HardwareType;	// Hardware type for this message
+	uint8_t		HardwareLen;	// Length of hardware type
+	uint8_t		Hops;			// Number of hops
+	uint32_t		TransactionID;	// DHCP Transaction ID
+	uint16_t		SecondsElapsed;	// Number of elapsed seconds
+	uint16_t		BootpFlags;		// BOOTP Flags
 	IP_ADDR		ClientIP;		// Client IP
 	IP_ADDR		YourIP;			// Your IP
 	IP_ADDR		NextServerIP;	// Next Server IP
@@ -126,16 +126,16 @@ typedef enum
 } SM_DHCP;
 
 
-void DHCPInit(BYTE vInterface);
+void DHCPInit(uint8_t vInterface);
 void DHCPTask(void);
 void DHCPServerTask(void);
-void DHCPDisable(BYTE vInterface);
-void DHCPEnable(BYTE vInterface);
-BOOL DHCPIsEnabled(BYTE vInterface);
-BOOL DHCPIsBound(BYTE vInterface);
-BOOL DHCPStateChanged(BYTE vInterface);
-BOOL DHCPIsServerDetected(BYTE vInterface);
+void DHCPDisable(uint8_t vInterface);
+void DHCPEnable(uint8_t vInterface);
+_Bool DHCPIsEnabled(uint8_t vInterface);
+_Bool DHCPIsBound(uint8_t vInterface);
+_Bool DHCPStateChanged(uint8_t vInterface);
+_Bool DHCPIsServerDetected(uint8_t vInterface);
 
-extern BOOL bDHCPServerEnabled;
+extern _Bool bDHCPServerEnabled;
 
 #endif

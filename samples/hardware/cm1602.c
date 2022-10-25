@@ -43,14 +43,14 @@ typedef union {
         unsigned R6 :1;
         unsigned R7 :1;
     };
-    BYTE v;
+    uint8_t v;
 } PORTXBITS_t;
 
-extern volatile PORTXBITS_t CM1602_PORTBITS @ CM1602_PORTADDR;
+extern volatile PORTXBITS_t CM1602_PORTBITS __at(CM1602_PORTADDR);
 
 // Clock the control bits in order to push the 4/8 bits to the display.
 // In case of 4-bit, the lower data is sent and the HIGH part should be ZERO
-static void pulsePort(BYTE v)
+static void pulsePort(uint8_t v)
 {
     PORTXBITS_t data;
     data.v = v;
@@ -81,7 +81,7 @@ static void pulsePort(BYTE v)
 }
 
 // write a byte to the port
-static void writeByte(BYTE data)
+static void writeByte(uint8_t data)
 {
 #if CM1602_IF_MODE == 4
 	// 4-bit interface. Send high first
@@ -95,13 +95,13 @@ static void writeByte(BYTE data)
 #endif
 }
 
-static void writeCmd(BYTE data)
+static void writeCmd(uint8_t data)
 {
 	CM1602_IF_BIT_RS = 0;
 	writeByte(data);
 }
 
-static void writeData(BYTE data)
+static void writeData(uint8_t data)
 {
 	CM1602_IF_BIT_RS = 1;
 	writeByte(data);
@@ -152,9 +152,9 @@ void cm1602_reset(void)
 
     // Push fake go-to-8bit state 3 times
 #if CM1602_IF_MODE == 4
-    BYTE cmd = (CMD_FUNCSET | CMD_FUNCSET_DL_8) >> 4;
+    uint8_t cmd = (CMD_FUNCSET | CMD_FUNCSET_DL_8) >> 4;
 #else
-    BYTE cmd = CMD_FUNCSET | CMD_FUNCSET_DL_8;
+    uint8_t cmd = CMD_FUNCSET | CMD_FUNCSET_DL_8;
 #endif
     pulsePort(cmd); 
     wait30ms();
@@ -230,19 +230,19 @@ void cm1602_shift(enum CM1602_SHIFT data)
 	wait40us();
 }
 
-void cm1602_setCgramAddr(BYTE address)
+void cm1602_setCgramAddr(uint8_t address)
 {
 	writeCmd(CMD_SETCGRAM | address);
 	wait40us();
 }
 
-void cm1602_setDdramAddr(BYTE address)
+void cm1602_setDdramAddr(uint8_t address)
 {
 	writeCmd(CMD_SETDDRAM | address);
 	wait40us();
 }
 
-void cm1602_write(BYTE data)
+void cm1602_write(uint8_t data)
 {
 	writeData(data);
 	wait40us();

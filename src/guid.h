@@ -6,11 +6,11 @@
  */
 typedef struct 
 {
-	DWORD data1;
-	WORD data2;
-	WORD data3;
-	DWORD data4a;
-	DWORD data4b;
+	uint32_t data1;
+	uint16_t data2;
+	uint16_t data3;
+	uint32_t data4a;
+	uint32_t data4b;
 } GUID;
 
 /**
@@ -22,7 +22,7 @@ typedef union {
         char c1;
         char c2;
     } chars;
-    BYTE bytes[2];
+    uint8_t bytes[2];
 } TWOCC;
 
 /**
@@ -36,7 +36,7 @@ typedef union {
         char c3;
         char c4;
     } chars;
-    BYTE bytes[4];
+    uint8_t bytes[4];
 } FOURCC;
 
 #endif

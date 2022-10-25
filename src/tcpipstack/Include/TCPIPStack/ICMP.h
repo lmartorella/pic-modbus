@@ -53,18 +53,18 @@
 #ifndef __ICMP_H
 #define __ICMP_H
 
-void ICMPProcess(NODE_INFO *remote, WORD len);
+void ICMPProcess(NODE_INFO *remote, uint16_t len);
 
-BOOL ICMPBeginUsage(void);
-void ICMPSendPing(DWORD dwRemoteIP);
-void ICMPSendPingToHost(BYTE * szRemoteHost);
-LONG ICMPGetReply(void);
+_Bool ICMPBeginUsage(void);
+void ICMPSendPing(uint32_t dwRemoteIP);
+void ICMPSendPingToHost(uint8_t * szRemoteHost);
+int32_t ICMPGetReply(void);
 void ICMPEndUsage(void);
 
 #if defined(__18CXX)
-	void ICMPSendPingToHostROM(ROM BYTE * szRemoteHost);
+	void ICMPSendPingToHostROM(ROM uint8_t * szRemoteHost);
 #else
-	#define ICMPSendPingToHostROM(a) 	ICMPSendPingToHost((BYTE*)(a))
+	#define ICMPSendPingToHostROM(a) 	ICMPSendPingToHost((uint8_t*)(a))
 #endif
 
 

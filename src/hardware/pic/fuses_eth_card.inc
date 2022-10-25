@@ -1,8 +1,5 @@
-#include "../pch.h"
-#include "../appio.h"
-
-void Delay10TCYx(unsigned char);
-void Delay1KTCYx(unsigned char);
+#include "../../pch.h"
+#include "../../appio.h"
     
 // ==== ETH CARD based on 18f87j60
 
@@ -47,40 +44,30 @@ void Delay1KTCYx(unsigned char);
 
 // The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
 void wait40us(void)
-{	
-    // 40us = ~256 * 160ns
-    // So wait 256 cycles
-    Delay10TCYx(26);
+{
+    __delay_us(40);
 }
 
 void wait100us(void)
 {
-    wait40us();
-    wait40us();
-    wait40us();
+    __delay_us(100);
 }
 
 // The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
 void wait2ms(void)
 {
-	// 2ms = ~12500 * 160ns
-	Delay1KTCYx(13);
+    __delay_ms(2);
 }
 
 // The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
 void wait30ms(void)
 {
-	// 30ms = ~187500 * 160ns
-	Delay1KTCYx(188);
+    __delay_ms(30);
 }
 
 void wait1s(void)
 {
-    for (int i = 0; i < 33; i++)
-    {
-        wait30ms();
-        CLRWDT();
-    }
+    __delaywdt_ms(1000);
 }
 
 void enableInterrupts()
@@ -99,7 +86,7 @@ void enableInterrupts()
     
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-static persistent LAST_EXC_TYPE g_exception;
+static __persistent LAST_EXC_TYPE g_exception;
 
 // Check RCON and STKPTR register for anormal reset cause
 void sys_storeResetReason()

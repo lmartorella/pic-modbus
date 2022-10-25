@@ -3,12 +3,12 @@
 /**
  * Code-memory optimized version of memcmp
  */
-bit memcmp8(void* p1, void* p2, BYTE size)
+__bit memcmp8(void* p1, void* p2, uint8_t size)
 {
     while (size-- > 0) {
-        if (*((BYTE*)p1) != *((BYTE*)p2)) return 1;
-        p1 = ((BYTE*)p1) + 1;
-        p2 = ((BYTE*)p2) + 1;
+        if (*((uint8_t*)p1) != *((uint8_t*)p2)) return 1;
+        p1 = ((uint8_t*)p1) + 1;
+        p2 = ((uint8_t*)p2) + 1;
     }
     return 0;
 }

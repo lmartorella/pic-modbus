@@ -11,9 +11,9 @@
 #include "hardware/an_integrator.h"
 #include "hardware/i2c.h"
 
-static bit nil() {
+static __bit nil() {
     CLRWDT();
-    return FALSE;
+    return false;
 }
 
 // REGISTER SINKS

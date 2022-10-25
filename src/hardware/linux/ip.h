@@ -4,12 +4,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-typedef WORD UDP_PORT;
+typedef uint16_t UDP_PORT;
 typedef int UDP_SOCKET;
 typedef int TCP_SOCKET;
 
 typedef struct {
-    DWORD MyIPAddr;
+    uint32_t MyIPAddr;
 } AppConfig_t;
 extern AppConfig_t AppConfig;
 
@@ -21,24 +21,24 @@ void StackTask();
 
 void TCPDiscard(TCP_SOCKET socket);
 void TCPDisconnect(TCP_SOCKET socket);
-WORD TCPIsGetReady(TCP_SOCKET socket);
-WORD TCPIsPutReady(TCP_SOCKET socket);
-BOOL TCPIsConnected(TCP_SOCKET socket);
+uint16_t TCPIsGetReady(TCP_SOCKET socket);
+uint16_t TCPIsPutReady(TCP_SOCKET socket);
+_Bool TCPIsConnected(TCP_SOCKET socket);
 void TCPFlush(TCP_SOCKET socket);
-WORD TCPGetArray(TCP_SOCKET socket, BYTE* buf, WORD size);
-void TCPPutArray(TCP_SOCKET socket, const BYTE* buf, WORD size);
-TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vSocketPurpose);
+uint16_t TCPGetArray(TCP_SOCKET socket, uint8_t* buf, uint16_t size);
+void TCPPutArray(TCP_SOCKET socket, const uint8_t* buf, uint16_t size);
+TCP_SOCKET TCPOpen(uint32_t dwRemoteHost, uint8_t vRemoteHostType, uint16_t wPort, uint8_t vSocketPurpose);
 #define TCP_OPEN_SERVER		0u
 #define TCP_PURPOSE_GENERIC_TCP_SERVER 1
 #define INVALID_SOCKET      (0xFE)	// The socket is invalid or could not be opened
 
-UDP_SOCKET UDPOpenEx(DWORD remoteHost, BYTE remoteHostType, UDP_PORT localPort, UDP_PORT remotePort);
+UDP_SOCKET UDPOpenEx(uint32_t remoteHost, uint8_t remoteHostType, UDP_PORT localPort, UDP_PORT remotePort);
 #define UDP_OPEN_NODE_INFO	4u
 #define INVALID_UDP_SOCKET      (0xffu)		// Indicates a UDP socket that is not valid
-WORD UDPIsPutReady(UDP_SOCKET s);
+uint16_t UDPIsPutReady(UDP_SOCKET s);
 void UDPPutString(const char *strData);
-void UDPPutArray(const BYTE *cData, WORD wDataLen);
-void UDPPutW(WORD w);
+void UDPPutArray(const uint8_t *cData, uint16_t wDataLen);
+void UDPPutW(uint16_t w);
 void UDPFlush();
 
 #endif /* IP_RASPBIAN_H */

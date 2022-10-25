@@ -63,14 +63,14 @@
 // IP packet header definition
 typedef struct _IP_HEADER
 {
-    BYTE    VersionIHL;
-    BYTE    TypeOfService;
-    WORD    TotalLength;
-    WORD    Identification;
-    WORD    FragmentInfo;
-    BYTE    TimeToLive;
-    BYTE    Protocol;
-    WORD    HeaderChecksum;
+    uint8_t    VersionIHL;
+    uint8_t    TypeOfService;
+    uint16_t    TotalLength;
+    uint16_t    Identification;
+    uint16_t    FragmentInfo;
+    uint8_t    TimeToLive;
+    uint8_t    Protocol;
+    uint16_t    HeaderChecksum;
     IP_ADDR SourceAddress;
     IP_ADDR DestAddress;
 } IP_HEADER;
@@ -81,23 +81,23 @@ typedef struct _PSEUDO_HEADER
 {
     IP_ADDR SourceAddress;
     IP_ADDR DestAddress;
-    BYTE Zero;
-    BYTE Protocol;
-    WORD Length;
+    uint8_t Zero;
+    uint8_t Protocol;
+    uint16_t Length;
 } PSEUDO_HEADER;
 
 #define SwapPseudoHeader(h)  (h.Length = swaps(h.Length))
 
 
 /*********************************************************************
- * Function:        BOOL IPIsTxReady(BOOL HighPriority)
+ * Function:        _Bool IPIsTxReady(_Bool HighPriority)
  *
  * PreCondition:    None
  *
  * Input:           None
  *
- * Output:          TRUE if transmit buffer is empty
- *                  FALSE if transmit buffer is not empty
+ * Output:          true if transmit buffer is empty
+ *                  false if transmit buffer is not empty
  *
  * Side Effects:    None
  *
@@ -128,12 +128,12 @@ typedef struct _PSEUDO_HEADER
 
 
 /*********************************************************************
- * Function:        WORD IPPutHeader(   IP_ADDR *Dest,
- *                                      BYTE    Protocol,
- *                                      WORD    Identifier,
- *                                      WORD    DataLen)
+ * Function:        uint16_t IPPutHeader(   IP_ADDR *Dest,
+ *                                      uint8_t    Protocol,
+ *                                      uint16_t    Identifier,
+ *                                      uint16_t    DataLen)
  *
- * PreCondition:    IPIsTxReady() == TRUE
+ * PreCondition:    IPIsTxReady() == true
  *
  * Input:           Src         - Destination node address
  *                  Protocol    - Current packet protocol
@@ -151,18 +151,18 @@ typedef struct _PSEUDO_HEADER
  *                  at the same time.
  *
  ********************************************************************/
-WORD    IPPutHeader(NODE_INFO *remote,
-                    BYTE protocol,
-                    WORD len);
+uint16_t    IPPutHeader(NODE_INFO *remote,
+                    uint8_t protocol,
+                    uint16_t len);
 
 
 /*********************************************************************
- * Function:        BOOL IPGetHeader( IP_ADDR    *localIP,
+ * Function:        _Bool IPGetHeader( IP_ADDR    *localIP,
  *                                    NODE_INFO  *remote,
- *                                    BYTE        *Protocol,
- *                                    WORD        *len)
+ *                                    uint8_t        *Protocol,
+ *                                    uint16_t        *len)
  *
- * PreCondition:    MACGetHeader() == TRUE
+ * PreCondition:    MACGetHeader() == true
  *
  * Input:           localIP     - Local node IP Address as received
  *                                in current IP header.
@@ -172,8 +172,8 @@ WORD    IPPutHeader(NODE_INFO *remote,
  *                  Protocol    - Current packet protocol
  *                  len         - Current packet data length
  *
- * Output:          TRUE, if valid packet was received
- *                  FALSE otherwise
+ * Output:          true, if valid packet was received
+ *                  false otherwise
  *
  * Side Effects:    None
  *
@@ -182,16 +182,16 @@ WORD    IPPutHeader(NODE_INFO *remote,
  *                  at the same time.
  *
  ********************************************************************/
-BOOL IPGetHeader(IP_ADDR *localIP,
+_Bool IPGetHeader(IP_ADDR *localIP,
                  NODE_INFO *remote,
-                 BYTE *protocol,
-                 WORD *len);
+                 uint8_t *protocol,
+                 uint16_t *len);
 
 
 /*********************************************************************
  * Macro:           IPDiscard()
  *
- * PreCondition:    MACGetHeader() == TRUE
+ * PreCondition:    MACGetHeader() == true
  *
  * Input:           None
  *
@@ -210,7 +210,7 @@ BOOL IPGetHeader(IP_ADDR *localIP,
 /*********************************************************************
  * Macro:           IPGetArray(a, b)
  *
- * PreCondition:    MACGetHeader() == TRUE
+ * PreCondition:    MACGetHeader() == true
  *
  * Input:           a       - Data buffer
  *                  b       - Buffer length
@@ -228,7 +228,7 @@ BOOL IPGetHeader(IP_ADDR *localIP,
 
 
 /*********************************************************************
- * Function:        IPSetRxBuffer(WORD Offset)
+ * Function:        IPSetRxBuffer(uint16_t Offset)
  *
  * PreCondition:    IPHeaderLen must have been intialized by 
  *					IPGetHeader() or IPPutHeader()
@@ -243,7 +243,7 @@ BOOL IPGetHeader(IP_ADDR *localIP,
  * Note:            None
  *
  ********************************************************************/
-void IPSetRxBuffer(WORD Offset);
+void IPSetRxBuffer(uint16_t Offset);
 
 
 

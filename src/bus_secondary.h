@@ -10,7 +10,7 @@
 void bus_sec_init();
 // Poll general bus activities
 void bus_sec_poll();
-bit bus_sec_isIdle();
+__bit bus_sec_isIdle();
 
 #endif
 

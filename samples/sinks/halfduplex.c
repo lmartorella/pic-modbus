@@ -7,7 +7,7 @@
 static struct {
     // 0xff -> echo data
     // 0xfe -> don't read any data
-    BYTE mode;
+    uint8_t mode;
     union {
         struct {
             // Size 16-bit, but only 7 are used (+sign)
@@ -20,7 +20,7 @@ static struct {
     };
 } s_header;
 static signed char s_pos;
-static BYTE* s_ptr;
+static uint8_t* s_ptr;
 
 static enum {
     ST_IDLE,
@@ -39,7 +39,7 @@ void halfduplex_init()
     s_header.count = 0;
 }
 
-bit halfduplex_read()
+__bit halfduplex_read()
 {
     if (s_state != ST_RECEIVE_DATA) {
         // IN HEADER READ
@@ -86,7 +86,7 @@ bit halfduplex_read()
     }
 }
 
-bit halfduplex_write()
+__bit halfduplex_write()
 {
     if (s_state != ST_TRANSMIT_DATA) {
         if (prot_control_writeAvail() < 2) {

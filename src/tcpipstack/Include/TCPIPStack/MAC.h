@@ -83,7 +83,7 @@
 	#include "ENC28J60.h"
 #elif defined(ENC100_INTERFACE_MODE)
 	#include "ENCX24J600.h"
-	#define PHYREG WORD
+	#define PHYREG uint16_t
 #elif defined(__PIC32MX__) && defined(_ETH)
 	// extra includes for PIC32MX with embedded ETH Controller
 #else
@@ -166,8 +166,8 @@ __ALIGN2PACK typedef struct
 	#error Warning, Ethernet RX buffer is tiny.  Reduce TCP socket count, the size of each TCP socket, or move sockets to a different RAM
 #endif
 
-WORD	MACCalcRxChecksum(WORD offset, WORD len);
-WORD 	CalcIPBufferChecksum(WORD len);
+uint16_t	MACCalcRxChecksum(uint16_t offset, uint16_t len);
+uint16_t 	CalcIPBufferChecksum(uint16_t len);
 
 void	MACPowerDown(void);
 void	MACEDPowerDown(void);
@@ -175,17 +175,17 @@ void 	MACPowerUp(void);
 #if defined(ENC_CS_TRIS) || defined(ENC100_INTERFACE_MODE) || \
 	(defined(__18F97J60) || defined(__18F96J65) || defined(__18F96J60) || defined(__18F87J60) || defined(__18F86J65) || defined(__18F86J60) || defined(__18F67J60) || defined(__18F66J65) || defined(__18F66J60) || \
 	  defined(_18F97J60) ||  defined(_18F96J65) ||  defined(_18F96J60) ||  defined(_18F87J60) ||  defined(_18F86J65) ||  defined(_18F86J60) ||  defined(_18F67J60) ||  defined(_18F66J65) ||  defined(_18F66J60))
-void	WritePHYReg(BYTE Register, WORD Data);
-PHYREG	ReadPHYReg(BYTE Register);
+void	WritePHYReg(uint8_t Register, uint16_t Data);
+PHYREG	ReadPHYReg(uint8_t Register);
 #endif
 void	SetRXHashTableEntry(MAC_ADDR DestMACAddr);
 
 // ENC28J60 specific
-void	SetCLKOUT(BYTE NewConfig);
-BYTE	GetCLKOUT(void);
+void	SetCLKOUT(uint8_t NewConfig);
+uint8_t	GetCLKOUT(void);
 
 /******************************************************************************
- * Macro:        	void SetLEDConfig(WORD NewConfig)
+ * Macro:        	void SetLEDConfig(uint16_t NewConfig)
  *
  * PreCondition:    SPI bus must be initialized (done in MACInit()).
  *
@@ -236,13 +236,13 @@ BYTE	GetCLKOUT(void);
 
 
 /******************************************************************************
- * Macro:        	WORD GetLEDConfig(void)
+ * Macro:        	uint16_t GetLEDConfig(void)
  *
  * PreCondition:    SPI bus must be initialized (done in MACInit()).
  *
  * Input:           None
  *
- * Output:          WORD -	xxx0: Pulse stretching disabled
+ * Output:          uint16_t -	xxx0: Pulse stretching disabled
  *							xxx2: Pulse stretch to 40ms (default)
  *							xxx6: Pulse stretch to 73ms
  *							xxxA: Pulse stretch to 139ms
@@ -286,31 +286,31 @@ BYTE	GetCLKOUT(void);
 
 void MACInit(void);
 void MACProcess(void);
-BOOL MACIsLinked(void);
+_Bool MACIsLinked(void);
 
-BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type);
-void MACSetReadPtrInRx(WORD offset);
+_Bool MACGetHeader(MAC_ADDR *remote, uint8_t* type);
+void MACSetReadPtrInRx(uint16_t offset);
 ETH_POINTER MACSetWritePtr(ETH_POINTER address);
 ETH_POINTER MACSetReadPtr(ETH_POINTER address);
-BYTE MACGet(void);
-WORD MACGetArray(BYTE *val, WORD len);
+uint8_t MACGet(void);
+uint16_t MACGetArray(uint8_t *val, uint16_t len);
 void MACDiscardRx(void);
-WORD MACGetFreeRxSize(void);
-void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len);
-BOOL MACIsMemCopyDone(void);
+uint16_t MACGetFreeRxSize(void);
+void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, uint16_t len);
+_Bool MACIsMemCopyDone(void);
 
-void MACPutHeader(MAC_ADDR *remote, BYTE type, WORD dataLen);
-BOOL MACIsTxReady(void);
-void MACPut(BYTE val);
-void MACPutArray(const BYTE *val, WORD len);
+void MACPutHeader(MAC_ADDR *remote, uint8_t type, uint16_t dataLen);
+_Bool MACIsTxReady(void);
+void MACPut(uint8_t val);
+void MACPutArray(const uint8_t *val, uint16_t len);
 void MACFlush(void);
 
 
 // ROM function variants for PIC18
 #if defined(__18CXX)
-	void MACPutROMArray(ROM BYTE *val, WORD len);
+	void MACPutROMArray(ROM uint8_t *val, uint16_t len);
 #else
-	#define MACPutROMArray(a,b)	MACPutArray((BYTE*)a,b)
+	#define MACPutROMArray(a,b)	MACPutArray((uint8_t*)a,b)
 #endif
 
 // PIC32MX with embedded ETHC functions

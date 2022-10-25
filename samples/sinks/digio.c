@@ -8,13 +8,13 @@
 #define DEBOUNCE_TIMEOUT (TICKS_PER_SECOND / 10)
 
 #ifdef HAS_DIGIO_IN
-static BYTE s_lastInState;
+static uint8_t s_lastInState;
 static TICK_TYPE s_debounceTimer;
 
 // Circular buffer
-static BYTE s_evtBegin;
-static BYTE s_evtEnd;
-typedef struct { TICK_TYPE tick; BYTE state; } EVENT_TABLE_t;
+static uint8_t s_evtBegin;
+static uint8_t s_evtEnd;
+typedef struct { TICK_TYPE tick; uint8_t state; } EVENT_TABLE_t;
 static EVENT_TABLE_t s_events[DIGIO_EVENT_BUFFER_SIZE];
 
 // Protocol write state. Any number from 1 to DIGIO_EVENT_BUFFER_SIZE means that 
@@ -45,29 +45,29 @@ void digio_init()
 
 #ifdef HAS_DIGIO_OUT
 
-bit digio_out_write()
+__bit digio_out_write()
 {
     // One port
-    WORD b = 1;
+    uint16_t b = 1;
     // Number of switch = 1
-    prot_control_write(&b, sizeof(WORD));
-    return FALSE;
+    prot_control_write(&b, sizeof(uint16_t));
+    return false;
 }
 
 // Read bits to set as output
-bit digio_out_read()
+__bit digio_out_read()
 {
     if (prot_control_readAvail() < 2) {
         // Need more data
-        return TRUE;
+        return true;
     }
-    BYTE arr;
+    uint8_t arr;
     // Number of bytes sent (expect 1)
     prot_control_read(&arr, 1);
     // The byte: the bit 0 is data
     prot_control_read(&arr, 1);
     DIGIO_PORT_OUT_BIT = !!arr;
-    return FALSE;
+    return false;
 }
 
 #endif
@@ -79,7 +79,7 @@ void digio_in_poll() {
     if (now - s_debounceTimer >= DEBOUNCE_TIMEOUT)
     {
         s_debounceTimer = now;
-        BYTE state = DIGIO_PORT_IN_BIT;
+        uint8_t state = DIGIO_PORT_IN_BIT;
         if (state != s_lastInState) {
             s_lastInState = state;
             // Allocate a new event in the table
@@ -95,7 +95,7 @@ void digio_in_poll() {
 }
 
 // Write bits read as input
-bit digio_in_write()
+__bit digio_in_write()
 {   
     if (s_in_writeState == IN_STATE_HEADER) {
         if (prot_control_writeAvail() < sizeof(TICK_TYPE) * 2 + 3) {
@@ -104,7 +104,7 @@ bit digio_in_write()
         }
 
         // Timer tick size (low nibble) + bit count (high nibble)
-        BYTE sizes = (1 << 4) + sizeof(TICK_TYPE);
+        uint8_t sizes = (1 << 4) + sizeof(TICK_TYPE);
         prot_control_write(&sizes, 1);
 
         // The byte: last bit state

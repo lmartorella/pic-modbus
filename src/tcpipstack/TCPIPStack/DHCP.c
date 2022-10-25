@@ -105,11 +105,11 @@ typedef struct
 			unsigned char bDHCPServerDetected : 1;	// Indicates if a DCHP server has been detected
 			unsigned char bUseUnicastMode : 1;		// Indicates if the
 	    } bits;
-	    BYTE val;
+	    uint8_t val;
 	} flags;
-	DWORD 				dwTimer;		// Tick timer value used for triggering future events after a certain wait period.
-	DWORD				dwLeaseTime;	// DHCP lease time remaining, in seconds
-	DWORD				dwServerID;		// DHCP Server ID cache
+	uint32_t 				dwTimer;		// Tick timer value used for triggering future events after a certain wait period.
+	uint32_t				dwLeaseTime;	// DHCP lease time remaining, in seconds
+	uint32_t				dwServerID;		// DHCP Server ID cache
 	IP_ADDR				tempIPAddress;	// Temporary IP address to use when no DHCP lease
 	IP_ADDR				tempGateway;	// Temporary gateway to use when no DHCP lease
 	IP_ADDR				tempMask;		// Temporary mask to use when no DHCP lease
@@ -129,14 +129,14 @@ typedef struct
 			char DNS2:1;		// Secondary DNS is valid
 			char HostName:1;	// Host name is valid (not implemented)
 		} bits;
-		BYTE val;
+		uint8_t val;
 	} validValues;
 } DHCP_CLIENT_VARS;
 
-BOOL DHCPClientInitializedOnce = FALSE;
+_Bool DHCPClientInitializedOnce = false;
 
-static BYTE _DHCPReceive(void);
-static void _DHCPSend(BYTE messageType, BOOL bRenewing);
+static uint8_t _DHCPReceive(void);
+static void _DHCPSend(uint8_t messageType, _Bool bRenewing);
 
 #if defined (WF_CS_IO)
 extern void SignalDHCPSuccessful(void);
@@ -145,7 +145,7 @@ extern void SetDhcpProgressState(void);
 
 /*****************************************************************************
   Function:
-	static void LoadState(BYTE vInterface)
+	static void LoadState(uint8_t vInterface)
 
   Summary:
 	Saves the DHCPClient state information structure to the appropriate
@@ -186,7 +186,7 @@ static DHCP_CLIENT_VARS DHCPClient;
 
 /*****************************************************************************
   Function:
-	void DHCPInit(BYTE vInterface)
+	void DHCPInit(uint8_t vInterface)
 
   Summary:
 	Resets the DHCP client module for the specified interface.
@@ -209,15 +209,15 @@ static DHCP_CLIENT_VARS DHCPClient;
 	This function may be called multiple times throughout the life of the
 	application, if desired.
 ***************************************************************************/
-void DHCPInit(BYTE vInterface)
+void DHCPInit(uint8_t vInterface)
 {
-	BYTE i;
+	uint8_t i;
 
 	// Upon the first call after POR, we must reset all handles to invalid so
 	// that we don't inadvertently close someone else's handle.
 	if(!DHCPClientInitializedOnce)
 	{
-		DHCPClientInitializedOnce = TRUE;
+		DHCPClientInitializedOnce = true;
 		for(i = 0; i < NETWORK_INTERFACES; i++)
 		{
 			LoadState(i);
@@ -237,14 +237,14 @@ void DHCPInit(BYTE vInterface)
 	// Reset state machine and flags to default values
 	DHCPClient.smState = SM_DHCP_GET_SOCKET;
 	DHCPClient.flags.val = 0;
-	DHCPClient.flags.bits.bUseUnicastMode = TRUE;	// This flag toggles before use, so this statement actually means to start out using broadcast mode.
-	DHCPClient.flags.bits.bEvent = TRUE;
+	DHCPClient.flags.bits.bUseUnicastMode = true;	// This flag toggles before use, so this statement actually means to start out using broadcast mode.
+	DHCPClient.flags.bits.bEvent = true;
 }
 
 
 /*****************************************************************************
   Function:
-	void DHCPDisable(BYTE vInterface)
+	void DHCPDisable(uint8_t vInterface)
 
   Summary:
 	Disables the DHCP Client for the specified interface.
@@ -271,7 +271,7 @@ void DHCPInit(BYTE vInterface)
 	client.  The application should replace the current IP address and other
 	configuration with static information following a call to this function.
 ***************************************************************************/
-void DHCPDisable(BYTE vInterface)
+void DHCPDisable(uint8_t vInterface)
 {
 	LoadState(vInterface);
 
@@ -287,7 +287,7 @@ void DHCPDisable(BYTE vInterface)
 
 /*****************************************************************************
   Function:
-	void DHCPEnable(BYTE vInterface)
+	void DHCPEnable(uint8_t vInterface)
 
   Summary:
 	Enables the DHCP client for the specified interface.
@@ -306,20 +306,20 @@ void DHCPDisable(BYTE vInterface)
   Returns:
 	None
 ***************************************************************************/
-void DHCPEnable(BYTE vInterface)
+void DHCPEnable(uint8_t vInterface)
 {
 	LoadState(vInterface);
 
 	if(DHCPClient.smState == SM_DHCP_DISABLED)
 	{
 		DHCPClient.smState = SM_DHCP_GET_SOCKET;
-		DHCPClient.flags.bits.bIsBound = FALSE;
+		DHCPClient.flags.bits.bIsBound = false;
 	}
 }
 
 /*****************************************************************************
   Function:
-	BOOL DHCPIsEnabled(BYTE vInterface)
+	_Bool DHCPIsEnabled(uint8_t vInterface)
 
   Summary:
 	Determins if the DHCP client is enabled on the specified interface.
@@ -337,7 +337,7 @@ void DHCPEnable(BYTE vInterface)
   Returns:
 	None
 ***************************************************************************/
-BOOL DHCPIsEnabled(BYTE vInterface)
+_Bool DHCPIsEnabled(uint8_t vInterface)
 {
 	LoadState(vInterface);
 	return DHCPClient.smState != SM_DHCP_DISABLED;
@@ -346,7 +346,7 @@ BOOL DHCPIsEnabled(BYTE vInterface)
 
 /*****************************************************************************
   Function:
-	BOOL DHCPIsBound(BYTE vInterface)
+	_Bool DHCPIsBound(uint8_t vInterface)
 
   Summary:
 	Determins if the DHCP client has an IP address lease on the specified
@@ -364,11 +364,11 @@ BOOL DHCPIsEnabled(BYTE vInterface)
 		specify 0x00.
 
   Returns:
-	TRUE - DHCP client has obtained an IP address lease (and likely other
+	true - DHCP client has obtained an IP address lease (and likely other
 		parameters) and these values are currently being used.
-	FALSE - No IP address is currently leased
+	false - No IP address is currently leased
 ***************************************************************************/
-BOOL DHCPIsBound(BYTE vInterface)
+_Bool DHCPIsBound(uint8_t vInterface)
 {
 	LoadState(vInterface);
 	return DHCPClient.flags.bits.bIsBound;
@@ -376,7 +376,7 @@ BOOL DHCPIsBound(BYTE vInterface)
 
 /*****************************************************************************
   Function:
-	BOOL DHCPStateChanged(BYTE vInterface)
+	_Bool DHCPStateChanged(uint8_t vInterface)
 
   Summary:
 	Determins if the DHCP client on the specified interface has changed states
@@ -396,27 +396,27 @@ BOOL DHCPIsBound(BYTE vInterface)
 		specify 0x00.
 
   Returns:
-	TRUE - The IP address lease have been reliquished (due to reinitilization),
+	true - The IP address lease have been reliquished (due to reinitilization),
 		obtained (first event), or renewed since the last call to
 		DHCPStateChanged().
-	FALSE - The DHCP client has not detected any changes since the last call to
+	false - The DHCP client has not detected any changes since the last call to
 		DHCPStateChanged().
 ***************************************************************************/
-BOOL DHCPStateChanged(BYTE vInterface)
+_Bool DHCPStateChanged(uint8_t vInterface)
 {
 	LoadState(vInterface);
 	if(DHCPClient.flags.bits.bEvent)
 	{
 		DHCPClient.flags.bits.bEvent = 0;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
 /*****************************************************************************
   Function:
-	BOOL DHCPIsServerDetected(BYTE vInterface)
+	_Bool DHCPIsServerDetected(uint8_t vInterface)
 
   Summary:
 	Determins if the DHCP client on the specified interface has seen a DHCP
@@ -434,12 +434,12 @@ BOOL DHCPStateChanged(BYTE vInterface)
 		specify 0x00.
 
   Returns:
-	TRUE - At least one DHCP server is attached to the specified network
+	true - At least one DHCP server is attached to the specified network
 		interface.
-	FALSE - No DHCP servers are currently detected on the specified network
+	false - No DHCP servers are currently detected on the specified network
 		interface.
 ***************************************************************************/
-BOOL DHCPIsServerDetected(BYTE vInterface)
+_Bool DHCPIsServerDetected(uint8_t vInterface)
 {
 	LoadState(vInterface);
 	return DHCPClient.flags.bits.bDHCPServerDetected;
@@ -469,7 +469,7 @@ BOOL DHCPIsServerDetected(BYTE vInterface)
 ***************************************************************************/
 void DHCPTask(void)
 {
-	BYTE i;
+	uint8_t i;
 
 	for(i = 0; i < NETWORK_INTERFACES; i++)
 	{
@@ -498,8 +498,8 @@ void DHCPTask(void)
 				// minimum time.
 				DHCPClient.dwLeaseTime = 60;
 				DHCPClient.validValues.val = 0x00;
-				DHCPClient.flags.bits.bIsBound = FALSE;
-				DHCPClient.flags.bits.bOfferReceived = FALSE;
+				DHCPClient.flags.bits.bIsBound = false;
+				DHCPClient.flags.bits.bOfferReceived = false;
 
 				// No point in wasting time transmitting a discovery if we are
 				// unlinked.  No one will see it.
@@ -521,7 +521,7 @@ void DHCPTask(void)
 				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remote.remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remote.remoteNode));
 
 				// Send the DHCP Discover broadcast
-				_DHCPSend(DHCP_DISCOVER_MESSAGE, FALSE);
+				_DHCPSend(DHCP_DISCOVER_MESSAGE, false);
 
 				// Start a timer and begin looking for a response
 				DHCPClient.dwTimer = TickGet();
@@ -540,7 +540,7 @@ void DHCPTask(void)
 
 				// Let the DHCP server module know that there is a DHCP server
 				// on this network
-				DHCPClient.flags.bits.bDHCPServerDetected = TRUE;
+				DHCPClient.flags.bits.bDHCPServerDetected = true;
 
 				// Check to see if we received an offer
 				if(_DHCPReceive() != DHCP_OFFER_MESSAGE)
@@ -561,7 +561,7 @@ void DHCPTask(void)
 				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remote.remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remote.remoteNode));
 
 				// Send the DHCP request message
-				_DHCPSend(DHCP_REQUEST_MESSAGE, FALSE);
+				_DHCPSend(DHCP_REQUEST_MESSAGE, false);
 
 				// Start a timer and begin looking for a response
 				DHCPClient.dwTimer = TickGet();
@@ -587,7 +587,7 @@ void DHCPTask(void)
 						DHCPClient.dwTimer = TickGet();
 						DHCPClient.smState = SM_DHCP_BOUND;
 						DHCPClient.flags.bits.bEvent = 1;
-						DHCPClient.flags.bits.bIsBound = TRUE;
+						DHCPClient.flags.bits.bIsBound = true;
 
 						if(DHCPClient.validValues.bits.IPAddress)
 						{
@@ -656,8 +656,8 @@ void DHCPTask(void)
                                     SetDhcpProgressState();
                                 #endif
 				// Send the DHCP request message
-				_DHCPSend(DHCP_REQUEST_MESSAGE, TRUE);
-				DHCPClient.flags.bits.bOfferReceived = FALSE;
+				_DHCPSend(DHCP_REQUEST_MESSAGE, true);
+				DHCPClient.flags.bits.bOfferReceived = false;
 
 				// Start a timer and begin looking for a response
 				DHCPClient.dwTimer = TickGet();
@@ -717,7 +717,7 @@ Parameters:
 Returns:
   One of the DCHP_TYPE* contants.
 ***************************************************************************/
-static BYTE _DHCPReceive(void)
+static uint8_t _DHCPReceive(void)
 {
 	/*********************************************************************
 	DHCP PACKET FORMAT AS PER RFC 1541
@@ -755,11 +755,11 @@ static BYTE _DHCPReceive(void)
 	+---------------------------------------------------------------+
 
 	********************************************************************/
-	BYTE v;
-	BYTE i, j;
-	BYTE type;
-	BOOL lbDone;
-	DWORD tempServerID;
+	uint8_t v;
+	uint8_t i, j;
+	uint8_t type;
+	_Bool lbDone;
+	uint32_t tempServerID;
 
 
 	// Assume unknown message until proven otherwise.
@@ -787,7 +787,7 @@ static BYTE _DHCPReceive(void)
 		if(!DHCPClient.flags.bits.bOfferReceived)
 		{
 			UDPSetRxBuffer(16);
-			UDPGetArray((BYTE*)&DHCPClient.tempIPAddress, sizeof(DHCPClient.tempIPAddress));
+			UDPGetArray((uint8_t*)&DHCPClient.tempIPAddress, sizeof(DHCPClient.tempIPAddress));
 			DHCPClient.validValues.bits.IPAddress = 1;
 		}
 
@@ -796,7 +796,7 @@ static BYTE _DHCPReceive(void)
 		// cookie fields)
 		UDPSetRxBuffer(240);
 
-		lbDone = FALSE;
+		lbDone = false;
 		do
 		{
 			// Get the Option number
@@ -804,7 +804,7 @@ static BYTE _DHCPReceive(void)
 			// DHCP message, ie: missing DHCP_END_OPTION marker
 			if(!UDPGet(&v))
 			{
-				lbDone = TRUE;
+				lbDone = true;
 				break;
 			}
 
@@ -841,7 +841,7 @@ static BYTE _DHCPReceive(void)
 						}
 						else
 						{
-							UDPGetArray((BYTE*)&DHCPClient.tempMask, sizeof(DHCPClient.tempMask));
+							UDPGetArray((uint8_t*)&DHCPClient.tempMask, sizeof(DHCPClient.tempMask));
 							DHCPClient.validValues.bits.Mask = 1;
 						}
 					}
@@ -863,7 +863,7 @@ static BYTE _DHCPReceive(void)
 						}
 						else
 						{
-							UDPGetArray((BYTE*)&DHCPClient.tempGateway, sizeof(DHCPClient.tempGateway));
+							UDPGetArray((uint8_t*)&DHCPClient.tempGateway, sizeof(DHCPClient.tempGateway));
 							DHCPClient.validValues.bits.Gateway = 1;
 						}
 					}
@@ -886,7 +886,7 @@ static BYTE _DHCPReceive(void)
 					// Check to see if this is the first offer
 					if(!DHCPClient.flags.bits.bOfferReceived)
 					{
-						UDPGetArray((BYTE*)&DHCPClient.tempDNS, sizeof(DHCPClient.tempDNS));
+						UDPGetArray((uint8_t*)&DHCPClient.tempDNS, sizeof(DHCPClient.tempDNS));
 						DHCPClient.validValues.bits.DNS = 1;
 						j -= 4;
 					}
@@ -897,7 +897,7 @@ static BYTE _DHCPReceive(void)
 						// Check to see if this is the first offer
 						if(!DHCPClient.flags.bits.bOfferReceived)
 						{
-							UDPGetArray((BYTE*)&DHCPClient.tempDNS2, sizeof(DHCPClient.tempDNS2));
+							UDPGetArray((uint8_t*)&DHCPClient.tempDNS2, sizeof(DHCPClient.tempDNS2));
 							DHCPClient.validValues.bits.DNS2 = 1;
 							j -= 4;
 						}
@@ -942,17 +942,17 @@ static BYTE _DHCPReceive(void)
 					// Len must be 4.
 					if ( v == 4u )
 					{
-						UDPGet(&(((BYTE*)&tempServerID)[3]));   // Get the id
-						UDPGet(&(((BYTE*)&tempServerID)[2]));
-						UDPGet(&(((BYTE*)&tempServerID)[1]));
-						UDPGet(&(((BYTE*)&tempServerID)[0]));
+						UDPGet(&(((uint8_t*)&tempServerID)[3]));   // Get the id
+						UDPGet(&(((uint8_t*)&tempServerID)[2]));
+						UDPGet(&(((uint8_t*)&tempServerID)[1]));
+						UDPGet(&(((uint8_t*)&tempServerID)[0]));
 					}
 					else
 						goto UDPInvalid;
 					break;
 
 				case DHCP_END_OPTION:
-					lbDone = TRUE;
+					lbDone = true;
 					break;
 
 				case DHCP_IP_LEASE_TIME:
@@ -969,10 +969,10 @@ static BYTE _DHCPReceive(void)
 						}
 						else
 						{
-							UDPGet(&(((BYTE*)(&DHCPClient.dwLeaseTime))[3]));
-							UDPGet(&(((BYTE*)(&DHCPClient.dwLeaseTime))[2]));
-							UDPGet(&(((BYTE*)(&DHCPClient.dwLeaseTime))[1]));
-							UDPGet(&(((BYTE*)(&DHCPClient.dwLeaseTime))[0]));
+							UDPGet(&(((uint8_t*)(&DHCPClient.dwLeaseTime))[3]));
+							UDPGet(&(((uint8_t*)(&DHCPClient.dwLeaseTime))[2]));
+							UDPGet(&(((uint8_t*)(&DHCPClient.dwLeaseTime))[1]));
+							UDPGet(&(((uint8_t*)(&DHCPClient.dwLeaseTime))[0]));
 
 							// In case if our clock is not as accurate as the remote
 							// DHCP server's clock, let's treat the lease time as only
@@ -997,7 +997,7 @@ static BYTE _DHCPReceive(void)
 	if ( type == DHCP_OFFER_MESSAGE )
 	{
 		DHCPClient.dwServerID = tempServerID;
-		DHCPClient.flags.bits.bOfferReceived = TRUE;
+		DHCPClient.flags.bits.bOfferReceived = true;
 	}
 	else
 	{
@@ -1020,7 +1020,7 @@ UDPInvalid:
 
 /*****************************************************************************
   Function:
-	static void _DHCPSend(BYTE messageType, BOOL bRenewing)
+	static void _DHCPSend(uint8_t messageType, _Bool bRenewing)
 
   Description:
 	Sends a DHCP message.
@@ -1035,9 +1035,9 @@ UDPInvalid:
   Returns:
 	None
 ***************************************************************************/
-static void _DHCPSend(BYTE messageType, BOOL bRenewing)
+static void _DHCPSend(uint8_t messageType, _Bool bRenewing)
 {
-	BYTE i;
+	uint8_t i;
 	IP_ADDR	MyIP;
 
 
@@ -1057,7 +1057,7 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 	// If this is DHCP REQUEST message, use previously allocated IP address.
 	if((messageType == DHCP_REQUEST_MESSAGE) && bRenewing)
 	{
-		UDPPutArray((BYTE*)&DHCPClient.tempIPAddress, sizeof(DHCPClient.tempIPAddress));
+		UDPPutArray((uint8_t*)&DHCPClient.tempIPAddress, sizeof(DHCPClient.tempIPAddress));
 	}
 	else
 	{
@@ -1072,7 +1072,7 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 		UDPPut(0x00);
 
 	// Load chaddr - Client hardware address.
-	UDPPutArray((BYTE*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
+	UDPPutArray((uint8_t*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
 
 	// Set chaddr[6..15], sname and file as zeros.
 	for ( i = 0; i < 202u; i++ )
@@ -1092,7 +1092,7 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 	if(messageType == DHCP_DISCOVER_MESSAGE)
 	{
 		// Reset offered flag so we know to act upon the next valid offer
-		DHCPClient.flags.bits.bOfferReceived = FALSE;
+		DHCPClient.flags.bits.bOfferReceived = false;
 	}
 
 
@@ -1106,10 +1106,10 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 		// If this is a renwal request, we must not include server id.
 		UDPPut(DHCP_SERVER_IDENTIFIER);
 		UDPPut(DHCP_SERVER_IDENTIFIER_LEN);
-		UDPPut(((BYTE*)(&DHCPClient.dwServerID))[3]);
-		UDPPut(((BYTE*)(&DHCPClient.dwServerID))[2]);
-		UDPPut(((BYTE*)(&DHCPClient.dwServerID))[1]);
-		UDPPut(((BYTE*)(&DHCPClient.dwServerID))[0]);
+		UDPPut(((uint8_t*)(&DHCPClient.dwServerID))[3]);
+		UDPPut(((uint8_t*)(&DHCPClient.dwServerID))[2]);
+		UDPPut(((uint8_t*)(&DHCPClient.dwServerID))[1]);
+		UDPPut(((uint8_t*)(&DHCPClient.dwServerID))[0]);
 	}
 
 	// Load our interested parameters
@@ -1128,7 +1128,7 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 	{
 		UDPPut(DHCP_PARAM_REQUEST_IP_ADDRESS);
 		UDPPut(DHCP_PARAM_REQUEST_IP_ADDRESS_LEN);
-		UDPPutArray((BYTE*)&DHCPClient.tempIPAddress, DHCP_PARAM_REQUEST_IP_ADDRESS_LEN);
+		UDPPutArray((uint8_t*)&DHCPClient.tempIPAddress, DHCP_PARAM_REQUEST_IP_ADDRESS_LEN);
 	}
 
 	// Add any new paramter request here.

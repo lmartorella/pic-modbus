@@ -179,28 +179,28 @@
 	// Stores extended state data for each connection
 	typedef struct
 	{
-		DWORD byteCount;					// How many bytes have been read so far
-		DWORD nextCallback;					// Byte index of the next callback
-		DWORD callbackID;					// Callback ID to execute, also used as watchdog timer
-		DWORD callbackPos;					// Callback position indicator
-		BYTE *ptrData;						// Points to first free byte in data
-		BYTE *ptrRead;						// Points to current read location
+		uint32_t byteCount;					// How many bytes have been read so far
+		uint32_t nextCallback;					// Byte index of the next callback
+		uint32_t callbackID;					// Callback ID to execute, also used as watchdog timer
+		uint32_t callbackPos;					// Callback position indicator
+		uint8_t *ptrData;						// Points to first free byte in data
+		uint8_t *ptrRead;						// Points to current read location
 		MPFS_HANDLE file;					// File pointer for the file being served
 	    MPFS_HANDLE offsets;				// File pointer for any offset info being used
-		BYTE hasArgs;						// True if there were get or cookie arguments
-		BYTE isAuthorized;					// 0x00-0x79 on fail, 0x80-0xff on pass
+		uint8_t hasArgs;						// True if there were get or cookie arguments
+		uint8_t isAuthorized;					// 0x00-0x79 on fail, 0x80-0xff on pass
 		HTTP_STATUS httpStatus;				// Request method/status
 	    HTTP_FILE_TYPE fileType;			// File type to return with Content-Type
-		BYTE data[HTTP_MAX_DATA_LEN];		// General purpose data buffer
+		uint8_t data[HTTP_MAX_DATA_LEN];		// General purpose data buffer
 		#if defined(HTTP_USE_POST)
-		BYTE smPost;						// POST state machine variable
+		uint8_t smPost;						// POST state machine variable
 		#endif
 	} HTTP_CONN;
 
 #if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
 	#define RESERVED_HTTP_MEMORY 0ul        // Macro indicating how much RAM to allocate on an ethernet controller to store HTTP state data.
 #else
-	#define RESERVED_HTTP_MEMORY ((DWORD)MAX_HTTP_CONNECTIONS * (DWORD)sizeof(HTTP_CONN))
+	#define RESERVED_HTTP_MEMORY ((uint32_t)MAX_HTTP_CONNECTIONS * (uint32_t)sizeof(HTTP_CONN))
 #endif
 
 /****************************************************************************
@@ -216,7 +216,7 @@
 #endif
 
 extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
-extern BYTE curHTTPID;
+extern uint8_t curHTTPID;
 
 /****************************************************************************
   Section:
@@ -225,25 +225,25 @@ extern BYTE curHTTPID;
 
 void HTTPInit(void);
 void HTTPServer(void);
-BYTE* HTTPURLDecode(BYTE* cData);
-BYTE* HTTPGetArg(BYTE* cData, BYTE* cArg);
-void HTTPIncFile(ROM BYTE* cFile);
+uint8_t* HTTPURLDecode(uint8_t* cData);
+uint8_t* HTTPGetArg(uint8_t* cData, uint8_t* cArg);
+void HTTPIncFile(ROM uint8_t* cFile);
 
 #if defined(__18CXX)
-	BYTE* HTTPGetROMArg(BYTE* cData, ROM BYTE* cArg);
+	uint8_t* HTTPGetROMArg(uint8_t* cData, ROM uint8_t* cArg);
 #else
 	// Non-ROM variant for C30 / C32
-	#define HTTPGetROMArg(a,b)	HTTPGetArg(a,(BYTE*)b)
+	#define HTTPGetROMArg(a,b)	HTTPGetArg(a,(uint8_t*)b)
 #endif
 
 #if defined(HTTP_USE_POST)
-	HTTP_READ_STATUS HTTPReadPostName(BYTE* cData, WORD wLen);
-	HTTP_READ_STATUS HTTPReadPostValue(BYTE* cData, WORD wLen);
+	HTTP_READ_STATUS HTTPReadPostName(uint8_t* cData, uint16_t wLen);
+	HTTP_READ_STATUS HTTPReadPostValue(uint8_t* cData, uint16_t wLen);
 #endif
 
 /*****************************************************************************
   Function:
-	HTTP_READ_STATUS HTTPReadPostPair(BYTE* cData, WORD wLen)
+	HTTP_READ_STATUS HTTPReadPostPair(uint8_t* cData, uint16_t wLen)
 
   Summary:
 	Reads a name and value pair from a URL encoded string in the TCP buffer.
@@ -436,7 +436,7 @@ HTTP_IO_RESULT HTTPExecutePost(void);
 
 /*****************************************************************************
   Function:
-	BYTE HTTPNeedsAuth(BYTE* cFile)
+	uint8_t HTTPNeedsAuth(uint8_t* cFile)
 
   Summary:
 	Determines if a given file name requires authentication
@@ -473,12 +473,12 @@ HTTP_IO_RESULT HTTPExecutePost(void);
 	This function may NOT write to the TCP buffer.
   ***************************************************************************/
 #if defined(HTTP_USE_AUTHENTICATION)
-	BYTE HTTPNeedsAuth(BYTE* cFile);
+	uint8_t HTTPNeedsAuth(uint8_t* cFile);
 #endif
 
 /*****************************************************************************
   Function:
-	BYTE HTTPCheckAuth(BYTE* cUser, BYTE* cPass)
+	uint8_t HTTPCheckAuth(uint8_t* cUser, uint8_t* cPass)
 
   Summary:
 	Performs validation on a specific user name and password.
@@ -521,14 +521,14 @@ HTTP_IO_RESULT HTTPExecutePost(void);
 	This function may NOT write to the TCP buffer.
   ***************************************************************************/
 #if defined(HTTP_USE_AUTHENTICATION)
-	BYTE HTTPCheckAuth(BYTE* cUser, BYTE* cPass);
+	uint8_t HTTPCheckAuth(uint8_t* cUser, uint8_t* cPass);
 #endif
 
 /*****************************************************************************
   Function:
 	void HTTPPrint_varname(void)
-	void HTTPPrint_varname(WORD wParam1)
-	void HTTPPrint_varname(WORD wParam1, WORD wParam2, ...)
+	void HTTPPrint_varname(uint16_t wParam1)
+	void HTTPPrint_varname(uint16_t wParam1, uint16_t wParam2, ...)
 
   Summary:
 	Inserts dynamic content into a web page
@@ -545,9 +545,9 @@ HTTP_IO_RESULT HTTPExecutePost(void);
 
 	The function prototype is located in your project's HTTPPrint.h, which
 	is automatically generated by the MPFS2 Utility.  The prototype will
-	have WORD parameters included for each parameter passed in the dynamic
+	have uint16_t parameters included for each parameter passed in the dynamic
 	variable.  For example, the variable "~myArray(2,6)~" will generate the
-	prototype "void HTTPPrint_varname(WORD, WORD);".
+	prototype "void HTTPPrint_varname(uint16_t, uint16_t);".
 
 	When called, this function should write its output directly to the TCP
 	socket using any combination of TCPIsPutReady, TCPPut, TCPPutArray,
@@ -586,7 +586,7 @@ HTTP_IO_RESULT HTTPExecutePost(void);
 	or curHTTP.data for storage associated with individual requests.
   ***************************************************************************/
 #if defined(DOCUMENTATION_ONLY)
-	void HTTPPrint_varname(WORD wParam1, WORD wParam2, ...);
+	void HTTPPrint_varname(uint16_t wParam1, uint16_t wParam2, ...);
 #endif
 
 

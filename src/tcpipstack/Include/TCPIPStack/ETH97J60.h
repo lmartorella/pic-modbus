@@ -53,12 +53,12 @@
 
 #ifndef __ETH97J60_H
 #define __ETH97J60_H
-#include "GenericTypeDefs.h"
+#include "../Compiler.h"
 
 typedef union {
-	BYTE v[7];
+	uint8_t v[7];
 	struct {
-		WORD	 ByteCount;
+		uint16_t	 ByteCount;
 		unsigned CollisionCount:4;
 		unsigned CRCError:1;
 		unsigned LengthCheckError:1;
@@ -72,7 +72,7 @@ typedef union {
 		unsigned LateCollision:1;
 		unsigned Giant:1;
 		unsigned Underrun:1;
-		WORD 	 BytesTransmittedOnWire;
+		uint16_t 	 BytesTransmittedOnWire;
 		unsigned ControlFrame:1;
 		unsigned PAUSEControlFrame:1;
 		unsigned BackpressureApplied:1;
@@ -82,9 +82,9 @@ typedef union {
 } TXSTATUS;
 
 typedef union {
-	BYTE v[4];
+	uint8_t v[4];
 	struct {
-		WORD	 ByteCount;
+		uint16_t	 ByteCount;
 		unsigned PreviouslyIgnored:1;
 		unsigned RXDCPreviouslySeen:1;
 		unsigned CarrierPreviouslySeen:1;
@@ -119,7 +119,7 @@ typedef union {
 
 
 typedef union {
-	WORD Val;
+	uint16_t Val;
 	WORD_VAL VAL;
 
 	// PHCON1 bits ----------
@@ -330,6 +330,6 @@ typedef union {
 #define	PHLCON_LFRQ0	(1ul<<2)
 #define	PHLCON_STRCH	(1ul<<1)
 
-typedef WORD ETH_POINTER;
+typedef uint16_t ETH_POINTER;
 
 #endif

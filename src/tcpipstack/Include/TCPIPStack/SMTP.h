@@ -100,7 +100,7 @@
     ROMPointers -   Indicates which parameters to read from ROM instead of RAM.
     UseSSL -        When STACK_USE_SSL_CLIENT is enabled, this flag causes
                     the SMTP client to make an SSL connection to the server.
-    ServerPort -    (WORD value) Indicates the port on which to connect to the
+    ServerPort -    (uint16_t value) Indicates the port on which to connect to the
                     remote SMTP server.
 
   Remarks:
@@ -113,53 +113,53 @@ typedef struct
 {
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} Server;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} Username;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} Password;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} To;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} CC;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} BCC;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} From;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} Subject;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} OtherHeaders;
 	union
 	{
-		BYTE *szRAM;
-		ROM BYTE *szROM;
+		uint8_t *szRAM;
+		ROM uint8_t *szROM;
 	} Body;
 
 	struct
@@ -177,10 +177,10 @@ typedef struct
 	} ROMPointers;
 	
 	#if defined(STACK_USE_SSL_CLIENT)
-	BOOL UseSSL;
+	_Bool UseSSL;
 	#endif
 	
-	WORD ServerPort;
+	uint16_t ServerPort;
 	
 } SMTP_POINTERS;
 
@@ -195,26 +195,26 @@ typedef struct
 	SMTP Function Prototypes
   ***************************************************************************/
 
-BOOL SMTPBeginUsage(void);
-WORD SMTPEndUsage(void);
+_Bool SMTPBeginUsage(void);
+uint16_t SMTPEndUsage(void);
 void SMTPTask(void);
 void SMTPSendMail(void);
-BOOL SMTPIsBusy(void);
-WORD SMTPIsPutReady(void);
-BOOL SMTPPut(BYTE c);
-WORD SMTPPutArray(BYTE* Data, WORD Len);
-WORD SMTPPutString(BYTE* Data);
+_Bool SMTPIsBusy(void);
+uint16_t SMTPIsPutReady(void);
+_Bool SMTPPut(uint8_t c);
+uint16_t SMTPPutArray(uint8_t* Data, uint16_t Len);
+uint16_t SMTPPutString(uint8_t* Data);
 void SMTPFlush(void);
 void SMTPPutDone(void);
 
 #if defined(__18CXX)
-	WORD SMTPPutROMArray(ROM BYTE* Data, WORD Len);
-	WORD SMTPPutROMString(ROM BYTE* Data);
+	uint16_t SMTPPutROMArray(ROM uint8_t* Data, uint16_t Len);
+	uint16_t SMTPPutROMString(ROM uint8_t* Data);
 #else
 	// Non-ROM variant for C30 / C32
-	#define SMTPPutROMArray(a,b)	SMTPPutArray((BYTE*)a,b)
+	#define SMTPPutROMArray(a,b)	SMTPPutArray((uint8_t*)a,b)
 	// Non-ROM variant for C30 / C32
-	#define SMTPPutROMString(a)		SMTPPutString((BYTE*)a)
+	#define SMTPPutROMString(a)		SMTPPutString((uint8_t*)a)
 #endif
 
 

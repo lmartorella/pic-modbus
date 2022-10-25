@@ -47,7 +47,7 @@ static enum {
 // Sink state
 #define SINK_STATE_IDLE (0)
 static signed char s_sinkStateOrSize;
-static BYTE s_ptr;
+static uint8_t s_ptr;
 
 BMP180_BUFFER bmp180_buffer;
 static TICK_TYPE s_lastTime;
@@ -81,7 +81,7 @@ void bmp180_readTempPressureData() {
 }
 
 // Returns 1 if idle
-bit bmp180_poll() {
+__bit bmp180_poll() {
     if (s_state == STATE_IDLE) {
         return 1;
     }
@@ -91,7 +91,7 @@ bit bmp180_poll() {
 
     // Wait for I2C to finish previous operation
     //int oss = 3;
-    BOOL idle = i2c_poll();
+    _Bool idle = i2c_poll();
     if (!idle) {
         return 0;
     }
@@ -158,12 +158,12 @@ bit bmp180_poll() {
         case STATE_WAIT_DATA:   
             s_state = STATE_IDLE;
             // Buffer ready!
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
-bit bmp180_sinkWrite() {
+__bit bmp180_sinkWrite() {
     // Wait for BMP180 idle (shared with app)
     if (!bmp180_poll()) {
         // Wait for data
@@ -188,11 +188,11 @@ bit bmp180_sinkWrite() {
         // Data will follow
         return 1;
     } else if (s_sinkStateOrSize > 0) {
-        BYTE l = prot_control_writeAvail();
-        if ((BYTE)s_sinkStateOrSize < l) {
-            l = (BYTE)s_sinkStateOrSize;
+        uint8_t l = prot_control_writeAvail();
+        if ((uint8_t)s_sinkStateOrSize < l) {
+            l = (uint8_t)s_sinkStateOrSize;
         }
-        prot_control_write(((BYTE*)&bmp180_buffer) + s_ptr, l);
+        prot_control_write(((uint8_t*)&bmp180_buffer) + s_ptr, l);
         s_ptr += l;
         s_sinkStateOrSize -= l;
         return s_sinkStateOrSize > 0;
@@ -202,7 +202,7 @@ bit bmp180_sinkWrite() {
     }
 }
 
-bit bmp180_sinkRead() {
+__bit bmp180_sinkRead() {
     if (prot_control_readAvail() < 1) {
         return 1;        
     }

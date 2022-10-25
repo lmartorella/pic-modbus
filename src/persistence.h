@@ -20,8 +20,8 @@ typedef struct
     /**
      * The bean node bus address
      */ 
-    BYTE address;
-    BYTE filler;
+    uint8_t address;
+    uint8_t filler;
 #endif
 
 #ifdef HAS_PERSISTENT_SINK_DATA

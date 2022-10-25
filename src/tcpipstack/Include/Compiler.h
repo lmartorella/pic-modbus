@@ -126,6 +126,58 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef union _BYTE_VAL
+{
+    uint8_t Val;
+    struct
+    {
+        unsigned char b0:1;
+        unsigned char b1:1;
+        unsigned char b2:1;
+        unsigned char b3:1;
+        unsigned char b4:1;
+        unsigned char b5:1;
+        unsigned char b6:1;
+        unsigned char b7:1;
+    } bits;
+} BYTE_VAL;
+
+typedef union _WORD_VAL
+{
+    uint16_t Val;
+    uint8_t v[2];
+    struct
+    {
+        uint8_t LB;
+        uint8_t HB;
+    } byte;
+    struct
+    {
+        unsigned char b0:1;
+        unsigned char b1:1;
+        unsigned char b2:1;
+        unsigned char b3:1;
+        unsigned char b4:1;
+        unsigned char b5:1;
+        unsigned char b6:1;
+        unsigned char b7:1;
+        unsigned char b8:1;
+        unsigned char b9:1;
+        unsigned char b10:1;
+        unsigned char b11:1;
+        unsigned char b12:1;
+        unsigned char b13:1;
+        unsigned char b14:1;
+        unsigned char b15:1;
+    } bits;
+} WORD_VAL;
+
+typedef union _DWORD_VAL
+{
+    uint32_t Val;
+    uint8_t v[4];
+    uint16_t w[2];
+} DWORD_VAL;
 
 // Base RAM and ROM pointer types for given architecture
 #if defined(__PIC32MX__)
@@ -239,7 +291,7 @@
 #if defined (COMPILER_XC)
     #define __ALIGN2PACK __pack __align(2)
     #define __PACK __pack
-    #define __PERSISTENT persistent
+    #define __PERSISTENT __persistent
 #else
     #define __ALIGN2PACK __attribute__((aligned(2), packed))
     #define __PACK __attribute__((packed))

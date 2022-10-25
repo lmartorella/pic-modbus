@@ -24,11 +24,11 @@ static enum {
             
 } s_state;
 
-static BYTE s_header[3] = { 0x55, 0xAA, 0 };
-static bit s_availForAddressAssign;
+static uint8_t s_header[3] = { 0x55, 0xAA, 0 };
+static __bit s_availForAddressAssign;
 // The master knows me
-static bit s_known;
-static BYTE s_tempAddressForAssignment;
+static __bit s_known;
+static uint8_t s_tempAddressForAssignment;
 
 /**
  * Wait for the channel to be free again and skip the glitch after a TX/RX switch (server DISENGAGE_CHANNEL_TIMEOUT time)
@@ -46,10 +46,10 @@ static void reinit_quick()
 {
     s_state = STATE_HEADER_0;
     // Skip bit9 = 0
-    rs485_skipData = TRUE;
+    rs485_skipData = true;
 }
 
-bit bus_sec_isIdle() 
+__bit bus_sec_isIdle() 
 {
     return s_state == STATE_HEADER_0;
 }
@@ -70,7 +70,7 @@ void bus_sec_init()
         // Reset address
         pers_data.address = UNASSIGNED_SUB_ADDRESS;       
         pers_save();
-        s_availForAddressAssign = TRUE;
+        s_availForAddressAssign = true;
     } 
 
     if (pers_data.address == UNASSIGNED_SUB_ADDRESS) {
@@ -88,14 +88,14 @@ static void storeAddress()
     pers_data.address = s_header[2] = s_tempAddressForAssignment;
     pers_save();
     
-    s_availForAddressAssign = FALSE;
+    s_availForAddressAssign = false;
     led_off();
 }
 
-static void sendAck(BYTE ackCode) {
+static void sendAck(uint8_t ackCode) {
     // Respond with a socket response
-    rs485_write(FALSE, s_header, 3);
-    rs485_write(FALSE, &ackCode, 1);
+    rs485_write(false, s_header, 3);
+    rs485_write(false, &ackCode, 1);
     // And then wait for TX end before going idle
     s_state = STATE_WAIT_TX;
 }
@@ -103,7 +103,7 @@ static void sendAck(BYTE ackCode) {
 // Called often
 void bus_sec_poll()
 {
-    BYTE buf;
+    uint8_t buf;
     
     switch (s_state) {
         case STATE_SOCKET_OPEN: 
@@ -195,7 +195,7 @@ void bus_sec_poll()
                                 // Master now knows me
                                 s_known = 1;
                                 // Start reading data with rc9 not set
-                                rs485_skipData = rs485_lastRc9 = FALSE;
+                                rs485_skipData = rs485_lastRc9 = false;
                                 // Socket, direct connect
                                 s_state = STATE_SOCKET_OPEN;
                                 return;
@@ -232,7 +232,7 @@ void prot_control_close()
 }
 
 // Socket connected?
-bit prot_control_isConnected()
+__bit prot_control_isConnected()
 {
     return s_state == STATE_SOCKET_OPEN;
 }

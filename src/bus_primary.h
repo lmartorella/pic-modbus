@@ -10,7 +10,7 @@
 void bus_prim_init();
 // Poll general bus activities
 void bus_prim_poll();
-bit bus_prim_isIdle();
+__bit bus_prim_isIdle();
 
 // 8*8 = 63 max children (last is broadcast)
 #define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
@@ -37,14 +37,14 @@ typedef enum {
 BUS_PRIMARY_STATE bus_prim_getState();
 
 // Dirty children
-extern bit bus_prim_hasDirtyChildren;
-extern BYTE bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
-extern BYTE bus_prim_knownChildren[BUFFER_MASK_SIZE];
+extern __bit bus_prim_hasDirtyChildren;
+extern uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
+extern uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
 void bus_prim_resetDirtyChildren();
 
 // Get active children mask & size
 int bus_prim_getChildrenMaskSize();
-const BYTE* bus_prim_getChildrenMask();
+const uint8_t* bus_prim_getChildrenMask();
 
 #endif
 

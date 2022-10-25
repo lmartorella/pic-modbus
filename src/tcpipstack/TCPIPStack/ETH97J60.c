@@ -87,7 +87,7 @@
 // A header appended at the start of all RX frames by the hardware
 typedef struct
 {
-    WORD			NextPacketPointer;
+    uint16_t			NextPacketPointer;
     RXSTATUS		StatusVector;
 
     MAC_ADDR        DestMACAddr;
@@ -111,9 +111,9 @@ static union
 		unsigned char filler : 4;
 	} bits;
 } flags;
-static WORD wTXWatchdog;	// Time of last transmission (high resolution); used for determining when TX hardware may need software intervention
+static uint16_t wTXWatchdog;	// Time of last transmission (high resolution); used for determining when TX hardware may need software intervention
 #if defined(ETH_RX_POLARITY_SWAP_TRIS)
-	static WORD wRXPolarityTimer;	// Time of last transmission (long duration); used for determining when a RX polarity swap may be needed
+	static uint16_t wRXPolarityTimer;	// Time of last transmission (long duration); used for determining when a RX polarity swap may be needed
 #endif
 
 #if defined(HI_TECH_C) || defined(__XC__)
@@ -121,8 +121,8 @@ static WORD wTXWatchdog;	// Time of last transmission (high resolution); used fo
 	// statements.  MPLAB C18 uses PRODL and therefore doesn't need this temp
 	// byte, but the HI-TECH PICC-18 compiler uses PRODL differently and doesn't
 	// allow it to be used as a temporary byte.
-	static unsigned char errataTempL @ 0xE7E;	// Six least significant address bits must not be '110110' for Ethernet MIIM Errata workaround (issue #5).
-	static unsigned char errataTempH @ 0xE7F;	// Six least significant address bits must not be '110110' for Ethernet MIIM Errata workaround (issue #5).
+	static unsigned char errataTempL __at(0xE7E);	// Six least significant address bits must not be '110110' for Ethernet MIIM Errata workaround (issue #5).
+	static unsigned char errataTempH __at(0xE7F);	// Six least significant address bits must not be '110110' for Ethernet MIIM Errata workaround (issue #5).
 #endif
 
 
@@ -146,7 +146,7 @@ static WORD wTXWatchdog;	// Time of last transmission (high resolution); used fo
  *****************************************************************************/
 void MACInit(void)
 {
-	BYTE i;
+	uint8_t i;
 
 	TRISA &= 0xFC;			// Clear TRISA0 and TRISA1 to set LED0 and LED1 as outputs for Ethernet module status
     ECON2bits.ETHEN = 1;	// Enable Ethernet!
@@ -236,16 +236,16 @@ void MACInit(void)
 
 
 /******************************************************************************
- * Function:        BOOL MACIsLinked(void)
+ * Function:        _Bool MACIsLinked(void)
  *
  * PreCondition:    None
  *
  * Input:           None
  *
- * Output:          TRUE: If the PHY reports that a link partner is present
+ * Output:          true: If the PHY reports that a link partner is present
  *						  and the link has been up continuously since the last
  *						  call to MACIsLinked()
- *					FALSE: If the PHY reports no link partner, or the link went
+ *					false: If the PHY reports no link partner, or the link went
  *						   down momentarily since the last call to MACIsLinked()
  *
  * Side Effects:    None
@@ -254,12 +254,12 @@ void MACInit(void)
  *
  * Note:            None
  *****************************************************************************/
-BOOL MACIsLinked(void)
+_Bool MACIsLinked(void)
 {
 	// LLSTAT is a latching low link status bit.  Therefore, if the link
 	// goes down and comes back up before a higher level stack program calls
-	// MACIsLinked(), MACIsLinked() will still return FALSE.  The next
-	// call to MACIsLinked() will return TRUE (unless the link goes down
+	// MACIsLinked(), MACIsLinked() will still return false.  The next
+	// call to MACIsLinked() will return true (unless the link goes down
 	// again).
     PHYREG r = ReadPHYReg(PHSTAT1);
 	return r.PHSTAT1bits.LLSTAT;
@@ -267,15 +267,15 @@ BOOL MACIsLinked(void)
 
 
 /******************************************************************************
- * Function:        BOOL MACIsTxReady(void)
+ * Function:        _Bool MACIsTxReady(void)
  *
  * PreCondition:    None
  *
  * Input:           None
  *
- * Output:          TRUE: If no Ethernet transmission is in progress
- *					FALSE: If a previous transmission was started, and it has
- *						   not completed yet.  While FALSE, the data in the
+ * Output:          true: If no Ethernet transmission is in progress
+ *					false: If a previous transmission was started, and it has
+ *						   not completed yet.  While false, the data in the
  *						   transmit buffer and the TXST/TXND pointers must not
  *						   be changed.
  *
@@ -285,20 +285,20 @@ BOOL MACIsLinked(void)
  *
  * Note:            None
  *****************************************************************************/
-BOOL MACIsTxReady(void)
+_Bool MACIsTxReady(void)
 {
 	if(!ECON1bits.TXRTS)
-		return TRUE;
+		return true;
 
 	// Retry transmission if the current packet seems to be not completing
 	// Wait 3ms before triggering the retry.
-	if((WORD)TickGet() - wTXWatchdog >= (3ull*TICK_SECOND/1000ull))
+	if((uint16_t)TickGet() - wTXWatchdog >= (3ull*TICK_SECOND/1000ull))
 	{
 		ECON1bits.TXRTS = 0;
 		MACFlush();
 	}
 
-	return FALSE;
+	return false;
 }
 
 
@@ -356,13 +356,13 @@ void MACDiscardRx(void)
 
 
 /******************************************************************************
- * Function:        WORD MACGetFreeRxSize(void)
+ * Function:        uint16_t MACGetFreeRxSize(void)
  *
  * PreCondition:    None
  *
  * Input:           None
  *
- * Output:          A WORD estimate of how much RX buffer space is free at
+ * Output:          A uint16_t estimate of how much RX buffer space is free at
  *					the present time.
  *
  * Side Effects:    None
@@ -371,7 +371,7 @@ void MACDiscardRx(void)
  *
  * Note:            None
  *****************************************************************************/
-WORD MACGetFreeRxSize(void)
+uint16_t MACGetFreeRxSize(void)
 {
 	WORD_VAL ReadPT, WritePT;
 
@@ -407,19 +407,19 @@ WORD MACGetFreeRxSize(void)
 }
 
 /******************************************************************************
- * Function:        BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
+ * Function:        _Bool MACGetHeader(MAC_ADDR *remote, uint8_t* type)
  *
  * PreCondition:    None
  *
  * Input:           *remote: Location to store the Source MAC address of the
  *							 received frame.
- *					*type: Location of a BYTE to store the constant
+ *					*type: Location of a uint8_t to store the constant
  *						   MAC_UNKNOWN, ETHER_IP, or ETHER_ARP, representing
  *						   the contents of the Ethernet type field.
  *
- * Output:          TRUE: If a packet was waiting in the RX buffer.  The
+ * Output:          true: If a packet was waiting in the RX buffer.  The
  *						  remote, and type values are updated.
- *					FALSE: If a packet was not pending.  remote and type are
+ *					false: If a packet was not pending.  remote and type are
  *						   not changed.
  *
  * Side Effects:    Last packet is discarded if MACDiscardRx() hasn't already
@@ -429,7 +429,7 @@ WORD MACGetFreeRxSize(void)
  *
  * Note:            None
  *****************************************************************************/
-BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
+_Bool MACGetHeader(MAC_ADDR *remote, uint8_t* type)
 {
 	ENC_PREAMBLE header;
 
@@ -441,7 +441,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 		#if defined(ETH_RX_POLARITY_SWAP_TRIS)
 		{
 			// See if the polarty swap timer has expired (happens every 429ms)
-			if((WORD)TickGetDiv256() - wRXPolarityTimer > (WORD)(TICK_SECOND*3/7/256))
+			if((uint16_t)TickGetDiv256() - wRXPolarityTimer > (uint16_t)(TICK_SECOND*3/7/256))
 			{
 				// Check if the Ethernet link is up.  If it isn't we need to
 				// clear the bRXPolarityValid flag because the user could plug
@@ -465,13 +465,13 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 				}
 
 				// Reset timer for next polarity swap test
-				wRXPolarityTimer = (WORD)TickGetDiv256();
+				wRXPolarityTimer = (uint16_t)TickGetDiv256();
 				flags.bits.bRXPolarityTimerOnTX = 0;
 			}
 		}
 		#endif
 
-		return FALSE;
+		return false;
 	}
 
 	// Flag that we have received a packet so that we don't swap the RX polarity
@@ -482,7 +482,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 	if(flags.bits.bWasDiscarded == 0u)
 	{
 		MACDiscardRx();
-		return FALSE;
+		return false;
 	}
 	// Save the location of this packet
 	CurrentPacketLocation.Val = NextPacketLocation.Val;
@@ -491,7 +491,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
     ERDPT = CurrentPacketLocation.Val;
 
 	// Obtain the MAC header from the Ethernet buffer
-	MACGetArray((BYTE*)&header, sizeof(header));
+	MACGetArray((uint8_t*)&header, sizeof(header));
 
 	// The EtherType field, like most items transmitted on the Ethernet medium
 	// are in big endian.
@@ -526,14 +526,14 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 
     // Mark this packet as discardable
     flags.bits.bWasDiscarded = 0;
-	return TRUE;
+	return true;
 }
 
 
 /******************************************************************************
- * Function:        void MACPutHeader(MAC_ADDR *remote, BYTE type, WORD dataLen)
+ * Function:        void MACPutHeader(MAC_ADDR *remote, uint8_t type, uint16_t dataLen)
  *
- * PreCondition:    MACIsTxReady() must return TRUE.
+ * PreCondition:    MACIsTxReady() must return true.
  *
  * Input:           *remote: Pointer to memory which contains the destination
  * 							 MAC address (6 bytes)
@@ -554,25 +554,25 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
  *					is constructed (header first or data first) is not
  *					important.
  *****************************************************************************/
-void MACPutHeader(MAC_ADDR *remote, BYTE type, WORD dataLen)
+void MACPutHeader(MAC_ADDR *remote, uint8_t type, uint16_t dataLen)
 {
 	// Set the write pointer to the beginning of the transmit buffer
 	EWRPT = TXSTART + 1;
 
 	// Calculate where to put the TXND pointer
-    dataLen += (WORD)sizeof(ETHER_HEADER) + TXSTART;
+    dataLen += (uint16_t)sizeof(ETHER_HEADER) + TXSTART;
 
 	// Write the TXND pointer into the registers, given the dataLen given
 	ETXND = dataLen;
 
 	// Set the per-packet control byte and write the Ethernet destination
 	// address
-    MACPutArray((BYTE*)remote, sizeof(*remote));
+    MACPutArray((uint8_t*)remote, sizeof(*remote));
 
 	// Write our MAC address in the Ethernet source field
-	MACPutArray((BYTE*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
+	MACPutArray((uint8_t*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
 
-	// Write the appropriate Ethernet Type WORD for the protocol being used
+	// Write the appropriate Ethernet Type uint16_t for the protocol being used
     MACPut(0x08);
     MACPut((type == MAC_IP) ? ETHER_IP : ETHER_ARP);
 }
@@ -594,7 +594,7 @@ void MACPutHeader(MAC_ADDR *remote, BYTE type, WORD dataLen)
  *					and handle CRC generation, collision retransmission and
  *					other details.
  *
- * Note:			After transmission completes (MACIsTxReady() returns TRUE),
+ * Note:			After transmission completes (MACIsTxReady() returns true),
  *					the packet can be modified and transmitted again by calling
  *					MACFlush() again.  Until MACPutHeader() or MACPut() is
  *					called (in the TX data area), the data in the TX buffer
@@ -610,7 +610,7 @@ void MACFlush(void)
 
 	// Wait at least 1.6us after TX Reset before setting TXRTS.
 	// If you don't wait long enough, the TX logic won't be finished resetting.
-	{volatile BYTE i = 8; while(i--);}
+	{volatile uint8_t i = 8; while(i--);}
 	EIRbits.TXERIF = 0;
 
 	// Since we are about to transmit something (which usually results in RX
@@ -627,7 +627,7 @@ void MACFlush(void)
 			if(!flags.bits.bRXPolarityTimerOnTX)
 			{
 				// Reset the timer and swap the polarity
-				wRXPolarityTimer = (WORD)TickGetDiv256();
+				wRXPolarityTimer = (uint16_t)TickGetDiv256();
 				flags.bits.bRXPolarityTimerOnTX = 1;
 				if(flags.bits.bRXPolarityAtNextTX)
 					ETH_RX_POLARITY_SWAP_IO = 1;
@@ -640,7 +640,7 @@ void MACFlush(void)
 	#endif
 
 	// Start the transmission
-	// After transmission completes (MACIsTxReady() returns TRUE), the packet
+	// After transmission completes (MACIsTxReady() returns true), the packet
 	// can be modified and transmitted again by calling MACFlush() again.
 	// Until MACPutHeader() is called, the data in the TX buffer will not be
 	// corrupted.
@@ -650,12 +650,12 @@ void MACFlush(void)
 
 
 /******************************************************************************
- * Function:        void MACSetReadPtrInRx(WORD offset)
+ * Function:        void MACSetReadPtrInRx(uint16_t offset)
  *
  * PreCondition:    A packet has been obtained by calling MACGetHeader() and
- *					getting a TRUE result.
+ *					getting a true result.
  *
- * Input:           offset: WORD specifying how many bytes beyond the Ethernet
+ * Input:           offset: uint16_t specifying how many bytes beyond the Ethernet
  *							header's type field to relocate the SPI read
  *							pointer.
  *
@@ -671,7 +671,7 @@ void MACFlush(void)
  *					define an RX buffer which spans the 0x1FFF->0x0000 memory
  *					boundary.
  *****************************************************************************/
-void MACSetReadPtrInRx(WORD offset)
+void MACSetReadPtrInRx(uint16_t offset)
 {
 	WORD_VAL ReadPT;
 
@@ -696,7 +696,7 @@ void MACSetReadPtrInRx(WORD offset)
  *
  * Input:           Address: Address to seek to
  *
- * Output:          WORD: Old EWRPT location
+ * Output:          uint16_t: Old EWRPT location
  *
  * Side Effects:    None
  *
@@ -707,10 +707,10 @@ void MACSetReadPtrInRx(WORD offset)
  *****************************************************************************/
 ETH_POINTER MACSetWritePtr(ETH_POINTER address)
 {
-	WORD oldVal;
+	uint16_t oldVal;
 
 	oldVal = EWRPT;
-	EWRPT = (WORD)address;
+	EWRPT = (uint16_t)address;
 	return (ETH_POINTER)oldVal;
 }
 
@@ -721,7 +721,7 @@ ETH_POINTER MACSetWritePtr(ETH_POINTER address)
  *
  * Input:           Address: Address to seek to
  *
- * Output:          WORD: Old ERDPT value
+ * Output:          uint16_t: Old ERDPT value
  *
  * Side Effects:    None
  *
@@ -732,16 +732,16 @@ ETH_POINTER MACSetWritePtr(ETH_POINTER address)
  *****************************************************************************/
 ETH_POINTER MACSetReadPtr(ETH_POINTER address)
 {
-	WORD oldVal;
+	uint16_t oldVal;
 
 	oldVal = ERDPT;
-	ERDPT = (WORD)address;
+	ERDPT = (uint16_t)address;
 	return (ETH_POINTER)oldVal;
 }
 
 
 /******************************************************************************
- * Function:        WORD MACCalcRxChecksum(WORD offset, WORD len)
+ * Function:        uint16_t MACCalcRxChecksum(uint16_t offset, uint16_t len)
  *
  * PreCondition:    None
  *
@@ -759,10 +759,10 @@ ETH_POINTER MACSetReadPtr(ETH_POINTER address)
  *
  * Note:            None
  *****************************************************************************/
-WORD MACCalcRxChecksum(WORD offset, WORD len)
+uint16_t MACCalcRxChecksum(uint16_t offset, uint16_t len)
 {
-	WORD temp;
-	WORD RDSave;
+	uint16_t temp;
+	uint16_t RDSave;
 
 	// Add the offset requested by firmware plus the Ethernet header
 	temp = CurrentPacketLocation.Val + sizeof(ENC_PREAMBLE) + offset;
@@ -781,7 +781,7 @@ WORD MACCalcRxChecksum(WORD offset, WORD len)
 
 
 /******************************************************************************
- * Function:        WORD CalcIPBufferChecksum(WORD len)
+ * Function:        uint16_t CalcIPBufferChecksum(uint16_t len)
  *
  * PreCondition:    Read buffer pointer set to starting of checksum data
  *
@@ -805,7 +805,7 @@ WORD MACCalcRxChecksum(WORD offset, WORD len)
  *					buffer area.  No validation is done on the len parameter.
  *****************************************************************************/
 /*
-WORD CalcIPBufferChecksum(WORD len)
+uint16_t CalcIPBufferChecksum(uint16_t len)
 {
 	WORD_VAL temp;
 
@@ -816,7 +816,7 @@ WORD CalcIPBufferChecksum(WORD len)
 	}
 	else if(len == 1u)
 	{
-		return ~((WORD)MACGet());
+		return ~((uint16_t)MACGet());
 	}
 
 
@@ -855,12 +855,12 @@ WORD CalcIPBufferChecksum(WORD len)
     while(ECON1bits.DMAST);
 
 	// Return the resulting good stuff
-	return (((WORD)EDMACSL)<<8) | EDMACSH;
+	return (((uint16_t)EDMACSL)<<8) | EDMACSH;
 }
 */
 
 /******************************************************************************
- * Function:        WORD CalcIPBufferChecksum(WORD len)
+ * Function:        uint16_t CalcIPBufferChecksum(uint16_t len)
  *
  * PreCondition:    Read buffer pointer set to starting of checksum data
  *
@@ -880,13 +880,13 @@ WORD CalcIPBufferChecksum(WORD len)
  * Note:            This function works either in the RX buffer area or the TX
  *					buffer area.  No validation is done on the len parameter.
  *****************************************************************************/
-WORD CalcIPBufferChecksum(WORD len)
+uint16_t CalcIPBufferChecksum(uint16_t len)
 {
-	WORD Start;
+	uint16_t Start;
 	DWORD_VAL Checksum = {0x00000000ul};
-	WORD ChunkLen;
-	BYTE DataBuffer[20];	// Must be an even size
-	WORD *DataPtr;
+	uint16_t ChunkLen;
+	uint8_t DataBuffer[20];	// Must be an even size
+	uint16_t *DataPtr;
 
 	// Save the read pointer starting address
 	Start = ERDPT;
@@ -908,7 +908,7 @@ WORD CalcIPBufferChecksum(WORD len)
 		}
 
 		// Calculate the checksum over this chunk
-		DataPtr = (WORD*)&DataBuffer[0];
+		DataPtr = (uint16_t*)&DataBuffer[0];
 		while(ChunkLen)
 		{
 			Checksum.Val += *DataPtr++;
@@ -920,7 +920,7 @@ WORD CalcIPBufferChecksum(WORD len)
 	ERDPT = Start;
 
 	// Do an end-around carry (one's complement arrithmatic)
-	Checksum.Val = (DWORD)Checksum.w[0] + (DWORD)Checksum.w[1];
+	Checksum.Val = (uint32_t)Checksum.w[0] + (uint32_t)Checksum.w[1];
 
 	// Do another end-around carry in case if the prior add
 	// caused a carry out
@@ -931,7 +931,7 @@ WORD CalcIPBufferChecksum(WORD len)
 }
 
 /******************************************************************************
- * Function:        void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, WORD len)
+ * Function:        void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, uint16_t len)
  *
  * PreCondition:    None
  *
@@ -954,20 +954,20 @@ WORD CalcIPBufferChecksum(WORD len)
  *					calling this function, this function will block until it
  *					can start this transfer.
  *****************************************************************************/
-void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len)
+void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, uint16_t len)
 {
 	WORD_VAL ReadSave, WriteSave;
-	BOOL UpdateWritePointer = FALSE;
-	BOOL UpdateReadPointer = FALSE;
+	_Bool UpdateWritePointer = false;
+	_Bool UpdateReadPointer = false;
 
 	if(destAddr == (ETH_POINTER)-1)
 	{
-		UpdateWritePointer = TRUE;
+		UpdateWritePointer = true;
 		destAddr = (ETH_POINTER)EWRPT;
 	}
 	if(sourceAddr == (ETH_POINTER)-1)
 	{
-		UpdateReadPointer = TRUE;
+		UpdateReadPointer = true;
 		sourceAddr = (ETH_POINTER)ERDPT;
 	}
 
@@ -977,8 +977,8 @@ void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len)
 	{
 		ReadSave.Val = ERDPT;
 		WriteSave.Val = EWRPT;
-		ERDPT = (WORD)sourceAddr;
-		EWRPT = (WORD)destAddr;
+		ERDPT = (uint16_t)sourceAddr;
+		EWRPT = (uint16_t)destAddr;
 		while(len--)
 			MACPut(MACGet());
 		if(!UpdateReadPointer)
@@ -994,14 +994,14 @@ void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len)
 	{
 		if(UpdateWritePointer)
 		{
-			WriteSave.Val = (WORD)destAddr + len;
+			WriteSave.Val = (uint16_t)destAddr + len;
 			EWRPT = WriteSave.Val;
 		}
-		len += (WORD)sourceAddr - 1;
+		len += (uint16_t)sourceAddr - 1;
 		while(ECON1bits.DMAST);
-		EDMAST = (WORD)sourceAddr;
-		EDMADST = (WORD)destAddr;
-		if(((WORD)sourceAddr <= RXSTOP) && (len > RXSTOP)) //&& (sourceAddr >= RXSTART))
+		EDMAST = (uint16_t)sourceAddr;
+		EDMADST = (uint16_t)destAddr;
+		if(((uint16_t)sourceAddr <= RXSTOP) && (len > RXSTOP)) //&& (sourceAddr >= RXSTART))
 			len -= RXSIZE;
 		EDMAND = len;
 		ECON1bits.CSUMEN = 0;
@@ -1011,7 +1011,7 @@ void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len)
 		if(UpdateReadPointer)
 		{
 			len++;
-			if(((WORD)sourceAddr <= RXSTOP) && (len > RXSTOP)) //&& (sourceAddr >= RXSTART))
+			if(((uint16_t)sourceAddr <= RXSTOP) && (len > RXSTOP)) //&& (sourceAddr >= RXSTART))
 				len -= RXSIZE;
 			ERDPT = len;
 		}
@@ -1019,20 +1019,20 @@ void MACMemCopyAsync(ETH_POINTER destAddr, ETH_POINTER sourceAddr, WORD len)
 }
 
 /*
-void MACMemCopyAsync(WORD destAddr, WORD sourceAddr, WORD len)
+void MACMemCopyAsync(uint16_t destAddr, uint16_t sourceAddr, uint16_t len)
 {
 	WORD_VAL ReadSave, WriteSave;
-	BOOL UpdateWritePointer = FALSE;
-	BOOL UpdateReadPointer = FALSE;
+	_Bool UpdateWritePointer = false;
+	_Bool UpdateReadPointer = false;
 
 	if(((WORD_VAL*)&destAddr)->bits.b15)
 	{
-		UpdateWritePointer = TRUE;
+		UpdateWritePointer = true;
 		destAddr = EWRPT;
 	}
 	if(((WORD_VAL*)&sourceAddr)->bits.b15)
 	{
-		UpdateReadPointer = TRUE;
+		UpdateReadPointer = true;
 		sourceAddr = ERDPT;
 	}
 
@@ -1056,13 +1056,13 @@ void MACMemCopyAsync(WORD destAddr, WORD sourceAddr, WORD len)
 }
 */
 
-BOOL MACIsMemCopyDone(void)
+_Bool MACIsMemCopyDone(void)
 {
 	return !ECON1bits.DMAST;
 }
 
 /******************************************************************************
- * Function:        BYTE MACGet()
+ * Function:        uint8_t MACGet()
  *
  * PreCondition:    ERDPT must point to the place to read from.
  *
@@ -1079,7 +1079,7 @@ BOOL MACIsMemCopyDone(void)
  * Note:            For better performance, implement this function as a macro:
  *					#define MACGet()	(EDATA)
  *****************************************************************************/
-BYTE MACGet()
+uint8_t MACGet()
 {
 	#if defined(HI_TECH_C) || defined(__XC__)
 		asm("movff	0xF61, _errataTempL");	// movff EDATA, errataTempL
@@ -1091,7 +1091,7 @@ BYTE MACGet()
 
 
 /******************************************************************************
- * Function:        WORD MACGetArray(BYTE *val, WORD len)
+ * Function:        uint16_t MACGetArray(uint8_t *val, uint16_t len)
  *
  * PreCondition:    ERDPT must point to the place to read from.
  *
@@ -1108,9 +1108,9 @@ BYTE MACGet()
  *
  * Note:            None
  *****************************************************************************/
-WORD MACGetArray(BYTE *val, WORD len)
+uint16_t MACGetArray(uint8_t *val, uint16_t len)
 {
-    WORD w;
+    uint16_t w;
 
     w = len;
 	if(val)
@@ -1135,7 +1135,7 @@ WORD MACGetArray(BYTE *val, WORD len)
 			}
 			#else
 			{
-				volatile BYTE i = EDATA;
+				volatile uint8_t i = EDATA;
 			}
 			#endif
 		}
@@ -1146,7 +1146,7 @@ WORD MACGetArray(BYTE *val, WORD len)
 
 
 /******************************************************************************
- * Function:        void MACPut(BYTE val)
+ * Function:        void MACPut(uint8_t val)
  *
  * PreCondition:    EWRPT must point to the location to begin writing.
  *
@@ -1161,7 +1161,7 @@ WORD MACGetArray(BYTE *val, WORD len)
  *
  * Note:            None
  *****************************************************************************/
-void MACPut(BYTE val)
+void MACPut(uint8_t val)
 {
 	// Note:  Due to a PIC18F97J60 bug, you must use the MOVFF instruction to
 	// write to EDATA or else the read pointer (ERDPT) will inadvertently
@@ -1177,7 +1177,7 @@ void MACPut(BYTE val)
 
 
 /******************************************************************************
- * Function:        void MACPutArray(BYTE *val, WORD len)
+ * Function:        void MACPutArray(uint8_t *val, uint16_t len)
  *
  * PreCondition:    EWRPT must point to the location to begin writing.
  *
@@ -1194,7 +1194,7 @@ void MACPut(BYTE val)
  *
  * Note:            None
  *****************************************************************************/
-void MACPutArray(const BYTE *val, WORD len)
+void MACPutArray(const uint8_t *val, uint16_t len)
 {
     while(len--)
 	{
@@ -1212,7 +1212,7 @@ void MACPutArray(const BYTE *val, WORD len)
 }//end MACPutArray
 
 #if defined(__18CXX)
-void MACPutROMArray(ROM BYTE *val, WORD len)
+void MACPutROMArray(ROM uint8_t *val, uint16_t len)
 {
     while(len--)
 	{
@@ -1247,7 +1247,7 @@ void MACPutROMArray(ROM BYTE *val, WORD len)
  *
  * Note:            None
  *****************************************************************************/
-PHYREG ReadPHYReg(BYTE Register)
+PHYREG ReadPHYReg(uint8_t Register)
 {
 	PHYREG Result;
 
@@ -1289,9 +1289,9 @@ PHYREG ReadPHYReg(BYTE Register)
  *
  * Note:            None
  *****************************************************************************/
-void WritePHYReg(BYTE Register, WORD Data)
+void WritePHYReg(uint8_t Register, uint16_t Data)
 {
-	BYTE GIESave;
+	uint8_t GIESave;
 
 	// Write the register address
 	MIREGADR = Register;
@@ -1307,16 +1307,16 @@ void WritePHYReg(BYTE Register, WORD Data)
 	// Interrupts must be disabled to prevent arbitrary ISR code from accessing
 	// memory with LSb bits of 0x16 and corrupting the MIWRL value.
 	#if defined(HI_TECH_C) || defined(__XC__)
-		errataTempL = ((BYTE*)&Data)[0];
-		errataTempH = ((BYTE*)&Data)[1];
+		errataTempL = ((uint8_t*)&Data)[0];
+		errataTempH = ((uint8_t*)&Data)[1];
 		GIESave = INTCON & 0xC0;		// Save GIEH and GIEL bits
 		INTCON &= 0x3F;					// Clear INTCONbits.GIEH and INTCONbits.GIEL
 		asm("movff	_errataTempL, 0xEB6");	// movff errataTempL, MIWRL
 		asm("nop");
 		asm("movff	_errataTempH, 0xEB7");	// movff errataTempH, MIWRH
 	#else
-		PRODL = ((BYTE*)&Data)[0];
-		PRODH = ((BYTE*)&Data)[1];
+		PRODL = ((uint8_t*)&Data)[0];
+		PRODH = ((uint8_t*)&Data)[1];
 		GIESave = INTCON & 0xC0;		// Save GIEH and GIEL bits
 		INTCON &= 0x3F;					// Clear INTCONbits.GIEH and INTCONbits.GIEL
 		_asm
@@ -1455,8 +1455,8 @@ void MACPowerUp(void)
 void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 {
 	DWORD_VAL CRC = {0xFFFFFFFF};
-	BYTE *HTRegister;
-	BYTE i, j;
+	uint8_t *HTRegister;
+	uint8_t i, j;
 
 	if((DestMACAddr.v[0] | DestMACAddr.v[1] | DestMACAddr.v[2] | DestMACAddr.v[3] | DestMACAddr.v[4] | DestMACAddr.v[5]) == 0x00u)
 	{
@@ -1479,7 +1479,7 @@ void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 	// using polynomial 0x4C11DB7
 	for(i = 0; i < sizeof(MAC_ADDR); i++)
 	{
-		BYTE  crcnext;
+		uint8_t  crcnext;
 
 		// shift in 8 bits
 		for(j = 0; j < 8; j++)

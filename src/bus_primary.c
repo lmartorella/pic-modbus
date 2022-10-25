@@ -10,15 +10,15 @@
 
 #ifdef HAS_RS485_BUS_PRIMARY
 
-BYTE bus_prim_knownChildren[BUFFER_MASK_SIZE];
-BYTE bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
-bit bus_prim_hasDirtyChildren;
+uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
+uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
+__bit bus_prim_hasDirtyChildren;
 
 // Ack message contains ACK
 #define ACK_MSG_SIZE 4
 #define BROADCAST_ADDRESS 0xff
 
-static BYTE s_scanIndex;
+static uint8_t s_scanIndex;
 static TICK_TYPE s_lastScanTime;
 static TICK_TYPE s_lastTime;
 
@@ -41,22 +41,22 @@ static enum {
 
 BUS_PRIMARY_STATS bus_prim_busStats;
 
-static bit s_waitTxFlush;
-static bit s_waitTxQuickEnd;
+static __bit s_waitTxFlush;
+static __bit s_waitTxQuickEnd;
 
 static void socketCreate();
 static void socketPoll();
 
-static bit isChildKnown(BYTE i)
+static __bit isChildKnown(uint8_t i)
 {
     return (bus_prim_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
-static BYTE countChildren()
+static uint8_t countChildren()
 {
-    BYTE count = 0;
-    for (BYTE i = 0; i < sizeof(bus_prim_knownChildren); i++) {
-        BYTE d = bus_prim_knownChildren[i];
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < sizeof(bus_prim_knownChildren); i++) {
+        uint8_t d = bus_prim_knownChildren[i];
         while(d) {
             count += (d & 1);
             d >>= 1;
@@ -65,7 +65,7 @@ static BYTE countChildren()
     return count;
 }
 
-static void setDirtyChild(BYTE i)
+static void setDirtyChild(uint8_t i)
 {
     flog("setDirty: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     bus_prim_dirtyChildren[i / 8] |= (1 << (i % 8));
@@ -77,14 +77,14 @@ static void updateDisp() {
     io_println(msg);
 }
 
-static void setChildKnown(BYTE i) {
+static void setChildKnown(uint8_t i) {
     setDirtyChild(i);
     bus_prim_knownChildren[i / 8] |= (1 << (i % 8));
     flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
     updateDisp();
 }
 
-static void setChildDead(BYTE i) {
+static void setChildDead(uint8_t i) {
     setDirtyChild(i);
     bus_prim_knownChildren[i / 8] &= ~(1 << (i % 8));
     flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
@@ -132,10 +132,10 @@ static void scanNext()
     }
     
     // Poll the line. Send sync
-    BYTE buffer[4] = { 0x55, 0xaa };
+    uint8_t buffer[4] = { 0x55, 0xaa };
     buffer[2] = s_scanIndex;
     buffer[3] = msgType;
-    rs485_write(TRUE, buffer, 4);
+    rs485_write(true, buffer, 4);
 
     // Wait for tx end and then for ack
     s_waitTxFlush = 1;
@@ -166,10 +166,10 @@ static void registerNewNode() {
     flog("Found index %d", s_scanIndex);
 
     // Send it
-    BYTE buffer[4] = { 0x55, 0xaa };
+    uint8_t buffer[4] = { 0x55, 0xaa };
     buffer[2] = s_scanIndex;
     buffer[3] = BUS_MSG_TYPE_ADDRESS_ASSIGN;
-    rs485_write(TRUE, buffer, 4);
+    rs485_write(true, buffer, 4);
 
     // Go ahead. Expect a valid response like the heartbeat
     s_waitTxFlush = 1;
@@ -178,7 +178,7 @@ static void registerNewNode() {
 
 static void checkAck()
 {
-    BYTE buffer[ACK_MSG_SIZE];
+    uint8_t buffer[ACK_MSG_SIZE];
     // Receive bytes
     // Expected: 0x55, 0xaa, [index], [state] with rc9 = 0 + EXC
     rs485_read(buffer, ACK_MSG_SIZE);
@@ -247,7 +247,7 @@ void bus_prim_poll()
         }
     }
  
-    BYTE s = rs485_readAvail();
+    uint8_t s = rs485_readAvail();
     switch (s_busState) {
         case BUS_PRIV_STATE_IDLE:
             // Should open a socket?
@@ -302,7 +302,7 @@ void bus_prim_disconnectSocket(int val)
 {
     if (s_socketConnected >= 0) {
         // Send break char
-        rs485_write(TRUE, (BYTE*)(&val), 1);
+        rs485_write(true, (uint8_t*)(&val), 1);
         s_waitTxFlush = 1;
         
         s_busState = BUS_PRIV_STATE_IDLE;
@@ -326,10 +326,10 @@ BUS_PRIMARY_STATE bus_prim_getState()
 static void socketCreate() 
 {
     // Bus is idle. Start transmitting/receiving.
-    BYTE buffer[4] = { 0x55, 0xaa };
+    uint8_t buffer[4] = { 0x55, 0xaa };
     buffer[2] = s_socketConnected;
     buffer[3] = BUS_MSG_TYPE_CONNECT;
-    rs485_write(TRUE, buffer, 4);
+    rs485_write(true, buffer, 4);
 
     // Don't wait the TX channel to be free, but immediately enqueue socket data, to avoid engage/disengage time and glitches
     // However wait for TX9 to be reusable, so wait for TX to be finished
@@ -341,30 +341,30 @@ static void socketCreate()
 static void socketPoll() 
 {
     // Bus line is slow, though
-    BYTE buffer[RS485_BUF_SIZE / 2];
-    BOOL over = 0, close = 0;
+    uint8_t buffer[RS485_BUF_SIZE / 2];
+    _Bool over = 0, close = 0;
             
     // Data from IP?
-    WORD rx = prot_control_readAvail();
+    uint16_t rx = prot_control_readAvail();
     if (rx > 0) {
         // Read data and push it into the line
         if (rx > sizeof(buffer)) {
             rx = sizeof(buffer);
         }
-        BYTE av = rs485_writeAvail();
+        uint8_t av = rs485_writeAvail();
         if (rx > av) {
             rx = av;
         }
         // Transfer rx bytes
         if (rx > 0) {
             prot_control_read(buffer, rx);
-            rs485_write(FALSE, buffer, rx);
+            rs485_write(false, buffer, rx);
             s_lastTime = timers_get();
         }
     }
     else {
         // Data received?
-        WORD tx = rs485_readAvail(); 
+        uint16_t tx = rs485_readAvail(); 
         if (tx > 0) {
            
             // Read data and push it into IP
@@ -426,7 +426,7 @@ int bus_prim_getChildrenMaskSize()
     return BUFFER_MASK_SIZE;
 }
 
-const BYTE* bus_prim_getChildrenMask()
+const uint8_t* bus_prim_getChildrenMask()
 {
     return bus_prim_knownChildren;
 }

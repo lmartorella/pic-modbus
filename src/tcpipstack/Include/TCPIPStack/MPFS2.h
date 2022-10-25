@@ -74,13 +74,13 @@
   Section:
 	Type Definitions
   ***************************************************************************/
-	#define MPFS2_FLAG_ISZIPPED		((WORD)0x0001)	// Indicates a file is compressed with GZIP compression
-	#define MPFS2_FLAG_HASINDEX		((WORD)0x0002)	// Indicates a file has an associated index of dynamic variables
+	#define MPFS2_FLAG_ISZIPPED		((uint16_t)0x0001)	// Indicates a file is compressed with GZIP compression
+	#define MPFS2_FLAG_HASINDEX		((uint16_t)0x0002)	// Indicates a file has an associated index of dynamic variables
 	#define MPFS_INVALID			(0xffffffffu)	// Indicates a position pointer is invalid
 	#define MPFS_INVALID_FAT		(0xffffu)		// Indicates an invalid FAT cache
 	#define MPFS_INVALID_HANDLE 	(0xffu)			// Indicates that a handle is not valid
-	typedef DWORD MPFS_PTR;							// MPFS Pointers are currently DWORDs
-	typedef BYTE MPFS_HANDLE;						// MPFS Handles are currently stored as BYTEs
+	typedef uint32_t MPFS_PTR;							// MPFS Pointers are currently DWORDs
+	typedef uint8_t MPFS_HANDLE;						// MPFS Handles are currently stored as BYTEs
 
 
 	// Stores each file handle's information
@@ -88,8 +88,8 @@
 	typedef struct
 	{
 		MPFS_PTR addr;		// Current address in the file system
-		DWORD bytesRem;		// How many bytes remain in this file
-		WORD fatID;			// ID of which file in the FAT was accessed
+		uint32_t bytesRem;		// How many bytes remain in this file
+		uint16_t fatID;			// ID of which file in the FAT was accessed
 	} MPFS_STUB;
 	
 	// Indicates the method for MPFSSeek
@@ -104,12 +104,12 @@
 	// Stores the data for an MPFS2 FAT record
 	typedef struct
 	{
-		DWORD string;		// Pointer to the file name
-		DWORD data;			// Address of the file data
-		DWORD len;			// Length of file data
-		DWORD timestamp;	// Timestamp of file
-		DWORD microtime;	// Microtime stamp of file
-		WORD flags;			// Flags for this file
+		uint32_t string;		// Pointer to the file name
+		uint32_t data;			// Address of the file data
+		uint32_t len;			// Length of file data
+		uint32_t timestamp;	// Timestamp of file
+		uint32_t microtime;	// Microtime stamp of file
+		uint16_t flags;			// Flags for this file
 	} MPFS_FAT_RECORD;
 
 /****************************************************************************
@@ -119,39 +119,39 @@
 
 void MPFSInit(void);
 
-MPFS_HANDLE MPFSOpen(BYTE* cFile);
+MPFS_HANDLE MPFSOpen(uint8_t* cFile);
 #if defined(__18CXX)
-	MPFS_HANDLE MPFSOpenROM(ROM BYTE* cFile);
+	MPFS_HANDLE MPFSOpenROM(ROM uint8_t* cFile);
 #else
 	// Non-ROM variant for C30 / C32
-	#define MPFSOpenROM(a)	MPFSOpen((BYTE*) a);
+	#define MPFSOpenROM(a)	MPFSOpen((uint8_t*) a);
 #endif
-MPFS_HANDLE MPFSOpenID(WORD hFatID);
+MPFS_HANDLE MPFSOpenID(uint16_t hFatID);
 void MPFSClose(MPFS_HANDLE hMPFS);
 
-BOOL MPFSGet(MPFS_HANDLE hMPFS, BYTE* c);
-WORD MPFSGetArray(MPFS_HANDLE hMPFS, BYTE* cData, WORD wLen);
-BOOL MPFSGetLong(MPFS_HANDLE hMPFS, DWORD* ul);
-BOOL MPFSSeek(MPFS_HANDLE hMPFS, DWORD dwOffset, MPFS_SEEK_MODE tMode);
+_Bool MPFSGet(MPFS_HANDLE hMPFS, uint8_t* c);
+uint16_t MPFSGetArray(MPFS_HANDLE hMPFS, uint8_t* cData, uint16_t wLen);
+_Bool MPFSGetLong(MPFS_HANDLE hMPFS, uint32_t* ul);
+_Bool MPFSSeek(MPFS_HANDLE hMPFS, uint32_t dwOffset, MPFS_SEEK_MODE tMode);
 #if defined(__C30__)
 	// Assembly function to read all three bytes of program memory for 16-bit parts
-	extern DWORD ReadProgramMemory(DWORD address);
+	extern uint32_t ReadProgramMemory(uint32_t address);
 #endif
 
 MPFS_HANDLE MPFSFormat(void);
-void MPFSPutEnd(BOOL final);
-WORD MPFSPutArray(MPFS_HANDLE hMPFS, BYTE* cData, WORD wLen);
+void MPFSPutEnd(_Bool final);
+uint16_t MPFSPutArray(MPFS_HANDLE hMPFS, uint8_t* cData, uint16_t wLen);
 
-DWORD MPFSGetTimestamp(MPFS_HANDLE hMPFS);
-DWORD MPFSGetMicrotime(MPFS_HANDLE hMPFS);
-WORD MPFSGetFlags(MPFS_HANDLE hMPFS);
-DWORD MPFSGetSize(MPFS_HANDLE hMPFS);
-DWORD MPFSGetBytesRem(MPFS_HANDLE hMPFS);
+uint32_t MPFSGetTimestamp(MPFS_HANDLE hMPFS);
+uint32_t MPFSGetMicrotime(MPFS_HANDLE hMPFS);
+uint16_t MPFSGetFlags(MPFS_HANDLE hMPFS);
+uint32_t MPFSGetSize(MPFS_HANDLE hMPFS);
+uint32_t MPFSGetBytesRem(MPFS_HANDLE hMPFS);
 MPFS_PTR MPFSGetStartAddr(MPFS_HANDLE hMPFS);
 MPFS_PTR MPFSGetEndAddr(MPFS_HANDLE hMPFS);
-BOOL MPFSGetFilename(MPFS_HANDLE hMPFS, BYTE* cName, WORD wLen);
-DWORD MPFSGetPosition(MPFS_HANDLE hMPFS);
-WORD MPFSGetID(MPFS_HANDLE hMPFS);
+_Bool MPFSGetFilename(MPFS_HANDLE hMPFS, uint8_t* cName, uint16_t wLen);
+uint32_t MPFSGetPosition(MPFS_HANDLE hMPFS);
+uint16_t MPFSGetID(MPFS_HANDLE hMPFS);
 
 // Alias of MPFSGetPosition
 #define MPFSTell(a)	MPFSGetPosition(a)
