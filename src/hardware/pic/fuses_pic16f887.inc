@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../appio.h"
+#include "../../pch.h"
+#include "../../appio.h"
    
 // Configuraton in garden source code
     
@@ -38,12 +38,12 @@ void enableInterrupts()
 }
 
 // Get a copy version of STATUS
-extern unsigned char __resetbits;
+extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-persistent BYTE g_exceptionPtr;
+__persistent uint8_t g_exceptionPtr;
 
 void sys_storeResetReason()
 {
