@@ -2,7 +2,7 @@
 #define	XC_HFD_TEMPLATE_H
 
 // Implement an additional polled UART for MCUs with one UART only (used by bus)
-#if defined(HAS_RS485_BUS) && defined(HAS_MAX232_SOFTWARE)
+#if defined(HAS_MAX232_SOFTWARE)
 
 #define SINK_HALFDUPLEX_ID "SLIN"
 void halfduplex_init();

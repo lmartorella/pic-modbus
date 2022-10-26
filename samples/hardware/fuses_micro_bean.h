@@ -5,8 +5,6 @@
 #define _XTAL_FREQ SYSTEM_CLOCK
 #define PRIO_TYPE
 
-#define HAS_RS485
-#define HAS_RS485_BUS
 #define HAS_RS485_BUS_SECONDARY
 
 // *****

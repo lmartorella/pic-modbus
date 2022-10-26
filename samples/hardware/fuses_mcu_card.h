@@ -22,7 +22,6 @@
 #define _XTAL_FREQ (SYSTEM_CLOCK)
 #define PRIO_TYPE low_priority
 
-#define HAS_RS485_BUS
 #define HAS_RS485_BUS_PRIMARY
 #define MASTER_MAX_CHILDREN 4
 
@@ -108,7 +107,6 @@
 // ******
 // RS485: use USART1 on 18F87J60 (PORTG)
 // ******
-#define HAS_RS485
 #define RS485_BUF_SIZE 64
 #ifdef PROTO_PINOUT
     #define RS485_RCSTA RCSTA2bits

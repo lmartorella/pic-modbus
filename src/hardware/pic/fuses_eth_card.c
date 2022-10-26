@@ -78,10 +78,8 @@ void enableInterrupts()
     INTCONbits.PEIE = 1;
     INTCON2bits.TMR0IP = 0;		// TMR0 Low priority
     
-#ifdef HAS_RS485
     // Enable low priority interrupt on transmit
     RS485_INIT_INT();
-#endif
 }
     
 // The pointer is pointing to ROM space that will not be reset

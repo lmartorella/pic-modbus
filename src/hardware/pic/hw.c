@@ -1,7 +1,7 @@
 #include "../../../../src/nodes/pch.h"
 
 /**
- * Uses .inc file to include compile-time code
+ * Route the right .c file to include compile-time code
  */
 
 #ifdef _IS_ETH_CARD
