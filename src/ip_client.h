@@ -5,8 +5,6 @@
  * Module to implement a master node (IP client)
  */
 
-#include "hardware/hw.h"
-
 #ifdef HAS_IP
 
 #if __XC8

@@ -1,10 +1,8 @@
 #include "pch.h"
 #include "rs485.h"
 #include "appio.h"
-
-#ifdef HAS_RS485
-
-#undef ETH_DEBUG_LINES
+#include "uart.h"
+#include "timers.h"
 
 RS485_STATE rs485_state;
 
@@ -48,11 +46,7 @@ void rs485_init()
 {
     uart_init();
     uart_receive();
-   
-#ifdef ETH_DEBUG_LINES
-    TRISDbits.RD0 = 0;
-#endif
-    
+       
     rs485_skipData = 0;
     rs485_over = 0;
     rs485_close = 0;
@@ -124,9 +118,6 @@ void rs485_interrupt()
                 uart_tx_fifo_empty_set_mask(false);
                 // goto first phase of tx end
                 s_lastTx = 1;
-#ifdef ETH_DEBUG_LINES
-                PORTDbits.RD0 = 1;
-#endif
                 break;
             }
         } while (uart_tx_fifo_empty());
@@ -203,9 +194,6 @@ void rs485_poll()
             break;
         case RS485_LINE_TX_DISENGAGE:
             if (elapsed >= DISENGAGE_CHANNEL_TIMEOUT) {
-#ifdef ETH_DEBUG_LINES
-                PORTDbits.RD0 = 0;
-#endif
                 // Detach TX line
                 rs485_state = RS485_LINE_RX;
                 rs485_startRead();
@@ -335,5 +323,3 @@ __bit rs485_read(uint8_t* data, uint8_t size)
         return ret;
     }   
 }
-
-#endif

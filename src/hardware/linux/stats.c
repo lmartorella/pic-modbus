@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "stats_raspbian.h"
+#include "../../stats.h"
 
 #define MIN_SIZE 16
 

@@ -1,5 +1,5 @@
-#ifndef STATS_RASPBIAN_H
-#define STATS_RASPBIAN_H
+#ifndef _NET_STATS_H
+#define _NET_STATS_H
 
 // Table of stats
 typedef struct {
@@ -13,5 +13,5 @@ void stats_delete(Stats* stats);
 void stats_add(Stats* stats, size_t item);
 void stats_clear(Stats* stats);
 
-#endif /* STATS_RASPBIAN_H */
+#endif /* _NET_STATS_H */
 

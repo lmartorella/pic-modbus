@@ -9,18 +9,13 @@
 // All TICKS are stored as 32-bit unsigned integers.
 
 // This value is used by TCP and other modules to implement timeout actions.
-// For this definition, the Timer must be initialized to use a 1:256 prescalar
+// For this definition, the Timer must be initialized to use a 1:256 pre-scalar
 // in Tick.c.  
 
 // Represents one second in Ticks
-#define TICK_SECOND				(TICK_TYPE)(TICKS_PER_SECOND)
+#define TICK_SECOND (TICK_TYPE)(TICKS_PER_SECOND)
 
 TICK_TYPE timers_get();
-
-/**
- * For ETH code
- */
-#define TickGet timers_get
 
 /**
  * Used by ETH code

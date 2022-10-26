@@ -5,12 +5,6 @@
  * Protocol implementation module
  */
 
-#ifdef HAS_RS485
-#include "rs485.h"
-#endif
-
-#ifdef HAS_RS485_BUS
-
 typedef enum { 
     // Message to beat a bean
     BUS_MSG_TYPE_HEARTBEAT = 1,
@@ -75,8 +69,6 @@ void prot_init();
 void prot_poll();
 // Has the slow timer ticked?
 extern __bit prot_slowTimer;
-
-#endif
 
 #endif	/* PROTOCOL_H */
 

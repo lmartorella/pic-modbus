@@ -1,9 +1,7 @@
 #ifndef PERSISTENCE_INCLUDE_
 #define PERSISTENCE_INCLUDE_
 
-#ifdef HAS_EEPROM
-#include "hardware/eeprom.h"
-#endif
+#include "guid.h"
 
 /**
  * The system persistence record
@@ -15,14 +13,13 @@ typedef struct
      */
 	GUID deviceId;
     
-    // Used by bus secondary
-#ifdef HAS_RS485_BUS_SECONDARY
     /**
-     * The bean node bus address
-     */ 
-    uint8_t address;
-    uint8_t filler;
-#endif
+     * The bean node bus address (only used by bus secondary)
+     */
+    struct {
+        uint8_t address;
+        uint8_t filler;
+    } sec;
 
 #ifdef HAS_PERSISTENT_SINK_DATA
     PERSISTENT_SINK_DATA sinkData;

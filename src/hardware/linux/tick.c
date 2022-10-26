@@ -1,8 +1,8 @@
 #include "../../pch.h"
-#include "../tick.h"
+#include "../../timers.h"
 #include <sys/time.h>
 
-uint32_t TickGet() {
+uint32_t timers_get() {
     struct timeval tv;
     if (gettimeofday(&tv, NULL) != 0) {
         fatal("gettimeofday");

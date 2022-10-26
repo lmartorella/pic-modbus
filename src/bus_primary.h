@@ -2,10 +2,8 @@
 #define	BUS_PRIM_H
 
 /**
- * Wired bus communication module (both master on bean nodes)
+ * Wired bus communication module, for net master
  */
-
-#ifdef HAS_RS485_BUS_PRIMARY
 
 void bus_prim_init();
 // Poll general bus activities
@@ -45,8 +43,6 @@ void bus_prim_resetDirtyChildren();
 // Get active children mask & size
 int bus_prim_getChildrenMaskSize();
 const uint8_t* bus_prim_getChildrenMask();
-
-#endif
 
 #endif	/* BUS_H */
 

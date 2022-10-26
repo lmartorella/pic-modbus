@@ -286,7 +286,6 @@
 #include "StackTsk.h"
 #include "Helpers.h"
 #include "Delay.h"
-#include "../../../hardware/tick.h"
 #include "MAC.h"
 #include "IP.h"
 #include "ARP.h"

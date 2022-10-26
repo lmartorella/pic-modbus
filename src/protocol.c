@@ -5,8 +5,8 @@
 #include "sinks.h"
 #include "bus_primary.h"
 #include "bus_secondary.h"
-
-#ifdef HAS_RS485_BUS
+#include "guid.h"
+#include "timers.h"
 
 #ifdef HAS_IP
 #include "ip_client.h"
@@ -316,5 +316,3 @@ void prot_poll()
         // Otherwise wait for data
     }
 }
-
-#endif

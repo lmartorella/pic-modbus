@@ -3,12 +3,12 @@
 #include "bus_primary.h"
 #include "protocol.h"
 #include "appio.h"
+#include "rs485.h"
+#include "timers.h"
 
 /**
  * Wired bus communication module for master nodes
  */
-
-#ifdef HAS_RS485_BUS_PRIMARY
 
 uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
 uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
@@ -430,5 +430,3 @@ const uint8_t* bus_prim_getChildrenMask()
 {
     return bus_prim_knownChildren;
 }
-
-#endif

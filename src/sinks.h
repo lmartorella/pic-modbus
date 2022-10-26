@@ -5,10 +5,6 @@
  * Sink definition and API module
  */
 
-#include "hardware/hw.h"
-
-#ifdef HAS_RS485_BUS
-
 /**
  * Init sinks
  */
@@ -56,5 +52,4 @@ extern const SinkFunction const sink_readHandlers[];
  */
 extern const SinkFunction const sink_writeHandlers[];
 
-#endif
 #endif

@@ -8,12 +8,11 @@
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
           <itemPath>../hardware/fuses_mcu_card.h</itemPath>
         </logicalFolder>
-        <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
-        <itemPath>../../../src/nodes/hardware/wait.h</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
+        <itemPath>../../../src/nodes/leds.h</itemPath>
+        <itemPath>../../../src/nodes/timers.h</itemPath>
+        <itemPath>../../../src/nodes/uart.h</itemPath>
+        <itemPath>../../../src/nodes/wait.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
         <logicalFolder name="Include" displayName="Include" projectFiles="true">
@@ -53,7 +52,7 @@
           <itemPath>../../../src/nodes/tcpipstack/Include/GenericTypeDefs_old.h</itemPath>
           <itemPath>../../../src/nodes/tcpipstack/Include/struct_queue.h</itemPath>
           <itemPath>../../../src/nodes/tcpipstack/Include/TimeDelay.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/timer.h</itemPath>
+          <itemPath>../../../src/nodes/tcpipstack/Include/timers.h</itemPath>
         </logicalFolder>
         <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
         </logicalFolder>
@@ -81,8 +80,9 @@
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.inc</itemPath>
         </logicalFolder>
-        <itemPath>../../../src/nodes/hardware/pic/eeprom.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/eeprom_pic18.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/tick_pic18.c</itemPath>
         <itemPath>../hardware/cm1602.c</itemPath>
         <itemPath>../hardware/counter.c</itemPath>
@@ -113,10 +113,10 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>../main.c</itemPath>
-      <itemPath>../../../src/nodes/persistence.c</itemPath>
+      <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
       <itemPath>../../../src/nodes/appio.c</itemPath>
       <itemPath>../../../src/nodes/bus_primary.c</itemPath>
-      <itemPath>../../../src/nodes/lib8.c</itemPath>
+      <itemPath>../../../src/nodes/hardware/pic/lib8.c</itemPath>
       <itemPath>../../../src/nodes/ip_client.c</itemPath>
       <itemPath>../../../src/nodes/sinks.c</itemPath>
       <itemPath>../../../src/nodes/rs485.c</itemPath>

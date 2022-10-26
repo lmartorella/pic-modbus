@@ -5,8 +5,6 @@
  * High-level RS485 operation module virtualization
  */
 
-#ifdef HAS_RS485
-
 /**
  * State of the wired line
  */
@@ -99,7 +97,5 @@ typedef enum {
 #define set_rs485_over() rs485_over=1;
 #endif
 
-#endif
-
-#endif	/* USART_H */
+#endif	/* RS485_H */
 

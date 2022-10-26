@@ -1,16 +1,15 @@
 #include "pch.h"
 #include "rs485.h"
-#include "hardware/tick.h"
+#include "timers.h"
 #include "bus_secondary.h"
 #include "protocol.h"
 #include "persistence.h"
 #include "appio.h"
+#include "leds.h"
 
 /**
  * Wired bus communication module for secondary RS485 nodes
  */
-
-#ifdef HAS_RS485_BUS_SECONDARY
 
 static enum {
     STATE_HEADER_0 = 0,         // header0, 55
@@ -68,24 +67,24 @@ void bus_sec_init()
 #endif
     ) {
         // Reset address
-        pers_data.address = UNASSIGNED_SUB_ADDRESS;       
+        pers_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
         pers_save();
         s_availForAddressAssign = true;
     } 
 
-    if (pers_data.address == UNASSIGNED_SUB_ADDRESS) {
+    if (pers_data.sec.address == UNASSIGNED_SUB_ADDRESS) {
         // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
 
-    s_header[2] = pers_data.address;
+    s_header[2] = pers_data.sec.address;
 
     reinit_quick();
 }
 
 static void storeAddress()
 {
-    pers_data.address = s_header[2] = s_tempAddressForAssignment;
+    pers_data.sec.address = s_header[2] = s_tempAddressForAssignment;
     pers_save();
     
     s_availForAddressAssign = false;
@@ -236,5 +235,3 @@ __bit prot_control_isConnected()
 {
     return s_state == STATE_SOCKET_OPEN;
 }
-
-#endif

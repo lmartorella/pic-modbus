@@ -1,5 +1,5 @@
 #include "../../../../src/nodes/pch.h"
-#include "../tick.h"
+#include "../timers.h"
 
 #ifdef _IS_ETH_CARD
 

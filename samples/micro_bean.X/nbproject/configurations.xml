@@ -14,12 +14,11 @@
       </logicalFolder>
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/eeprom.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/hw.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/leds.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/tick.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/uart.h</itemPath>
-          <itemPath>../../../src/nodes/hardware/wait.h</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
+          <itemPath>../../../src/nodes/leds.h</itemPath>
+          <itemPath>../../../src/nodes/timers.h</itemPath>
+          <itemPath>../../../src/nodes/uart.h</itemPath>
+          <itemPath>../../../src/nodes/wait.h</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/ip_client.h</itemPath>
         <itemPath>../../../src/nodes/pch.h</itemPath>
@@ -62,13 +61,14 @@
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
           <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/eeprom.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
         </logicalFolder>
         <itemPath>../main.c</itemPath>
         <itemPath>../../../src/nodes/appio.c</itemPath>
         <itemPath>../../../src/nodes/bus_secondary.c</itemPath>
-        <itemPath>../../../src/nodes/lib8.c</itemPath>
-        <itemPath>../../../src/nodes/persistence.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/lib8.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
         <itemPath>../../../src/nodes/protocol.c</itemPath>
         <itemPath>../../../src/nodes/rs485.c</itemPath>
         <itemPath>../../../src/nodes/sinks.c</itemPath>

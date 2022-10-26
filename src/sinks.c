@@ -3,15 +3,13 @@
 #include "appio.h"
 #include "protocol.h"
 #include "bus_primary.h"
+#include "guid.h"
+#include "timers.h"
 
-#ifdef HAS_RS485_BUS
-
-const TWOCC ResetCode = { "RS" };
-const TWOCC ExceptionText = { "EX" };
-const TWOCC EndOfMetadataText = { "EN" };
-#ifdef HAS_RS485_BUS_PRIMARY
-const TWOCC BusMasterStats = { "BM" };
-#endif
+static const TWOCC ResetCode = { "RS" };
+static const TWOCC ExceptionText = { "EX" };
+static const TWOCC EndOfMetadataText = { "EN" };
+static const TWOCC BusMasterStats = { "BM" };
 
 enum SYSSINK_CMD {
     SYSSINK_CMD_RESET = 1,
@@ -70,5 +68,3 @@ __bit sys_write()
     // Finish
     return false;
 }
-
-#endif
