@@ -78,7 +78,7 @@
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.inc</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.c</itemPath>
         </logicalFolder>
         <itemPath>../../../src/nodes/hardware/pic/eeprom_pic18.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
