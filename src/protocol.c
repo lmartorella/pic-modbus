@@ -316,3 +316,11 @@ void prot_poll() {
         // Otherwise wait for data
     }
 }
+
+void prot_control_close() {
+#ifdef HAS_RS485_BUS_PRIMARY
+    ip_flush();
+#elif defined HAS_RS485_BUS_SECONDARY
+    bus_sec_abort();
+#endif
+}

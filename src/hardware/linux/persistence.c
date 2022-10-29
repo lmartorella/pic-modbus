@@ -59,3 +59,7 @@ void pers_save()
         flog("Persistence file write err: %d", errno);
     }
 }
+
+void pers_poll() {
+    
+}
