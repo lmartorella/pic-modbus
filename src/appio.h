@@ -20,10 +20,12 @@ void io_printlnStatus(const char* msg);
  */
 void io_println(const char* msg);
 
+#ifdef DEBUGMODE
 /**
  * Print a char in the current row at the cursor (for debug builds)
  */
 void io_printChDbg(char ch);
+#endif
 
 /**
  * Enumerates the reason of a reset. Mainly used for MCU codes
@@ -86,7 +88,7 @@ extern LAST_EXC_TYPE g_lastException;
  */
 void sys_storeResetReason();
 
-#ifdef __POSIX
+#ifdef _CONF_POSIX
 /**
  * Log on log file (Linux only)
  */

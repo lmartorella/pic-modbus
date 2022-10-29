@@ -5,7 +5,6 @@
 #include "persistence.h"
 #include "bus_primary.h"
 
-#ifdef HAS_IP
 #ifdef __XC8
     #include "tcpipstack/Include/Compiler.h"
     #include "tcpipstack/Include/TCPIPStack/TCPIP.h"
@@ -24,12 +23,6 @@ static __bit s_lastDhcpState = false;
 static __bit s_sendHelo = 0;
 
 static void pollControlPort();
-
-void prot_control_close()
-{
-    TCPFlush(s_controlSocket);
-    // Leave the socket open
-}
 
 // Close the control port listener
 void prot_control_abort()
@@ -94,7 +87,7 @@ uint16_t prot_control_writeAvail()
 void ip_prot_init()
 {
     io_println("IP/DHCP");
-#if defined(__POSIX)
+#if defined(_CONF_POSIX)
     printf("Listen port: %d\n", SERVER_CONTROL_UDP_PORT);
 #endif
     
@@ -198,4 +191,7 @@ void ip_poll()
     }
 }
 
-#endif // HAS_IP
+void ip_flush() {
+    TCPFlush(s_controlSocket);
+    // Leave the socket open
+}

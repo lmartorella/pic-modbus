@@ -101,7 +101,7 @@
 #define INIT_DIGIO_IN_PORT() \
      ANSELBbits.ANSB3 = 0;   \
      TRISBbits.TRISB3 = 1;   \
-#define INTERRUPT_VECTOR dcnt_interrupt
+#define BEAN_INTERRUPT_VECTOR dcnt_interrupt
 */
 
 // Analog integrator

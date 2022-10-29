@@ -49,6 +49,8 @@ typedef enum {
 #define prot_control_idle(buf) rs485_write(true, buf, 1)
 #define prot_control_readAvail() rs485_readAvail()
 #define prot_control_writeAvail() rs485_writeAvail()
+#define prot_control_close() bus_sec_abort()
+#define prot_control_isConnected() bus_sec_isConnected()
 #else
 __bit prot_control_readW(uint16_t* w);
 __bit prot_control_read(void* data, uint16_t size);
@@ -59,11 +61,11 @@ void prot_control_over();
 uint16_t prot_control_readAvail();
 uint16_t prot_control_writeAvail();
 extern __bit prot_registered;
+void prot_control_close();
+#define prot_control_isConnected() ip_isConnected()
 #endif
 
-void prot_control_close();
 void prot_control_abort();
-__bit prot_control_isConnected();
 
 void prot_init();
 void prot_poll();

@@ -31,6 +31,13 @@ void ip_prot_init();
  */
 void ip_prot_slowTimer();
 
+/**
+ * Flush socket data
+ */
+void ip_flush();
+
+__bit ip_isConnected();
+
 #endif
 
 #endif //#ifdef HAS_IP

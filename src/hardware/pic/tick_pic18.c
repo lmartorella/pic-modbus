@@ -1,8 +1,6 @@
 #include "../../../../src/nodes/pch.h"
 #include "../timers.h"
 
-#ifdef _IS_ETH_CARD
-
 // Internal counter to store Ticks.  This variable is incremented in an ISR and
 // therefore must be marked volatile to prevent the compiler optimizer from
 // reordering code to use this value in the main context while interrupts are
@@ -221,5 +219,3 @@ void timers_poll(void)
         TICK_INTCON_IF = 0;
     }
 }
-
-#endif

@@ -7,8 +7,8 @@
 #include "../../src/nodes/bus_primary.h"
 #include "../../src/nodes/bus_secondary.h"
 
-#ifdef INTERRUPT_VECTOR
-extern void INTERRUPT_VECTOR();
+#ifdef BEAN_INTERRUPT_VECTOR
+extern void BEAN_INTERRUPT_VECTOR();
 #endif
 
 void __interrupt(PRIO_TYPE) low_isr()
@@ -16,8 +16,8 @@ void __interrupt(PRIO_TYPE) low_isr()
     // Update tick timers at ~Khz freq
     timers_poll();
     rs485_interrupt();
-#ifdef INTERRUPT_VECTOR
-    INTERRUPT_VECTOR();
+#ifdef BEAN_INTERRUPT_VECTOR
+    BEAN_INTERRUPT_VECTOR();
 #endif
 }
 
@@ -29,6 +29,7 @@ void main()
     // Init Ticks on timer0 (low prio) module
     timers_init();
     io_init();
+    led_init();
 
     pers_load();
 

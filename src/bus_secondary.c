@@ -221,8 +221,7 @@ void bus_sec_poll()
 }
 
 // Close the socket
-void prot_control_close()
-{
+void bus_sec_abort() {
     // set_rs485_close
     rs485_over = 1;
     rs485_close = 1;
@@ -231,7 +230,7 @@ void prot_control_close()
 }
 
 // Socket connected?
-__bit prot_control_isConnected()
+__bit bus_sec_isConnected()
 {
     return s_state == STATE_SOCKET_OPEN;
 }

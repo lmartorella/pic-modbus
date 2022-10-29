@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "appio.h"
+#include "../../pch.h"
+#include "../../appio.h"
 
 #ifdef HAS_CM1602
 #include "../../samples/beans/hardware/cm1602.h"
@@ -33,8 +33,7 @@ static void _stdout(const char* str) {
 }
 #endif
 
-void io_init()
-{
+void io_init() {
 #ifdef HAS_CM1602
     // reset display
     cm1602_reset();
@@ -60,16 +59,10 @@ void io_init()
         _stdout((const char*)g_lastException);
     }
 #endif
-
-#ifdef HAS_LED
-    led_init();
-    led_off();
-#endif
 }
 
 #ifdef HAS_CM1602
-static void _clr(uint8_t addr)
-{
+static void _clr(uint8_t addr) {
 	char i;
 	cm1602_setDdramAddr(addr);
 	for (i = 0; i < 16; i++)
@@ -81,58 +74,34 @@ static void _clr(uint8_t addr)
 #endif
 
 #ifdef HAS_CM1602
-static void _print(const char* str, uint8_t addr)
-{
+static void _print(const char* str, uint8_t addr) {
 	_clr(addr);
 	cm1602_writeStr(str);
 	CLRWDT();
 }
 #endif
 
-void io_println(const char* str)
-{
+void io_println(const char* str) {
 #ifdef HAS_CM1602
 	_print(str, 0x40);	
 #elif defined(HAS_DEBUG_LINE)
     _stdout(str);
-#elif defined(__POSIX)
-    printf("%s\r\n", str);
-    fflush(stdout);
 #endif
 }
 
-void io_printlnStatus(const char* str)
-{
+void io_printlnStatus(const char* str) {
 #ifdef HAS_CM1602
 	_print(str, 0x00);	
 #elif defined(HAS_DEBUG_LINE)
     _stdout(str);
-#elif defined(__POSIX)
-    printf("%s\r\n", str);
-    fflush(stdout);
 #endif
 }
 
-void io_printChDbg(char ch)
-{
+void io_printChDbg(char ch) {
 #ifdef HAS_CM1602
     cm1602_write(ch);
 #elif defined(HAS_DEBUG_LINE)
     max232_buffer1[0] = ch;
     max232_send(1);
-#elif defined(__POSIX)
-    printf("%c", ch);
-    fflush(stdout);
 #endif
 }
-
-#ifdef __POSIX
-void flog(const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-
-    vprintf(format, args);
-    printf("\n");
-    fflush(stdout);
-}
-#endif

@@ -116,7 +116,6 @@
       <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
       <itemPath>../../../src/nodes/appio.c</itemPath>
       <itemPath>../../../src/nodes/bus_primary.c</itemPath>
-      <itemPath>../../../src/nodes/hardware/pic/lib8.c</itemPath>
       <itemPath>../../../src/nodes/ip_client.c</itemPath>
       <itemPath>../../../src/nodes/sinks.c</itemPath>
       <itemPath>../../../src/nodes/rs485.c</itemPath>

@@ -181,8 +181,7 @@ static __bit memcmp2(char c1, char c2, char d1, char d2) {
 /*
     Manage POLLs (read buffers)
 */
-void prot_poll()
-{
+void prot_poll() {
     prot_slowTimer = 0;
     CLRWDT();
 #ifdef HAS_IP
@@ -315,4 +314,10 @@ void prot_poll()
         }
         // Otherwise wait for data
     }
+}
+
+void prot_control_close() {
+#ifdef HAS_RS485_BUS_PRIMARY
+    ip_flush();
+#endif
 }
