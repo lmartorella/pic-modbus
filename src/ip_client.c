@@ -11,10 +11,6 @@
     APP_CONFIG AppConfig;
 #endif
     
-#ifndef HAS_RS485_BUS_PRIMARY
-#error IP requires bus server
-#endif
-
 // UDP broadcast socket
 static UDP_SOCKET s_heloSocket;  
 // TCP lister control socket

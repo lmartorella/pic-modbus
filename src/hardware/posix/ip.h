@@ -4,6 +4,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+/**
+ * Uses the same API of the Microchip TCP stack
+ */
+
 typedef uint16_t UDP_PORT;
 typedef int UDP_SOCKET;
 typedef int TCP_SOCKET;
