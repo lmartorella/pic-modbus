@@ -90,7 +90,7 @@ void sys_storeResetReason();
 
 #ifdef _CONF_POSIX
 /**
- * Log on log file (Linux only)
+ * Log on log file (Posix only)
  */
 void flog(const char* format, ...);
 #else

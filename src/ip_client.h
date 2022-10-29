@@ -13,7 +13,7 @@
 #endif
 
 #if _CONF_POSIX
-#include "hardware/linux/ip.h"
+#include "hardware/posix/ip.h"
 #endif
 
 /**
