@@ -33,7 +33,7 @@ extern PersistentData pers_data;
 // Update copy of persistence
 void pers_load();
 // Poll long-running writing operations 
-#define pers_poll rom_poll
+void pers_poll();
 // Program the new content of the UserData
 void pers_save();
 

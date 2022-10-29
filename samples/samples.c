@@ -74,7 +74,7 @@ const int SINK_IDS_COUNT =
 #endif
 ;
 
-const SinkFunction const sink_readHandlers[] = {
+const SinkFunction sink_readHandlers[] = {
     sys_read
 #ifdef HAS_DIGIO_OUT
     ,digio_out_read
@@ -102,7 +102,7 @@ const SinkFunction const sink_readHandlers[] = {
 #endif
 };
 
-const SinkFunction const sink_writeHandlers[] = {
+const SinkFunction sink_writeHandlers[] = {
     sys_write
 #ifdef HAS_DIGIO_OUT
     ,digio_out_write

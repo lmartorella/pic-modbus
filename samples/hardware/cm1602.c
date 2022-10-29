@@ -1,4 +1,5 @@
 #include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/wait.h"
 #include "cm1602.h"
 
 #ifdef HAS_CM1602

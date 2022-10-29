@@ -40,11 +40,12 @@ typedef enum {
 #define UNASSIGNED_SUB_ADDRESS 0xff
 
 #ifdef HAS_RS485_BUS_SECONDARY
+#include "rs485.h"
 // Directly with define in order to minimize stack usage
 #define prot_control_readW(w) rs485_read((uint8_t*)w, 2) 
-#define prot_control_read(data, size) rs485_read((uint8_t*)data, size)
+#define prot_control_read(data, size) rs485_read((uint8_t*)data, (uint8_t)size)
 #define prot_control_writeW(w) rs485_write(false, (uint8_t*)&w, 2)
-#define prot_control_write(data, size) rs485_write(false, (uint8_t*)data, size)
+#define prot_control_write(data, size) rs485_write(false, (uint8_t*)data, (uint8_t)size)
 #define prot_control_over() set_rs485_over()
 #define prot_control_idle(buf) rs485_write(true, buf, 1)
 #define prot_control_readAvail() rs485_readAvail()

@@ -1,10 +1,11 @@
 #include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/timers.h"
 #include "an_integrator.h"
 
 #ifdef HAS_ANALOG_INTEGRATOR
 
-static long int _accumulator;
-static int _count;
+static int32_t _accumulator;
+static int16_t _count;
 static enum {
     IDLE,
     SAMPLING    
@@ -44,7 +45,7 @@ void anint_poll() {
             // Check if sample is done
             // if done, read it and 
             if (!ADCON0bits.GO) {
-                uint16_t value = (ADRESH << 8) + ADRESL;
+                uint16_t value = (uint16_t)((ADRESH << 8) + ADRESL);
                 _accumulator += value;
                 _count++;
                 if (_accumulator < 0 || _count < 0) {
@@ -58,8 +59,8 @@ void anint_poll() {
 }
 
 void anint_read(ANALOG_INTEGRATOR_DATA* data) {
-    data->count = _count;
-    data->value = _accumulator;
+    data->count = (uint16_t)_count;
+    data->value = (uint32_t)_accumulator;
     _count = 0;
     _accumulator = 0;
 }

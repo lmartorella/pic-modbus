@@ -57,6 +57,8 @@
 #ifndef __COMPILER_H
 #define __COMPILER_H
 
+#include "../../pch.h"
+
 // Include proper device header file
 //#if defined(__18CXX) && !defined(HI_TECH_C)	
 //	// PIC18 processor with Microchip C18 compiler

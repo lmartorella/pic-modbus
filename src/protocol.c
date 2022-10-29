@@ -7,6 +7,7 @@
 #include "bus_secondary.h"
 #include "guid.h"
 #include "timers.h"
+#include "rs485.h"
 
 #ifdef HAS_IP
 #include "ip_client.h"
@@ -15,8 +16,8 @@
 static TICK_TYPE s_slowTimer;
 __bit prot_slowTimer;
 
-static signed char s_inReadSink;
-static signed char s_inWriteSink;
+static int8_t s_inReadSink;
+static int8_t s_inWriteSink;
 // SORTED IN ORDER OF NEEDED BYTES!
 static enum { 
     CMD_CLOS, // need 0
@@ -156,7 +157,7 @@ static void READ_command()
     {
         fatal("RD.u");
     }   
-    s_inWriteSink = sinkId;
+    s_inWriteSink = (int8_t)sinkId;
 }
 
 // 2 bytes to receive
@@ -170,7 +171,7 @@ static void WRIT_command()
     {
         fatal("WR.u");
     }
-    s_inReadSink = sinkId;
+    s_inReadSink = (int8_t)sinkId;
 }
 
 // Code-memory optimized for small PIC XC8
@@ -314,10 +315,4 @@ void prot_poll() {
         }
         // Otherwise wait for data
     }
-}
-
-void prot_control_close() {
-#ifdef HAS_RS485_BUS_PRIMARY
-    ip_flush();
-#endif
 }

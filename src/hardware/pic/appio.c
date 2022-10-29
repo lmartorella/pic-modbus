@@ -2,7 +2,7 @@
 #include "../../appio.h"
 
 #ifdef HAS_CM1602
-#include "../../samples/beans/hardware/cm1602.h"
+#include "../../../../samples/beans/hardware/cm1602.h"
 #endif
 
 LAST_EXC_TYPE g_lastException = 0;

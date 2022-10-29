@@ -4,8 +4,10 @@
 #include "../../src/nodes/persistence.h"
 #include "../../src/nodes/protocol.h"
 #include "../../src/nodes/sinks.h"
-#include "../../src/nodes/bus_primary.h"
 #include "../../src/nodes/bus_secondary.h"
+#include "../../src/nodes/timers.h"
+#include "../../src/nodes/leds.h"
+#include "../../src/nodes/wait.h"
 
 #ifdef BEAN_INTERRUPT_VECTOR
 extern void BEAN_INTERRUPT_VECTOR();

@@ -5,14 +5,12 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <logicalFolder name="f1" displayName="pic" projectFiles="true">
-          <itemPath>../hardware/fuses_mcu_card.h</itemPath>
-        </logicalFolder>
         <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
         <itemPath>../../../src/nodes/leds.h</itemPath>
         <itemPath>../../../src/nodes/timers.h</itemPath>
         <itemPath>../../../src/nodes/uart.h</itemPath>
         <itemPath>../../../src/nodes/wait.h</itemPath>
+        <itemPath>../hardware/fuses_mcu_card.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
         <logicalFolder name="Include" displayName="Include" projectFiles="true">
@@ -77,17 +75,12 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <logicalFolder name="f1" displayName="pic" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.c</itemPath>
-        </logicalFolder>
         <itemPath>../../../src/nodes/hardware/pic/eeprom_pic18.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/tick_pic18.c</itemPath>
         <itemPath>../hardware/cm1602.c</itemPath>
-        <itemPath>../hardware/counter.c</itemPath>
-        <itemPath>../hardware/i2c.c</itemPath>
-        <itemPath>../hardware/max232_sw.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.c</itemPath>
@@ -96,6 +89,9 @@
         <itemPath>../sinks/displaySink.c</itemPath>
         <itemPath>../sinks/flowCounter.c</itemPath>
         <itemPath>../sinks/halfduplex.c</itemPath>
+        <itemPath>../hardware/counter.c</itemPath>
+        <itemPath>../hardware/max232_sw.c</itemPath>
+        <itemPath>../hardware/i2c.c</itemPath>
       </logicalFolder>
       <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
         <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
@@ -114,7 +110,6 @@
       </logicalFolder>
       <itemPath>../main.c</itemPath>
       <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
-      <itemPath>../../../src/nodes/appio.c</itemPath>
       <itemPath>../../../src/nodes/bus_primary.c</itemPath>
       <itemPath>../../../src/nodes/ip_client.c</itemPath>
       <itemPath>../../../src/nodes/sinks.c</itemPath>
@@ -146,7 +141,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.2.31"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.4.41"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -175,6 +170,62 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../hardware/counter.c" ex="true" overriding="false">
+      </item>
+      <item path="../hardware/i2c.c" ex="true" overriding="false">
+      </item>
+      <item path="../hardware/max232_sw.c" ex="true" overriding="false">
+      </item>
+      <item path="../sinks/bmp180.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+      <item path="../sinks/dht11.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+      <item path="../sinks/digio.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+      <item path="../sinks/flowCounter.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+      <item path="../sinks/halfduplex.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>
@@ -225,10 +276,10 @@
         <property key="code-model-rom" value=""/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
-        <property key="data-model-size-of-double" value="24"/>
-        <property key="data-model-size-of-double-gcc" value="short-double"/>
-        <property key="data-model-size-of-float" value="24"/>
-        <property key="data-model-size-of-float-gcc" value="short-float"/>
+        <property key="data-model-size-of-double" value="32"/>
+        <property key="data-model-size-of-double-gcc" value="no-short-double"/>
+        <property key="data-model-size-of-float" value="32"/>
+        <property key="data-model-size-of-float-gcc" value="no-short-float"/>
         <property key="display-class-usage" value="false"/>
         <property key="display-hex-usage" value="false"/>
         <property key="display-overall-usage" value="true"/>

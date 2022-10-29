@@ -16,7 +16,7 @@
 // Erase the entire row (destination should be multiple of ROW_SIZE = 1Kb)
 // and then copy the source bytes to the start of row, length should be at max 1Kb
 void rom_write(const void* destination, const void* source, uint16_t length);
-#define rom_poll()
+#define pers_poll()
 
 #define EEPROM_MODIFIER const
 
@@ -27,6 +27,5 @@ void rom_write(uint8_t destinationAddr, const uint8_t* source, uint8_t length);
 
 #define EEPROM_MODIFIER __eeprom
 
-void rom_poll();
-
+#endif
 #endif

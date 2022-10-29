@@ -36,8 +36,8 @@ BUS_PRIMARY_STATE bus_prim_getState();
 
 // Dirty children
 extern __bit bus_prim_hasDirtyChildren;
-extern uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
-extern uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
+extern uint8_t bus_prim_dirtyChildren[];
+extern uint8_t bus_prim_knownChildren[];
 void bus_prim_resetDirtyChildren();
 
 // Get active children mask & size

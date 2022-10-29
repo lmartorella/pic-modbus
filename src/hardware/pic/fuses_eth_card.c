@@ -1,5 +1,6 @@
 #include "../../pch.h"
 #include "../../appio.h"
+#include "../../wait.h"
     
 // ==== ETH CARD based on 18f87j60
 

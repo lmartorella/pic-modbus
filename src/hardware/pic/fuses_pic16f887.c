@@ -58,7 +58,7 @@ void sys_storeResetReason()
                 // Watchdog is used for RESET() on pic16!
                 if (g_exceptionPtr != 0) { 
                     g_resetReason = RESET_EXC;
-                    g_lastException = (const char*)g_exceptionPtr;
+                    g_lastException = (LAST_EXC_TYPE)g_exceptionPtr;
                 }
                 else {
                     g_resetReason = RESET_WATCHDOG;

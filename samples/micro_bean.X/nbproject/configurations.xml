@@ -48,9 +48,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <logicalFolder name="f1" displayName="pic" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/pic/fuses_pic16f1827.c</itemPath>
-        </logicalFolder>
         <itemPath>../hardware/cm1602.c</itemPath>
         <itemPath>../hardware/counter.c</itemPath>
         <itemPath>../hardware/i2c.c</itemPath>
@@ -60,12 +57,12 @@
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/hw.c</itemPath>
           <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
           <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
+          <itemPath>../../../src/nodes/hardware/pic/fuses_pic16f1827.c</itemPath>
         </logicalFolder>
         <itemPath>../main.c</itemPath>
-        <itemPath>../../../src/nodes/appio.c</itemPath>
         <itemPath>../../../src/nodes/bus_secondary.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
         <itemPath>../../../src/nodes/protocol.c</itemPath>

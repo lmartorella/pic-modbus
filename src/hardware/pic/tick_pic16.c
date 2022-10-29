@@ -67,7 +67,7 @@ void timers_init(void)
   Returns:
   	Lower 16 bits of the current Tick value.
   ***************************************************************************/
-uint16_t TickGet()
+uint16_t timers_get()
 {
     CLRWDT();
     // 2-byte value to store Ticks.  

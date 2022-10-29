@@ -46,10 +46,10 @@ extern const int SINK_IDS_COUNT;
 /**
  * The sink read handlers
  */
-extern const SinkFunction const sink_readHandlers[];
+extern const SinkFunction sink_readHandlers[];
 /**
  * The sink write handlers
  */
-extern const SinkFunction const sink_writeHandlers[];
+extern const SinkFunction sink_writeHandlers[];
 
 #endif

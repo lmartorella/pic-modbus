@@ -28,7 +28,7 @@ static uint8_t s_destinationAddr;
 static const uint8_t* s_source;
 
 // Since writing is slow, cannot lose protocol data. Hence polling
-void rom_poll() 
+void pers_poll() 
 {
     // Data to write and previous write operation finished?
     if (s_length > 0 && !EECON1bits.WR) {
