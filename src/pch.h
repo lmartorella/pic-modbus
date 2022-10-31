@@ -43,7 +43,7 @@ typedef unsigned char __bit;
 #define _IS_PIC16F1827_CARD
 
 #elif defined(_CONF_POSIX)
-#include "../../samples/netmaster/hardware/fuses_raspbian.h"
+#include "hardware/posix/fuses_posix_primary.h"
 #define _IS_RASPI_CARD
 
 #else
