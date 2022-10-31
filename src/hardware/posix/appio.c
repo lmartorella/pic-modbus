@@ -32,3 +32,14 @@ void flog(const char* format, ...) {
     printf("\n");
     fflush(stdout);
 }
+
+void sys_storeResetReason()
+{ }
+
+void enableInterrupts() 
+{ }
+
+void fatal(const char* str) {
+    fprintf(stderr, "FATAL: %s\n", str);
+    exit(1);
+}
