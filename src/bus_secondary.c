@@ -48,11 +48,6 @@ static void reinit_quick()
     rs485_skipData = true;
 }
 
-__bit bus_sec_isIdle() 
-{
-    return s_state == STATE_HEADER_0;
-}
-
 void bus_sec_init()
 {
     // Prepare address
@@ -100,10 +95,10 @@ static void sendAck(uint8_t ackCode) {
 }
 
 // Called often
-void bus_sec_poll()
+__bit bus_sec_poll()
 {
     uint8_t buf;
-    
+
     switch (s_state) {
         case STATE_SOCKET_OPEN: 
             if (rs485_lastRc9) {
@@ -146,6 +141,7 @@ void bus_sec_poll()
                     }
                 }
                 else {
+                    _Bool isManaged = false;
                     // Header correct. Now read the command and respond
                     switch (buf) { 
                         case BUS_MSG_TYPE_ADDRESS_ASSIGN:
@@ -158,7 +154,7 @@ void bus_sec_poll()
                                 // Store the new address in memory
                                 storeAddress();
                                 sendAck(BUS_ACK_TYPE_HEARTBEAT);
-                                return;
+                                isManaged = true;
                             }
                             break;
 
@@ -171,7 +167,7 @@ void bus_sec_poll()
                                 sendAck(s_known ? 
                                     (g_resetReason == RESET_NONE ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_READ_STATUS) 
                                         : BUS_ACK_TYPE_HELLO);
-                                return;
+                                isManaged = true;
                             }
                             break;
 
@@ -182,7 +178,7 @@ void bus_sec_poll()
                             // Only respond to hello if ready to program
                             if (s_availForAddressAssign) {
                                 sendAck(BUS_ACK_TYPE_HELLO);
-                                return;
+                                isManaged = true;
                             }
                             break;
 
@@ -197,7 +193,7 @@ void bus_sec_poll()
                                 rs485_skipData = rs485_lastRc9 = false;
                                 // Socket, direct connect
                                 s_state = STATE_SOCKET_OPEN;
-                                return;
+                                isManaged = true;
                             }
                             break;
                         default:
@@ -213,11 +209,15 @@ void bus_sec_poll()
 #ifdef DEBUGMODE
                     io_printChDbg('-');
 #endif
-                    // If not managed, reinit bus for the next message
-                    reinit_after_disengage();
+                    if (!isManaged) {
+                        // If not managed, reinit bus for the next message
+                        reinit_after_disengage();
+                    }
                 }
             }
     }
+
+    return s_state != STATE_HEADER_0;
 }
 
 // Close the socket

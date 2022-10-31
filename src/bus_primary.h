@@ -2,13 +2,15 @@
 #define	BUS_PRIM_H
 
 /**
- * Wired bus communication module, for net master
+ * Wired bus communication module, for primary (master) nodes
  */
 
 void bus_prim_init();
-// Poll general bus activities
-void bus_prim_poll();
-__bit bus_prim_isIdle();
+/**
+ * Poll general bus activities
+ * Returns true if the node is active and requires polling
+ */
+_Bool bus_prim_poll();
 
 // 8*8 = 63 max children (last is broadcast)
 #define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)

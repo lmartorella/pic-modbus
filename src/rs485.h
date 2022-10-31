@@ -35,8 +35,9 @@ void rs485_interrupt();
 
 /**
  * Poll as much as possible (internal timered)
+ * Returns true if active and require polling
  */
-void rs485_poll();
+_Bool rs485_poll();
 
 // Enqueue bytes to send. Use 9-bit address. Buffer is copied (max. 32 bytes)
 // Warning: the address bit is used immediately and not enqueued to the buffer

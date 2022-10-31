@@ -32,8 +32,11 @@ extern PersistentData pers_data;
 
 // Update copy of persistence
 void pers_load();
-// Poll long-running writing operations 
-void pers_poll();
+/**
+ * Poll long-running writing operations 
+ * Returns true if active and require polling
+ * */
+_Bool pers_poll();
 // Program the new content of the UserData
 void pers_save();
 

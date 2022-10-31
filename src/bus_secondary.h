@@ -6,9 +6,13 @@
  */
 
 void bus_sec_init();
-// Poll general bus activities
-void bus_sec_poll();
-__bit bus_sec_isIdle();
+
+/**
+ * Poll general bus activities
+ * Returns true if the node is active and requires polling
+ */
+__bit bus_sec_poll();
+
 void bus_sec_abort();
 __bit bus_sec_isConnected();
 

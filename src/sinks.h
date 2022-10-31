@@ -12,8 +12,9 @@ void sinks_init();
 
 /**
  * Poll sinks
+ * Returns true if active and require polling
  */
-void sinks_poll();
+_Bool sinks_poll();
 
 /**
  * The system sink type ID

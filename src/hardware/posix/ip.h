@@ -36,6 +36,9 @@ TCP_SOCKET TCPOpen(uint32_t dwRemoteHost, uint8_t vRemoteHostType, uint16_t wPor
 #define TCP_PURPOSE_GENERIC_TCP_SERVER 1
 #define INVALID_SOCKET      (0xFE)	// The socket is invalid or could not be opened
 
+// Do a select on the TCP socket
+void TCPWaitEvent(int msTimeout);
+
 UDP_SOCKET UDPOpenEx(uint32_t remoteHost, uint8_t remoteHostType, UDP_PORT localPort, UDP_PORT remotePort);
 #define UDP_OPEN_NODE_INFO	4u
 #define INVALID_UDP_SOCKET      (0xffu)		// Indicates a UDP socket that is not valid

@@ -222,24 +222,22 @@ static void checkAck()
     s_busState = BUS_PRIV_STATE_IDLE;
 }
 
-void bus_prim_poll()
-{   
+_Bool bus_prim_poll() {   
     if (s_waitTxFlush) {
         // Finished TX?
         if (rs485_state != RS485_LINE_RX) {
             // Skip state management
-            return;
+            return true;
         } else {
             // Start timeout and go ahead
             s_lastTime = timers_get();
             s_waitTxFlush = 0;
         }
-    }
-    else if (s_waitTxQuickEnd) {
+    } else if (s_waitTxQuickEnd) {
         // Finished TX?
         if (rs485_state >= RS485_LINE_TX) {
             // Skip state management
-            return;
+            return true;
         } else {
             // Start timeout and go ahead
             s_lastTime = timers_get();
@@ -247,17 +245,19 @@ void bus_prim_poll()
         }
     }
  
+    _Bool isActive = true;
     uint8_t s = rs485_readAvail();
     switch (s_busState) {
         case BUS_PRIV_STATE_IDLE:
             // Should open a socket?
             if (s_socketConnected >= 0) {
                 socketCreate();
-            }
-            else {
+            } else {
                 // Do/doing a scan?
                 if (timers_get() - s_lastScanTime >= BUS_SCAN_TIMEOUT) {
                     scanNext();
+                } else {
+                    isActive = false;
                 }
             }
             break;
@@ -283,12 +283,12 @@ void bus_prim_poll()
                 // Drop the TCP connection and reset the channel
                 bus_prim_disconnectSocket(SOCKET_ERR_TIMEOUT);
                 prot_control_abort();
-            }
-            else {
+            } else {
                 socketPoll();
             }
             break;
     }
+    return isActive;
 }
 
 // The command starts when the bus is idle

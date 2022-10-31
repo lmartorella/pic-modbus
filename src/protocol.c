@@ -182,7 +182,7 @@ static __bit memcmp2(char c1, char c2, char d1, char d2) {
 /*
     Manage POLLs (read buffers)
 */
-void prot_poll() {
+_Bool prot_poll() {
     prot_slowTimer = 0;
     CLRWDT();
 #ifdef HAS_IP
@@ -209,7 +209,7 @@ void prot_poll() {
 #ifdef HAS_RS485_BUS_PRIMARY
         bus_prim_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
 #endif
-        return;
+        return false;
     }
 
 #ifdef HAS_RS485_BUS_PRIMARY
@@ -217,7 +217,7 @@ void prot_poll() {
     switch (bus_prim_getState()) {
         case BUS_STATE_SOCKET_CONNECTED:
             // TCP is still polled by bus
-            return;
+            return true;
         case BUS_STATE_SOCKET_TIMEOUT:
             // drop the TCP connection        
             prot_control_abort();
@@ -235,7 +235,7 @@ void prot_poll() {
         if (!again) {
             s_inReadSink = -1;
         }
-        return;
+        return true;
     }
     if (s_inWriteSink >= 0) {
         // Address sink
@@ -245,7 +245,7 @@ void prot_poll() {
             // end of transmission, over to Master
             prot_control_over();
         }
-        return;
+        return true;
     }
 
     uint8_t s = prot_control_readAvail();
@@ -283,6 +283,7 @@ void prot_poll() {
             }
             s_commandToRun = CMD_NONE;
         }
+        return true;
     }
     else {
         // So decode message then
@@ -312,8 +313,11 @@ void prot_poll() {
                 // Unknown command
                 fatal("CM.u");
             }
+            return true;
+        } else {
+            // Otherwise wait for data
+            return false;
         }
-        // Otherwise wait for data
     }
 }
 

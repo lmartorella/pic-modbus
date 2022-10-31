@@ -57,7 +57,6 @@ typedef unsigned char __bit;
 #endif
 
 void enableInterrupts();
-void hw_init();
 
 #endif	/* PCH_H */
 

@@ -191,3 +191,10 @@ void ip_flush() {
     TCPFlush(s_controlSocket);
     // Leave the socket open
 }
+
+void ip_waitEvent() {
+#ifdef _CONF_POSIX
+    // Wait max 100ms for data
+    TCPWaitEvent(100);
+#endif
+}

@@ -69,7 +69,10 @@ void prot_control_close();
 void prot_control_abort();
 
 void prot_init();
-void prot_poll();
+/**
+ * Returns true if active and require polling
+ */
+_Bool prot_poll();
 // Has the slow timer ticked?
 extern __bit prot_slowTimer;
 

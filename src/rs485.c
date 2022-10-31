@@ -153,11 +153,12 @@ void rs485_interrupt()
 /**
  * Poll as much as possible (internal timered)
  */
-void rs485_poll()
+_Bool rs485_poll()
 {
     CLRWDT();
     if (s_oerr) {
         fatal("U.OER");
+        return false;
     }
     
     TICK_TYPE elapsed = timers_get() - s_lastTick;
@@ -200,6 +201,7 @@ void rs485_poll()
             }
             break;
     }
+    return rs485_state != RS485_LINE_RX;
 }
 
 void rs485_write(_Bool address, const uint8_t* data, uint8_t size)

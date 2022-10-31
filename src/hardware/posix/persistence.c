@@ -60,6 +60,6 @@ void pers_save()
     }
 }
 
-void pers_poll() {
-    
+_Bool pers_poll() {
+    return false;
 }

@@ -38,6 +38,11 @@ void ip_flush();
 
 __bit ip_isConnected();
 
+/**
+ * Do a select on the socket
+ */ 
+void ip_waitEvent();
+
 #endif
 
 #endif //#ifdef HAS_IP

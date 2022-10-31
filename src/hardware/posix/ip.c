@@ -203,7 +203,7 @@ void StackTask() {
         tv.tv_usec = 0;
         int ret = select(max_sd + 1, &readfds, NULL, NULL, &tv);
         if (ret < 0) {
-            fatal("Select error");
+            fatal("Select error on TCP accept");
         }
 
         if (ret > 0) {
@@ -285,6 +285,24 @@ void TCPFlush(TCP_SOCKET socket) {
         fatal("Socket error, send");
     }
     tcp_bufPtr = &tcp_buffer[0];
+}
+
+void TCPWaitEvent(int msTimeout) {
+    if (listen_socket >= 0) {
+        // Watch listen_socket to see when it has input
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(listen_socket, &rfds);
+
+        /* Wait up to timeout */
+        struct timeval tv = { .tv_sec = 0, .tv_usec = msTimeout * 1000 };
+
+        int retval = select(1, &rfds, NULL, NULL, &tv);
+
+        if (retval < 0) {
+            fatal("Select error on TCP read socket");
+        }
+    }
 }
 
 static int udp_sock;
