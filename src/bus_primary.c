@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 
 /**
  * Wired bus communication module for master nodes

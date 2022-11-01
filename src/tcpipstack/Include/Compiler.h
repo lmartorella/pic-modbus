@@ -57,7 +57,7 @@
 #ifndef __COMPILER_H
 #define __COMPILER_H
 
-#include "net.h"
+#include "net/net.h"
 
 // Include proper device header file
 //#if defined(__18CXX) && !defined(HI_TECH_C)	

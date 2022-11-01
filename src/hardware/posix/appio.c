@@ -1,5 +1,4 @@
-#include "net.h"
-#include "appio.h"
+#include "net/net.h"
 
 LAST_EXC_TYPE g_lastException = 0;
 RESET_REASON g_resetReason;

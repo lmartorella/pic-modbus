@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 
 #if _CONF_POSIX
 #include "./hardware/posix/ip.h"

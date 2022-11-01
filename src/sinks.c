@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 
 static const TWOCC ResetCode = { "RS" };
 static const TWOCC ExceptionText = { "EX" };

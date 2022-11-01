@@ -78,6 +78,7 @@ typedef unsigned char __bit;
 #include "ip_client.h"
 #include "rs485.h"
 #include "timers.h"
+#include "uart.h"
 #include "leds.h"
 
 #endif	/* _NET_H */

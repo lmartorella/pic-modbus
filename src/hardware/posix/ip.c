@@ -1,8 +1,6 @@
-#include "net.h"
+#include "net/net.h"
 #include "./ip.h"
-#include "stats.h"
-#include "appio.h"
-#include "timers.h"
+#include "./stats.h"
 
 #include <errno.h>
 #include <fcntl.h>

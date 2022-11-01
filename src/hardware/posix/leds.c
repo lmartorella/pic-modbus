@@ -1,5 +1,4 @@
-#include "net.h"
-#include "leds.h"
+#include "net/net.h"
 
 void led_init() { 
 }

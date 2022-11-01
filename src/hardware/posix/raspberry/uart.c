@@ -1,7 +1,4 @@
-#include "net.h"
-#include "uart.h"
-#include "appio.h"
-#include "timers.h"
+#include "net/net.h"
 
 #include <stdlib.h>
 #include <stdio.h>

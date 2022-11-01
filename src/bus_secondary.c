@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 
 /**
  * Wired bus communication module for secondary RS485 nodes

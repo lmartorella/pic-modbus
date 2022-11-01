@@ -1,5 +1,4 @@
-#include "net.h"
-#include "timers.h"
+#include "net/net.h"
 #include <sys/time.h>
 
 uint32_t timers_get() {

@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 #include "appio.h"
 
 #ifdef HAS_CM1602

@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 #include "timers.h"
 
 // Internal counter to store Ticks.  This variable is incremented in an ISR and

@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 #include "appio.h"
 #include "eeprom.h"
 

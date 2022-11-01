@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net/net.h"
 
 static TICK_TYPE s_slowTimer;
 __bit prot_slowTimer;

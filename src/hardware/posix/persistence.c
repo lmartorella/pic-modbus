@@ -1,7 +1,4 @@
-#include "net.h"
-#include "persistence.h"
-#include "protocol.h"
-#include "appio.h"
+#include "net/net.h"
 #include <unistd.h>
 #include <limits.h>
 
