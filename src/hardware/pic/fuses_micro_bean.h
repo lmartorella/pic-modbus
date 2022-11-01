@@ -10,8 +10,6 @@
 
 #define PRIO_TYPE
 
-#define HAS_RS485_BUS_SECONDARY
-
 // *****
 // Tick timer source. Uses TMR0 (8-bit prescales to 1:256), that resolve from 0.25ms to 16.7secs
 // *****

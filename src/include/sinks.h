@@ -8,7 +8,7 @@
 /**
  * Init sinks
  */
-void sinks_init();
+void sinks_init(_Bool isPrimary);
 
 /**
  * Poll sinks
@@ -22,13 +22,16 @@ _Bool sinks_poll();
 #define SINK_SYS_ID "SYS "
 
 /**
- * The system sink read function
+ * The system sink read functions
  */
-__bit sys_read();
+__bit sys_read_prim();
+__bit sys_read_sec();
+
 /**
- * The system sink write function
+ * The system sink write functions
  */
-__bit sys_write();
+__bit sys_write_prim();
+__bit sys_write_sec();
 
 // Returns 1 if more data should be read or written, 0 if done and the socket can  be freed.
 // The 'write' function sends data to master. The 'read' function receives data from master.

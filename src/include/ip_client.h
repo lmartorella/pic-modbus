@@ -5,17 +5,6 @@
  * Module to implement a master node (IP client)
  */
 
-#ifdef HAS_IP
-
-#if __XC8
-#include "tcpipstack/Include/Compiler.h"
-#include "tcpipstack/Include/TCPIPStack/TCPIP.h"
-#endif
-
-#if _CONF_POSIX
-#include "hardware/posix/ip.h"
-#endif
-
 /**
  * Poll activities
  */
@@ -42,8 +31,6 @@ __bit ip_isConnected();
  * Do a select on the socket
  */ 
 void ip_waitEvent();
-
-#endif
 
 #endif //#ifdef HAS_IP
 

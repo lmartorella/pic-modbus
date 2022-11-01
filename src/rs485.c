@@ -1,8 +1,4 @@
 #include "net.h"
-#include "rs485.h"
-#include "appio.h"
-#include "uart.h"
-#include "timers.h"
 
 RS485_STATE rs485_state;
 

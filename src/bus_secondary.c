@@ -1,11 +1,4 @@
 #include "net.h"
-#include "rs485.h"
-#include "timers.h"
-#include "bus_secondary.h"
-#include "protocol.h"
-#include "persistence.h"
-#include "appio.h"
-#include "leds.h"
 
 /**
  * Wired bus communication module for secondary RS485 nodes

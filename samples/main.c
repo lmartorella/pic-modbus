@@ -26,6 +26,11 @@ void main()
 
     pers_load();
 
+#if defined(HAS_RS485_BUS_SECONDARY)
+    bus_sec_init();
+#elif defined(HAS_RS485_BUS_PRIMARY)
+    bus_prim_init();
+#endif
     prot_init();
 
     rs485_init();

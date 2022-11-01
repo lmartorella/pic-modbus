@@ -2,9 +2,12 @@
 #define	_NET_H
 
 #ifdef __XC8
+
 #include <xc.h>
 #define HAS_EEPROM
+
 #elif defined _CONF_POSIX
+
 typedef unsigned char __bit;
 
 #define __PACK
@@ -27,19 +30,19 @@ typedef unsigned char __bit;
  * Loads the MCU headers and additional fuses
  */
 #if defined(_CONF_ETH_CARD)
-#include "hardware/pic/fuses_eth_card.h"
+#include "../hardware/pic/fuses_eth_card.h"
 #define _IS_ETH_CARD
 
 #elif defined(_CONF_GARDEN_BEAN)
-#include "hardware/pic/fuses_garden_bean.h"
+#include "../hardware/pic/fuses_garden_bean.h"
 #define _IS_PIC16F887_CARD
 
 #elif defined(_CONF_MICRO_BEAN)
-#include "hardware/pic/fuses_micro_bean.h"
+#include "../hardware/pic/fuses_micro_bean.h"
 #define _IS_PIC16F1827_CARD
 
 #elif defined(_CONF_POSIX)
-#include "hardware/posix/fuses_posix_primary.h"
+#include "../hardware/posix/fuses_posix.h"
 
 #else
 #error Missing configuration

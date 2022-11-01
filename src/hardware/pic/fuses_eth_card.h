@@ -27,7 +27,6 @@
 
 #define PRIO_TYPE low_priority
 
-#define HAS_RS485_BUS_PRIMARY
 #define MASTER_MAX_CHILDREN 16
 
 // ******* 

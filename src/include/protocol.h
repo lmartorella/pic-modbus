@@ -39,33 +39,6 @@ typedef enum {
 
 #define UNASSIGNED_SUB_ADDRESS 0xff
 
-#ifdef HAS_RS485_BUS_SECONDARY
-#include "rs485.h"
-// Directly with define in order to minimize stack usage
-#define prot_control_readW(w) rs485_read((uint8_t*)w, 2) 
-#define prot_control_read(data, size) rs485_read((uint8_t*)data, (uint8_t)size)
-#define prot_control_writeW(w) rs485_write(false, (uint8_t*)&w, 2)
-#define prot_control_write(data, size) rs485_write(false, (uint8_t*)data, (uint8_t)size)
-#define prot_control_over() set_rs485_over()
-#define prot_control_idle(buf) rs485_write(true, buf, 1)
-#define prot_control_readAvail() rs485_readAvail()
-#define prot_control_writeAvail() rs485_writeAvail()
-#define prot_control_close() bus_sec_abort()
-#define prot_control_isConnected() bus_sec_isConnected()
-#else
-__bit prot_control_readW(uint16_t* w);
-__bit prot_control_read(void* data, uint16_t size);
-void prot_control_writeW(uint16_t w);
-void prot_control_write(const void* data, uint16_t size);
-void prot_control_over();
-#define prot_control_idle()
-uint16_t prot_control_readAvail();
-uint16_t prot_control_writeAvail();
-extern __bit prot_registered;
-void prot_control_close();
-#define prot_control_isConnected() ip_isConnected()
-#endif
-
 void prot_control_abort();
 
 void prot_init();
@@ -75,6 +48,32 @@ void prot_init();
 _Bool prot_poll();
 // Has the slow timer ticked?
 extern __bit prot_slowTimer;
+extern __bit prot_registered;
+
+/**
+ * Implementation dependent calls
+ */
+// Directly with define in order to minimize stack usage
+#define prot_sec_control_readW(w) rs485_read((uint8_t*)w, 2) 
+#define prot_sec_control_read(data, size) rs485_read((uint8_t*)data, (uint8_t)size)
+#define prot_sec_control_writeW(w) rs485_write(false, (uint8_t*)&w, 2)
+#define prot_sec_control_write(data, size) rs485_write(false, (uint8_t*)data, (uint8_t)size)
+#define prot_sec_control_over() set_rs485_over()
+#define prot_sec_control_idle(buf) rs485_write(true, buf, 1)
+#define prot_sec_control_readAvail() rs485_readAvail()
+#define prot_sec_control_writeAvail() rs485_writeAvail()
+#define prot_sec_control_isConnected() bus_sec_isConnected()
+#define prot_sec_control_close() bus_sec_abort()
+
+__bit prot_prim_control_readW(uint16_t* w);
+__bit prot_prim_control_read(void* data, uint16_t size);
+void prot_prim_control_writeW(uint16_t w);
+void prot_prim_control_write(const void* data, uint16_t size);
+void prot_prim_control_over();
+#define prot_prim_control_idle()
+uint16_t prot_prim_control_readAvail();
+uint16_t prot_prim_control_writeAvail();
+#define prot_prim_control_isConnected() ip_isConnected()
+#define prot_prim_control_close() ip_flush()
 
 #endif	/* PROTOCOL_H */
-

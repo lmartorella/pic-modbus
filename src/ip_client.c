@@ -1,14 +1,13 @@
 #include "net.h"
-#include "protocol.h"
-#include "appio.h"
-#include "ip_client.h"
-#include "persistence.h"
-#include "bus_primary.h"
+
+#if _CONF_POSIX
+#include "./hardware/posix/ip.h"
+#endif
 
 #ifdef __XC8
-    #include "tcpipstack/Include/Compiler.h"
-    #include "tcpipstack/Include/TCPIPStack/TCPIP.h"
-    APP_CONFIG AppConfig;
+#include "tcpipstack/Include/Compiler.h"
+#include "tcpipstack/Include/TCPIPStack/TCPIP.h"
+APP_CONFIG AppConfig;
 #endif
     
 // UDP broadcast socket
@@ -21,15 +20,13 @@ static __bit s_sendHelo = 0;
 static void pollControlPort();
 
 // Close the control port listener
-void prot_control_abort()
-{
+void prot_prim_control_abort() {
     // Returns in listening state
     TCPDiscard(s_controlSocket);
     TCPDisconnect(s_controlSocket);
 }
 
-__bit prot_control_readW(uint16_t* w)
-{
+__bit prot_prim_control_readW(uint16_t* w) {
     uint16_t l = TCPIsGetReady(s_controlSocket);
     if (l < 2) { 
         return false;
@@ -38,8 +35,7 @@ __bit prot_control_readW(uint16_t* w)
     return true;
 }
 
-__bit prot_control_read(void* data, uint16_t size)
-{
+__bit prot_prim_control_read(void* data, uint16_t size) {
     uint16_t l = TCPIsGetReady(s_controlSocket);
     if (l < size) {
         return false;
@@ -48,40 +44,33 @@ __bit prot_control_read(void* data, uint16_t size)
     return true;
 }
 
-void prot_control_writeW(uint16_t w)
-{
+void prot_prim_control_writeW(uint16_t w) {
     TCPPutArray(s_controlSocket, (uint8_t*)&w, sizeof(uint16_t));
 }
 
-void prot_control_write(const void* data, uint16_t size)
-{
+void prot_prim_control_write(const void* data, uint16_t size) {
     // If I remove & from here, ip_control_read stop working!!
     TCPPutArray(s_controlSocket, (const uint8_t*)data, size);
 }
 
 // Flush and OVER to other party. TCP is full duplex, so OK to only flush
-void prot_control_over()
-{
+void prot_prim_control_over() {
     TCPFlush(s_controlSocket);
 }
 
-__bit prot_control_isConnected()
-{
+__bit prot_prim_control_isConnected() {
     return s_lastDhcpState && TCPIsConnected(s_controlSocket);
 }
 
-uint16_t prot_control_readAvail()
-{
+uint16_t prot_prim_control_readAvail() {
     return TCPIsGetReady(s_controlSocket);
 }
 
-uint16_t prot_control_writeAvail()
-{
+uint16_t prot_prim_control_writeAvail() {
     return TCPIsPutReady(s_controlSocket);
 }
 
-void ip_prot_init()
-{
+void ip_prot_init() {
     io_println("IP/DHCP");
 #if defined(_CONF_POSIX)
     printf("Listen port: %d\n", SERVER_CONTROL_UDP_PORT);
@@ -120,8 +109,7 @@ void ip_prot_init()
 /*
 	Manage slow timer (heartbeats)
 */
-void ip_prot_slowTimer()
-{
+void ip_prot_slowTimer() {
     _Bool dhcpOk = DHCPIsBound(0);
 
     if (dhcpOk != s_lastDhcpState)
@@ -149,19 +137,22 @@ void ip_prot_slowTimer()
     }
 }
 
-/*
-	HOME request
-*/
-__PACK typedef struct
-{
+/**
+ * HOME request
+ */
+__PACK typedef struct {
 	char preamble[4];
 	char messageType[4];
 	GUID device;
 	uint16_t controlPort;
 } HOME_REQUEST;
 
-void ip_poll() 
-{
+void ip_poll() {
+    // Do ETH stuff
+    StackTask();
+    // This tasks invokes each of the core stack application tasks
+    StackApplications();
+
     if (s_sendHelo) {
         // Still no HOME? Ping HELO
         if (UDPIsPutReady(s_heloSocket) >= (sizeof(HOME_REQUEST) + BUFFER_MASK_SIZE + 2))

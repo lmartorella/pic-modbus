@@ -9,7 +9,7 @@ file(GLOB RASPBERRY_SRC "./hardware/posix/raspberry/*.c")
 add_library(net SHARED ${POSIX_SRC} ${COMMON_SRC} ${RASPBERRY_SRC})
 
 target_compile_options(net PRIVATE -Wno-switch -Wno-duplicate-decl-specifier -Wno-main-return-type)
-target_include_directories(net PRIVATE .)
+target_include_directories(net PRIVATE include)
 set_target_properties(net PROPERTIES PUBLIC_HEADER *.h)
 
 install(TARGETS net

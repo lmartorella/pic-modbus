@@ -1,10 +1,4 @@
 #include "net.h"
-#include "ip_client.h"
-#include "bus_primary.h"
-#include "protocol.h"
-#include "appio.h"
-#include "rs485.h"
-#include "timers.h"
 
 /**
  * Wired bus communication module for master nodes
@@ -47,13 +41,11 @@ static __bit s_waitTxQuickEnd;
 static void socketCreate();
 static void socketPoll();
 
-static __bit isChildKnown(uint8_t i)
-{
+static __bit isChildKnown(uint8_t i) {
     return (bus_prim_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
-static uint8_t countChildren()
-{
+static uint8_t countChildren() {
     uint8_t count = 0;
     for (uint8_t i = 0; i < sizeof(bus_prim_knownChildren); i++) {
         uint8_t d = bus_prim_knownChildren[i];
@@ -91,8 +83,9 @@ static void setChildDead(uint8_t i) {
     updateDisp();
 }
 
-void bus_prim_init()
-{
+void bus_prim_init() {
+    ip_prot_init();
+
     // No beans are known, nor dirty
     memset(bus_prim_knownChildren, 0, BUFFER_MASK_SIZE);
     bus_prim_resetDirtyChildren();
@@ -338,14 +331,13 @@ static void socketCreate()
     s_busState = BUS_PRIV_STATE_SOCKET_CONNECTED;
 }
 
-static void socketPoll() 
-{
+static void socketPoll() {
     // Bus line is slow, though
     uint8_t buffer[RS485_BUF_SIZE / 2];
     _Bool over = 0, close = 0;
             
     // Data from IP?
-    uint16_t rx = prot_control_readAvail();
+    uint16_t rx = prot_prim_control_readAvail();
     if (rx > 0) {
         // Read data and push it into the line
         if (rx > sizeof(buffer)) {
@@ -357,7 +349,7 @@ static void socketPoll()
         }
         // Transfer rx bytes
         if (rx > 0) {
-            prot_control_read(buffer, rx);
+            prot_prim_control_read(buffer, rx);
             rs485_write(false, buffer, rx);
             s_lastTime = timers_get();
         }
@@ -407,26 +399,24 @@ static void socketPoll()
             }
 
             if (tx > 0) {
-                prot_control_write(buffer, tx);
+                prot_prim_control_write(buffer, tx);
             }
             if (over) {
                 // Flush
-                prot_control_over();
+                prot_prim_control_over();
             }
             if (close) {
                 // and close?
-                prot_control_abort();
+                prot_prim_control_close();
             }
         }
     }
 }
 
-int bus_prim_getChildrenMaskSize()
-{
+int bus_prim_getChildrenMaskSize() {
     return BUFFER_MASK_SIZE;
 }
 
-const uint8_t* bus_prim_getChildrenMask()
-{
+const uint8_t* bus_prim_getChildrenMask() {
     return bus_prim_knownChildren;
 }

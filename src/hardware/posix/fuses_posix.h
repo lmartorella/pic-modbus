@@ -5,7 +5,6 @@
 
 // Define IP and protocol
 #define HAS_IP
-#define HAS_RS485_BUS_PRIMARY
 
 #define RS485_BUF_SIZE 64
 
