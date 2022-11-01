@@ -1,5 +1,5 @@
-#include "../../pch.h"
-#include "../../appio.h"
+#include "net.h"
+#include "appio.h"
 
 #ifdef HAS_CM1602
 #include "../../../../samples/beans/hardware/cm1602.h"
@@ -7,8 +7,6 @@
 
 LAST_EXC_TYPE g_lastException = 0;
 RESET_REASON g_resetReason;
-
-extern void wait1s();
 
 #if defined(HAS_MAX232_SOFTWARE) && defined(DEBUGMODE)
 #define HAS_DEBUG_LINE
@@ -50,7 +48,7 @@ void io_init() {
         cm1602_writeStr((const char*)g_lastException);
     }
 
-    wait1s();
+    __delaywdt_ms(1000);
 #elif defined(HAS_DEBUG_LINE)
     _stdout("Boot: ");
     _stdout(g_resetReasonMsgs[g_resetReason]);

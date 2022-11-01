@@ -1,7 +1,7 @@
-#include "../../../pch.h"
-#include "../../../uart.h"
-#include "../../../appio.h"
-#include "../../../timers.h"
+#include "net.h"
+#include "uart.h"
+#include "appio.h"
+#include "timers.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,6 +16,8 @@
 #include <math.h>
 
 /**
+ * Uses the PL011 UART that supports 9-bit transmission.
+ * Access the feature at low-level via memory mapped I/O.
  * TODO: implement a interrupt-based version of this UART polling. Required interrupt to be
  * routed on Raspbian.
  */

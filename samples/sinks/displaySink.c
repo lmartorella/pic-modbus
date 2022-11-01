@@ -1,6 +1,6 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/protocol.h"
-#include "../../../src/nodes/appio.h"
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/protocol.h"
+#include "../../../src/nodes/include/appio.h"
 #include "displaySink.h"
 
 #if (defined(HAS_CM1602) || defined(_CONF_POSIX))

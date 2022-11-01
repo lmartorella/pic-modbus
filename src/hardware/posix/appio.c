@@ -1,10 +1,8 @@
-#include "../../pch.h"
-#include "../../appio.h"
+#include "net.h"
+#include "appio.h"
 
 LAST_EXC_TYPE g_lastException = 0;
 RESET_REASON g_resetReason;
-
-extern void wait1s();
 
 void io_init() {
 }
@@ -36,7 +34,7 @@ void flog(const char* format, ...) {
 void sys_storeResetReason()
 { }
 
-void enableInterrupts() 
+void sys_enableInterrupts() 
 { }
 
 void fatal(const char* str) {

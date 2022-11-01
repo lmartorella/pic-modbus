@@ -1,5 +1,5 @@
-#include "../../../../src/nodes/pch.h"
-#include "../../timers.h"
+#include "net.h"
+#include "timers.h"
 
 // Internal counter to store Ticks.  This variable is incremented in an ISR and
 // therefore must be marked volatile to prevent the compiler optimizer from

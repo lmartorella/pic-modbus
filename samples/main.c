@@ -1,13 +1,4 @@
-#include "../../src/nodes/pch.h"
-#include "../../src/nodes/ip_client.h"
-#include "../../src/nodes/appio.h"
-#include "../../src/nodes/persistence.h"
-#include "../../src/nodes/protocol.h"
-#include "../../src/nodes/sinks.h"
-#include "../../src/nodes/bus_secondary.h"
-#include "../../src/nodes/timers.h"
-#include "../../src/nodes/leds.h"
-#include "../../src/nodes/wait.h"
+#include <net/net.h>
 
 #ifdef BEAN_INTERRUPT_VECTOR
 extern void BEAN_INTERRUPT_VECTOR();
@@ -51,7 +42,7 @@ void main()
             
     sinks_init();
         
-    enableInterrupts();
+    sys_enableInterrupts();
 
     // I'm alive
     while (1) {   

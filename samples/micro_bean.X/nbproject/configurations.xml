@@ -15,20 +15,19 @@
       <logicalFolder name="f1" displayName="sdk" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
           <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
-          <itemPath>../../../src/nodes/leds.h</itemPath>
-          <itemPath>../../../src/nodes/timers.h</itemPath>
-          <itemPath>../../../src/nodes/uart.h</itemPath>
-          <itemPath>../../../src/nodes/wait.h</itemPath>
+          <itemPath>../../../src/nodes/include/leds.h</itemPath>
+          <itemPath>../../../src/nodes/include/timers.h</itemPath>
+          <itemPath>../../../src/nodes/include/uart.h</itemPath>
         </logicalFolder>
-        <itemPath>../../../src/nodes/ip_client.h</itemPath>
-        <itemPath>../../../src/nodes/pch.h</itemPath>
-        <itemPath>../../../src/nodes/persistence.h</itemPath>
-        <itemPath>../../../src/nodes/protocol.h</itemPath>
-        <itemPath>../../../src/nodes/rs485.h</itemPath>
-        <itemPath>../../../src/nodes/appio.h</itemPath>
-        <itemPath>../../../src/nodes/bus_secondary.h</itemPath>
-        <itemPath>../../../src/nodes/guid.h</itemPath>
-        <itemPath>../../../src/nodes/sinks.h</itemPath>
+        <itemPath>../../../src/nodes/include/ip_client.h</itemPath>
+        <itemPath>../../../src/nodes/include/net.h</itemPath>
+        <itemPath>../../../src/nodes/include/persistence.h</itemPath>
+        <itemPath>../../../src/nodes/include/protocol.h</itemPath>
+        <itemPath>../../../src/nodes/include/rs485.h</itemPath>
+        <itemPath>../../../src/nodes/include/appio.h</itemPath>
+        <itemPath>../../../src/nodes/include/bus_secondary.h</itemPath>
+        <itemPath>../../../src/nodes/include/guid.h</itemPath>
+        <itemPath>../../../src/nodes/include/sinks.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.h</itemPath>

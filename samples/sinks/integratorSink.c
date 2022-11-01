@@ -1,6 +1,6 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/sinks.h"
-#include "../../../src/nodes/protocol.h"    
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/sinks.h"
+#include "../../../src/nodes/include/protocol.h"    
 #include "integratorSink.h"
 #include "../hardware/an_integrator.h"
 

@@ -1,6 +1,6 @@
-#include "../../../../src/nodes/pch.h"
-#include "../../../../src/nodes/appio.h"
-#include "eeprom.h"
+#include "net.h"
+#include "appio.h"
+#include "./eeprom.h"
 
 /**
  * This module defines the virtualization layer for data persistence

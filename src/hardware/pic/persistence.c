@@ -1,8 +1,8 @@
-#include "../../pch.h"
-#include "../../persistence.h"
-#include "../../protocol.h"
-#include "../../appio.h"
-#include "eeprom.h"
+#include "net.h"
+#include "persistence.h"
+#include "protocol.h"
+#include "appio.h"
+#include "./eeprom.h"
 
 /**
  * The RAM backed-up data for writings and readings

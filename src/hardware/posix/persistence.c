@@ -1,7 +1,7 @@
-#include "../../pch.h"
-#include "../../persistence.h"
-#include "../../protocol.h"
-#include "../../appio.h"
+#include "net.h"
+#include "persistence.h"
+#include "protocol.h"
+#include "appio.h"
 #include <unistd.h>
 #include <limits.h>
 

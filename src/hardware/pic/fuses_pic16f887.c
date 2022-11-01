@@ -1,37 +1,9 @@
-#include "../../pch.h"
-#include "../../appio.h"
+#include "net.h"
+#include "appio.h"
    
-// Configuraton in garden source code
+// Configuration in garden source code
     
-void wait40us(void)
-{	
-    __delay_us(40);
-}
-
-void wait100us(void)
-{
-    __delay_us(100);
-}
-
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait2ms(void)
-{
-    __delay_ms(2);
-}
-
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait30ms(void)
-{
-    __delay_ms(30);
-}
-
-void wait1s(void)
-{
-    __delay_ms(1000);
-}
-
-void enableInterrupts()
-{
+void sys_enableInterrupts() {
     // Disable low/high interrupt mode
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;

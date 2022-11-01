@@ -5,7 +5,7 @@ add_definitions(-D_CONF_POSIX)
 
 file(GLOB COMMON_SRC "*.c")
 file(GLOB POSIX_SRC "./hardware/posix/*.c")
-file(GLOB RASPBERRY_SRC "./hardware/posix/raspbian/*.c")
+file(GLOB RASPBERRY_SRC "./hardware/posix/raspberry/*.c")
 add_library(net SHARED ${POSIX_SRC} ${COMMON_SRC} ${RASPBERRY_SRC})
 
 target_compile_options(net PRIVATE -Wno-switch -Wno-duplicate-decl-specifier -Wno-main-return-type)

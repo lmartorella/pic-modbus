@@ -88,6 +88,8 @@ extern LAST_EXC_TYPE g_lastException;
  */
 void sys_storeResetReason();
 
+void sys_enableInterrupts();
+
 #ifdef _CONF_POSIX
 /**
  * Log on log file (Posix only)

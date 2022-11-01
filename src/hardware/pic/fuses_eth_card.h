@@ -20,10 +20,15 @@
 
 #define SYSTEM_CLOCK 25000000ull
 #define _XTAL_FREQ (SYSTEM_CLOCK)
+
+// Internal core clock drives timer with 1:256 prescaler
+#define TICKS_PER_SECOND		(TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
+#define TICKS_PER_MILLISECOND		(TICK_TYPE)(TICKS_PER_SECOND / 1000)
+
 #define PRIO_TYPE low_priority
 
 #define HAS_RS485_BUS_PRIMARY
-#define MASTER_MAX_CHILDREN 4
+#define MASTER_MAX_CHILDREN 16
 
 // ******* 
 // DISPLAY
@@ -57,28 +62,6 @@
 #define CM1602_LINE_COUNT 	2
 #define CM1602_COL_COUNT 	20
 #define CM1602_FONT_HEIGHT 	7
-
-// ******* 
-// MP3
-// ******* 
-#undef HAS_VS1011
-
-// ******* 
-// MEM & LOADER & FLASH
-// *******
-//#define MAX_PROG_MEM		0x20000
-//#define ROM_BLOCK_SIZE		64
-//#define CONFIGURATION_SIZE 	8
-
-// ******
-// SPI
-// ******
-#undef HAS_SPI
-
-// ******
-// SPI RAM
-// ******
-#undef HAS_SPI_RAM
 
 // ******
 // IP: uses PORTA0,1 (leds)
@@ -181,14 +164,6 @@
 #define TICK_PRESCALER 256ull
 
 #define TICK_TYPE uint32_t
-
-#ifdef HAS_IO
-#ifdef HAS_SPI
-#error Cannot use SPI and IO togheter
-#elif defined(HAS_SPI_RAM)
-#error Cannot use SPI RAM and IO togheter
-#endif
-#endif
 
 // persistent char* are not supported by xc8 1.37
 #define LAST_EXC_TYPE long

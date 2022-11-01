@@ -1,5 +1,5 @@
-#include "../../pch.h"
-#include "../../appio.h"
+#include "net.h"
+#include "appio.h"
 
 // CONFIG1
 #pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
@@ -20,19 +20,7 @@
 #pragma config BORV = LO        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), low trip point selected.)
 #pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
  
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait40us()
-{	
-    __delay_us(40);
-}
-
-void wait2ms()
-{
-    __delay_ms(2);
-}
-
-void enableInterrupts()
-{
+void sys_enableInterrupts() {
     // Disable low/high interrupt mode
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;

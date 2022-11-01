@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../stats.h"
+#include "stats.h"
 
 #define MIN_SIZE 16
 

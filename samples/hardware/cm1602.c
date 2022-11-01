@@ -1,5 +1,4 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/wait.h"
+#include "../../../src/nodes/include/net.h"
 #include "cm1602.h"
 
 #ifdef HAS_CM1602
@@ -147,9 +146,7 @@ void cm1602_reset(void)
 #endif
 
     // max 100ms @5v , see ST7066U datasheet
-    wait30ms();
-    wait30ms();
-    wait30ms();
+    __delay_ms(90);
 
     // Push fake go-to-8bit state 3 times
 #if CM1602_IF_MODE == 4
@@ -158,9 +155,9 @@ void cm1602_reset(void)
     uint8_t cmd = CMD_FUNCSET | CMD_FUNCSET_DL_8;
 #endif
     pulsePort(cmd); 
-    wait30ms();
+    __delay_ms(30);
     pulsePort(cmd);
-    wait100us();
+    __delay_us(100);
     pulsePort(cmd);
 
     // Now the device is proper reset, and the mode is 8-bit
@@ -188,7 +185,7 @@ void cm1602_reset(void)
 #error CM1602_FONT_HEIGHT should be set to 7 or 10
 #endif
 
-    wait100us();
+    __delay_us(100);
 
 #if CM1602_IF_MODE == 4
     // Translating to 8-bit (default at power-up) to 4-bit
@@ -198,55 +195,55 @@ void cm1602_reset(void)
     pulsePort(cmd >> 4);		// Enables the 4-bit mode
 #endif
     writeCmd(cmd);
-    wait100us();
+    __delay_us(100);
 }
 
 void cm1602_clear(void)
 {
 	writeCmd(CMD_CLEAR);
-	wait2ms();
+	__delay_ms(2);
 }
 
 void cm1602_home(void)
 {
 	writeCmd(CMD_HOME);
-	wait2ms();
+	__delay_ms(2);
 }
 
 void cm1602_setEntryMode(enum CM1602_ENTRYMODE mode)
 {
 	writeCmd(CMD_ENTRY | mode);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_enable(enum CM1602_ENABLE enable)
 {
 	writeCmd(CMD_ENABLE | enable);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_shift(enum CM1602_SHIFT data)
 {
 	writeCmd(CMD_SHIFT | data);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_setCgramAddr(uint8_t address)
 {
 	writeCmd(CMD_SETCGRAM | address);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_setDdramAddr(uint8_t address)
 {
 	writeCmd(CMD_SETDDRAM | address);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_write(uint8_t data)
 {
 	writeData(data);
-	wait40us();
+	__delay_us(40);
 }
 
 void cm1602_writeStr(const char* data)

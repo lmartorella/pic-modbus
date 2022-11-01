@@ -1,4 +1,4 @@
-#include "../../../src/nodes/pch.h"
+#include "../../../src/nodes/include/net.h"
 #include "i2c.h"
 
 #ifdef HAS_I2C
@@ -34,31 +34,31 @@ void i2c_init() {
     I2C_PORT_SCL = 1;
     I2C_TRIS_SCL = 0;
 
-    wait2ms();
+    __delay_ms(2);
 
     // Start bit
     I2C_PORT_SDA = 0; // SDA low
-    wait40us();
+    __delay_us(40);
     I2C_PORT_SCL = 0; // SCL low
-    wait40us();
+    __delay_us(40);
      
     I2C_PORT_SDA = 1; // SDA = 1 
     // Produce 8 bits + 1 NACK
     for (uint8_t i = 0; i < 8; i++) {
-        wait40us();
+        __delay_us(40);
         I2C_PORT_SCL = 1;
-        wait40us();
+        __delay_us(40);
         I2C_PORT_SCL = 0;
     }
-    wait40us();
+    __delay_us(40);
 
     // Stop bit
     I2C_PORT_SDA = 0; // SDA low
-    wait40us();
+    __delay_us(40);
     I2C_PORT_SCL = 1; // SCL high
-    wait40us();
+    __delay_us(40);
     I2C_PORT_SDA = 1; // SDA high
-    wait2ms();
+    __delay_ms(2);
     
     // Ports as inputs
     I2C_TRIS_SDA = 1;
@@ -73,7 +73,7 @@ void i2c_init() {
     I2C_SSPCON1_SSPM = 8; // I2C master
     I2C_SSPCON1_SSPEN = 1;  
 
-    wait2ms();
+    __delay_ms(2);
     
     s_istate = STATE_IDLE;
 }

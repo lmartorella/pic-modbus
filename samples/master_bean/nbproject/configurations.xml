@@ -5,12 +5,11 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
-        <itemPath>../../../src/nodes/leds.h</itemPath>
-        <itemPath>../../../src/nodes/timers.h</itemPath>
-        <itemPath>../../../src/nodes/uart.h</itemPath>
-        <itemPath>../../../src/nodes/wait.h</itemPath>
-        <itemPath>../hardware/fuses_mcu_card.h</itemPath>
+        <itemPath>../../../src/nodes/include/hardware/pic/eeprom.h</itemPath>
+        <itemPath>../../../src/nodes/include/leds.h</itemPath>
+        <itemPath>../../../src/nodes/include/timers.h</itemPath>
+        <itemPath>../../../src/nodes/include/uart.h</itemPath>
+        <itemPath>../hardware/fuses_eth_card.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
         <logicalFolder name="Include" displayName="Include" projectFiles="true">
@@ -57,15 +56,15 @@
         <itemPath>../../../src/nodes/tcpipstack/HardwareProfile.h</itemPath>
         <itemPath>../../../src/nodes/tcpipstack/TCPIPConfig.h</itemPath>
       </logicalFolder>
-      <itemPath>../../../src/nodes/appio.h</itemPath>
-      <itemPath>../../../src/nodes/bus_primary.h</itemPath>
-      <itemPath>../../../src/nodes/guid.h</itemPath>
-      <itemPath>../../../src/nodes/ip_client.h</itemPath>
-      <itemPath>../../../src/nodes/pch.h</itemPath>
-      <itemPath>../../../src/nodes/persistence.h</itemPath>
-      <itemPath>../../../src/nodes/protocol.h</itemPath>
-      <itemPath>../../../src/nodes/rs485.h</itemPath>
-      <itemPath>../../../src/nodes/sinks.h</itemPath>
+      <itemPath>../../../src/nodes/include/appio.h</itemPath>
+      <itemPath>../../../src/nodes/include/bus_primary.h</itemPath>
+      <itemPath>../../../src/nodes/include/guid.h</itemPath>
+      <itemPath>../../../src/nodes/include/ip_client.h</itemPath>
+      <itemPath>../../../src/nodes/include/net.h</itemPath>
+      <itemPath>../../../src/nodes/include/persistence.h</itemPath>
+      <itemPath>../../../src/nodes/include/protocol.h</itemPath>
+      <itemPath>../../../src/nodes/include/rs485.h</itemPath>
+      <itemPath>../../../src/nodes/include/sinks.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -79,7 +78,7 @@
         <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/tick_pic18.c</itemPath>
         <itemPath>../hardware/cm1602.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/fuses_eth_card.c</itemPath>
+        <itemPath>../../../src/nodes/hardware/pic/fuses_pic18f87j60.c</itemPath>
         <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
@@ -232,7 +231,7 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value="_CONF_MCU_CARD;HAS_IP"/>
+        <property key="define-macros" value="_CONF_ETH_CARD;HAS_IP"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories" value=""/>
         <property key="favor-optimization-for" value="-speed,+space"/>
@@ -414,7 +413,7 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value="_CONF_MCU_CARD;HAS_IP;PROTO_PINOUT"/>
+        <property key="define-macros" value="_CONF_ETH_CARD;HAS_IP;PROTO_PINOUT"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories" value=""/>
         <property key="favor-optimization-for" value="-speed,+space"/>

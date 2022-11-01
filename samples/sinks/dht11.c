@@ -1,5 +1,5 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/protocol.h"
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/protocol.h"
 #include "dht11.h"
 
 #ifdef HAS_DHT11
@@ -14,7 +14,7 @@ void dht11_init()
     US_TIMER_INIT();
     
     // wait for sensor to stabilize
-    //wait1s();
+    // __delaywdt_ms(1000);
 }
 
 typedef enum {

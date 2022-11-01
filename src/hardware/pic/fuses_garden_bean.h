@@ -1,21 +1,21 @@
 #ifndef _FUSES_INCLUDE_
 #define _FUSES_INCLUDE_
 
+// Set via OSCCON (see garden/timers)
 #define SYSTEM_CLOCK 4000000ul
 #define _XTAL_FREQ SYSTEM_CLOCK
-#define PRIO_TYPE
 
-#undef HAS_CM1602
-#undef HAS_VS1011
-#undef HAS_SPI
-#undef HAS_SPI_RAM
-#undef HAS_IP
-#undef HAS_IO
-#undef HAS_DHT11
+// Internal core clock drives timer with 1:256 prescaler
+#define TICKS_PER_SECOND		(TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
+#define TICKS_PER_MILLISECOND		(TICK_TYPE)(TICKS_PER_SECOND / 1000)
+
+#define PRIO_TYPE
 
 #undef DEBUGMODE
 
-#define HAS_MAX232_SOFTWARE
+#define HAS_RS485_BUS_SECONDARY
+
+#undef HAS_MAX232_SOFTWARE
 #define RS232_RX_TRIS TRISBbits.TRISB3
 #define RS232_TX_TRIS TRISBbits.TRISB4
 #define RS232_RX_PORT PORTBbits.RB3
@@ -31,12 +31,9 @@
 #define RS232_BAUD 9600
 #define RS232_TCON_VALUE ((SYSTEM_CLOCK/4) / RS232_BAUD)   // 104
 #define RS232_TCON_VALUE_HALF ((SYSTEM_CLOCK/4) / RS232_BAUD / 2 - 38)  // 52-38. 38 Here is the result of checking with oscilloscope the exact poll point
-// Solar needs 0x48 for the biggest message(get fw version)
-#define MAX232_BUFSIZE1 0x30
-#define MAX232_BUFSIZE2 0x30
 
 // ******
-// RS485: use USART1 on 16F628 (PORTB)
+// RS485: use USART on 16F877 (PORTB)
 // ******
 #define RS485_BUF_SIZE 32
 #define RS485_RCSTA RCSTAbits
@@ -47,10 +44,10 @@
 #define RS485_PIR_RCIF PIR1bits.RCIF
 #define RS485_PIE_TXIE PIE1bits.TXIE
 #define RS485_PIE_RCIE PIE1bits.RCIE
-#define RS485_TRIS_TX TRISBbits.TRISB2
-#define RS485_TRIS_RX TRISBbits.TRISB1
-#define RS485_TRIS_EN TRISBbits.TRISB0
-#define RS485_PORT_EN PORTBbits.RB0
+#define RS485_TRIS_TX TRISCbits.TRISC6
+#define RS485_TRIS_RX TRISCbits.TRISC7
+#define RS485_TRIS_EN TRISDbits.TRISD1
+#define RS485_PORT_EN PORTDbits.RD1
 #define RS485_BAUD 19200
     // For 9600:
 //#define RS485_INIT_BAUD() \
@@ -58,6 +55,8 @@
 //    SPBRG = 25
 #define RS485_INIT_BAUD() \
      TXSTAbits.BRGH = 1;\
+     BAUDCTLbits.BRG16 = 0;\
+     SPBRGH = 0;\
      SPBRG = 12
 
 // *****
@@ -75,17 +74,17 @@
 #define TICK_INTCON_IE INTCONbits.T0IE
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK / 4)
 #define TICK_PRESCALER 256
-#define TICK_TYPE WORD
+#define TICK_TYPE uint16_t
 
+// The protocol led is overridden with the first button (in OFF state)
 #define HAS_LED
-#define LED_PORTBIT PORTBbits.RB5
-#define LED_TRISBIT TRISBbits.TRISB5
-
+#define LED_PORTBIT PORTAbits.RA3
+#define LED_TRISBIT TRISAbits.TRISA3
 
 // Reset the device with fatal error
-extern persistent BYTE g_exceptionPtr;
-#define fatal(msg) { g_exceptionPtr = (BYTE)msg; RESET(); }
-
+extern __persistent uint8_t g_exceptionPtr;
+#define LAST_EXC_TYPE uint8_t
+#define fatal(msg) { g_exceptionPtr = (uint8_t)msg; RESET(); }
 
 #endif
 

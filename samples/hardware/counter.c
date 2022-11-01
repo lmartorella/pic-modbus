@@ -1,5 +1,5 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/persistence.h"
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/persistence.h"
 #include "counter.h"
 
 #ifdef HAS_DIGITAL_COUNTER

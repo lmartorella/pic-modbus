@@ -1,5 +1,5 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/bus_secondary.h"
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/bus_secondary.h"
 #include "max232.h"
 
 #if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)

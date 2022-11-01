@@ -1,6 +1,5 @@
-#include "../../pch.h"
-#include "../../appio.h"
-#include "../../wait.h"
+#include "net.h"
+#include "appio.h"
     
 // ==== ETH CARD based on 18f87j60
 
@@ -42,37 +41,7 @@
 #pragma config CP0 = OFF
 
 
-
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait40us(void)
-{
-    __delay_us(40);
-}
-
-void wait100us(void)
-{
-    __delay_us(100);
-}
-
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait2ms(void)
-{
-    __delay_ms(2);
-}
-
-// The oscillator works at 25Mhz without PLL, so 1 cycle is 160nS 
-void wait30ms(void)
-{
-    __delay_ms(30);
-}
-
-void wait1s(void)
-{
-    __delaywdt_ms(1000);
-}
-
-void enableInterrupts()
-{
+void sys_enableInterrupts() {
     // Disable low/high interrupt mode
     RCONbits.IPEN = 0;		
     INTCONbits.GIE = 1;
@@ -149,6 +118,6 @@ void sys_storeResetReason()
 void fatal(const char* str)
 {
     g_exception = (LAST_EXC_TYPE)str;
-    wait30ms();
+    __delay_ms(30);
     RESET(); // generates RCON.RI
 }

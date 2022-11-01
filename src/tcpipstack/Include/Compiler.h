@@ -57,7 +57,7 @@
 #ifndef __COMPILER_H
 #define __COMPILER_H
 
-#include "../../pch.h"
+#include "net.h"
 
 // Include proper device header file
 //#if defined(__18CXX) && !defined(HI_TECH_C)	
@@ -300,7 +300,7 @@ typedef union _DWORD_VAL
     #define __PERSISTENT __attribute__((persistent))
 #endif
 
-#include "../../timers.h"
+#include "timers.h"
 #define TickGet timers_get
 
 #endif

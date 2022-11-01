@@ -1,5 +1,5 @@
-#include "../../../src/nodes/pch.h"
-#include "../../../src/nodes/protocol.h"
+#include "../../../src/nodes/include/net.h"
+#include "../../../src/nodes/include/protocol.h"
 #include "bmp180.h"
 #include "../hardware/i2c.h"
 
@@ -121,7 +121,7 @@ __bit bmp180_poll() {
 
         case STATE_ASK_TEMP:
             // Wait 4.5ms
-            if ((timers_get() - s_lastTime) > (TICKS_PER_MSECOND * 5)) {
+            if ((timers_get() - s_lastTime) > (TICKS_PER_MILLISECOND * 5)) {
                 bmp180_buffer.sendBuffer[0] = ADDR_MSB;
                 i2c_sendReceive7(REG_WRITE, 1, bmp180_buffer.sendBuffer);
                 s_state = STATE_ASK_TEMP_2;
@@ -143,7 +143,7 @@ __bit bmp180_poll() {
 
         case STATE_ASK_PRESS:   
             // Wait 25ms (OSS = 3)
-            if ((timers_get() - s_lastTime) > (TICKS_PER_MSECOND * 30)) {
+            if ((timers_get() - s_lastTime) > (TICKS_PER_MILLISECOND * 30)) {
                 bmp180_buffer.sendBuffer[0] = ADDR_MSB;
                 i2c_sendReceive7(REG_WRITE, 1, bmp180_buffer.sendBuffer);
                 s_state = STATE_ASK_PRESS_2;
