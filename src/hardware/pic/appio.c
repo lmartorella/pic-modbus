@@ -4,11 +4,7 @@
 LAST_EXC_TYPE g_lastException = 0;
 RESET_REASON g_resetReason;
 
-#if defined(HAS_MAX232_SOFTWARE) && defined(DEBUGMODE)
-#define HAS_DEBUG_LINE
-#endif
-
-#if defined(HAS_CM1602) || defined(HAS_DEBUG_LINE)
+#if defined(HAS_CM1602)
 static const char* g_resetReasonMsgs[] = { 
                 "N/A",
 				"POR",
@@ -18,13 +14,6 @@ static const char* g_resetReasonMsgs[] = {
 				"STK",
 				"RST",
 				"EXC:"  };
-#endif
-
-#ifdef HAS_DEBUG_LINE
-static void _stdout(const char* str) {
-    strcpy(max232_buffer1, str);
-    max232_send(strlen(str));
-}
 #endif
 
 void io_init() {
@@ -45,13 +34,6 @@ void io_init() {
     }
 
     __delaywdt_ms(1000);
-#elif defined(HAS_DEBUG_LINE)
-    _stdout("Boot: ");
-    _stdout(g_resetReasonMsgs[g_resetReason]);
-    if (g_resetReason == RESET_EXC && g_lastException != 0)
-    {
-        _stdout((const char*)g_lastException);
-    }
 #endif
 }
 
@@ -78,24 +60,17 @@ static void _print(const char* str, uint8_t addr) {
 void io_println(const char* str) {
 #ifdef HAS_CM1602
 	_print(str, 0x40);	
-#elif defined(HAS_DEBUG_LINE)
-    _stdout(str);
 #endif
 }
 
 void io_printlnStatus(const char* str) {
 #ifdef HAS_CM1602
 	_print(str, 0x00);	
-#elif defined(HAS_DEBUG_LINE)
-    _stdout(str);
 #endif
 }
 
 void io_printChDbg(char ch) {
 #ifdef HAS_CM1602
     cm1602_write(ch);
-#elif defined(HAS_DEBUG_LINE)
-    max232_buffer1[0] = ch;
-    max232_send(1);
 #endif
 }

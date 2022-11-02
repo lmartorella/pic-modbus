@@ -2,8 +2,6 @@
 #include "../../../src/nodes/include/protocol.h"
 #include "halfduplex.h"
 
-#if (defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232))
-
 static struct {
     // 0xff -> echo data
     // 0xfe -> don't read any data
@@ -145,5 +143,3 @@ __bit halfduplex_write()
         return 0;
     }
 }
-
-#endif

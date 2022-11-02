@@ -2,8 +2,6 @@
 #include "../../../src/nodes/include/bus_secondary.h"
 #include "max232.h"
 
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
-
 // Debug when RS232 RX line is sampled
 #undef TIMING_DEBUG
 
@@ -159,5 +157,3 @@ signed char max232_sendReceive(signed char size) {
     }   
 #endif
 }
-        
-#endif

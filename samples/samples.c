@@ -32,7 +32,7 @@ const char* const SINK_IDS =
 #ifdef HAS_DHT11
     SINK_DHT11_ID
 #endif
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
+#ifdef HAS_MAX232_SOFTWARE
     SINK_HALFDUPLEX_ID 
 #endif
 #if defined(HAS_BMP180)
@@ -60,7 +60,7 @@ const int SINK_IDS_COUNT =
 #ifdef HAS_DHT11
     + 1
 #endif
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
+#ifdef HAS_MAX232_SOFTWARE
     + 1
 #endif
 #if defined(HAS_BMP180)
@@ -88,7 +88,7 @@ const SinkFunction sink_readHandlers[] = {
 #ifdef HAS_DHT11
     ,nil
 #endif
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
+#ifdef HAS_MAX232_SOFTWARE
     ,halfduplex_read 
 #endif
 #if defined(HAS_BMP180)
@@ -116,7 +116,7 @@ const SinkFunction sink_writeHandlers[] = {
 #ifdef HAS_DHT11
     ,dht11_write
 #endif
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
+#ifdef HAS_MAX232_SOFTWARE
     ,halfduplex_write 
 #endif
 #if defined(HAS_BMP180)

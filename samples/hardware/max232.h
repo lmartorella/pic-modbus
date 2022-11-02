@@ -1,8 +1,6 @@
 #ifndef XC_RS232_H
 #define	XC_RS232_H
 
-#if defined(HAS_MAX232_SOFTWARE) || defined(HAS_FAKE_RS232)
-
 // Connection 9600,N,8,1
 void max232_init();
 
@@ -15,8 +13,6 @@ signed char max232_sendReceive(signed char txSize);
 
 // Disable interrupts. Send txSize byte from the buffer
 void max232_send(signed char txSize);
-
-#endif
 
 #endif	/* XC_RS232_H */
 
