@@ -54,7 +54,7 @@ void sys_enableInterrupts() {
     
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-static __persistent LAST_EXC_TYPE g_exception;
+static __persistent EXC_STRING_T g_exception;
 
 // Check RCON and STKPTR register for anormal reset cause
 void sys_storeResetReason()
@@ -62,52 +62,42 @@ void sys_storeResetReason()
     // Disable all A/D channels
     ADCON1 |= 0xF;
     
-    if (!RCONbits.NOT_RI)
-    {
-	// Software exception. 
-	// Obtain last reason from appio.h 
-	g_resetReason = RESET_EXC;
-	g_lastException = g_exception;
-	RCONbits.NOT_RI = 1;
+    if (!RCONbits.NOT_RI) {
+        // Software exception. 
+        // Obtain last reason from appio.h 
+        g_resetReason = RESET_EXC;
+        g_lastException = g_exception;
+        RCONbits.NOT_RI = 1;
+    } else if (!RCONbits.NOT_POR) {
+        // Normal Power-on startup. Ok.
+        g_resetReason = RESET_POWER;
+        RCONbits.NOT_POR = 1;
+        RCONbits.NOT_BOR = 1;
+    } else if (!RCONbits.NOT_BOR) {
+        // Brown-out reset. Low voltage.
+        g_resetReason = RESET_BROWNOUT;
+        RCONbits.NOT_POR = 1;
+        RCONbits.NOT_BOR = 1;
     }
-    else if (!RCONbits.NOT_POR)
-    {
-	// Normal Power-on startup. Ok.
-	g_resetReason = RESET_POWER;
-	RCONbits.NOT_POR = 1;
-	RCONbits.NOT_BOR = 1;
-    }    
-    else if (!RCONbits.NOT_BOR)
-    {
-	// Brown-out reset. Low voltage.
-	g_resetReason = RESET_BROWNOUT;
-	RCONbits.NOT_POR = 1;
-	RCONbits.NOT_BOR = 1;
-    }    
 /*
     else if (!RCONbits.NOT_CM)
     {
-	    // Configuration mismatch reset. EEPROM fail.
-	    _reason = RESET_CONFIGMISMATCH;
+        // Configuration mismatch reset. EEPROM fail.
+        _reason = RESET_CONFIGMISMATCH;
     }
 */
-    else if (!RCONbits.NOT_TO)
-    {
-	// Watchdog reset. Loop detected.
-	g_resetReason = RESET_WATCHDOG;
-	RCONbits.NOT_TO = 1;
-    }
-    else if (STKPTRbits.STKFUL || STKPTRbits.STKUNF)
-    {
-	// Stack underrun/overrun reset. 
-	g_resetReason = RESET_STACKFAIL;
-	STKPTRbits.STKFUL = 0;
-	STKPTRbits.STKUNF = 0;
-    }
-    else
-    {
-	// Else it was reset manually (MCLR)
-	g_resetReason = RESET_MCLR;
+    else if (!RCONbits.NOT_TO) {
+        // Watchdog reset. Loop detected.
+        g_resetReason = RESET_WATCHDOG;
+        RCONbits.NOT_TO = 1;
+    } else if (STKPTRbits.STKFUL || STKPTRbits.STKUNF) {
+        // Stack underrun/overrun reset. 
+        g_resetReason = RESET_STACKFAIL;
+        STKPTRbits.STKFUL = 0;
+        STKPTRbits.STKUNF = 0;
+    } else {
+        // Else it was reset manually (MCLR)
+        g_resetReason = RESET_MCLR;
     }
 
     g_exception = 0;
@@ -115,9 +105,8 @@ void sys_storeResetReason()
 }
 
 // Long (callable) version of fatal
-void fatal(const char* str)
-{
-    g_exception = (LAST_EXC_TYPE)str;
+void fatal(const char* str) {
+    g_exception = (EXC_STRING_T)str;
     __delay_ms(30);
     RESET(); // generates RCON.RI
 }

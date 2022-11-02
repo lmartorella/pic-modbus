@@ -1,6 +1,6 @@
 #include "net/net.h"
 
-LAST_EXC_TYPE g_lastException = 0;
+EXC_STRING_T g_lastException = EXC_STRING_NULL;
 RESET_REASON g_resetReason;
 
 void io_init() {

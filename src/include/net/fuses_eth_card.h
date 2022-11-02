@@ -164,8 +164,9 @@
 
 #define TICK_TYPE uint32_t
 
-// persistent char* are not supported by xc8 1.37
-#define LAST_EXC_TYPE long
+#define EXC_STRING_T const char*
+#define EXC_STRING_NULL (void*)0
+
 // Reset the device with fatal error
 void fatal(const char* msg);
 

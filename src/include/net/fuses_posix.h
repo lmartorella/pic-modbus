@@ -13,7 +13,8 @@ typedef uint32_t TICK_TYPE;
 #define TICKS_PER_SECOND (1000000u)
 #define TICKS_PER_MILLISECOND (1000u)
 
-#define LAST_EXC_TYPE const char*
+#define EXC_STRING_T const char*
+#define EXC_STRING_NULL ((void*)0)
 
 void fatal(const char* str);
 

@@ -32,7 +32,7 @@ extern __bank0 unsigned char __resetbits;
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-__persistent LAST_EXC_TYPE g_exceptionPtr;
+__persistent EXC_STRING_T g_exceptionPtr;
 
 void sys_storeResetReason()
 {
@@ -43,16 +43,16 @@ void sys_storeResetReason()
     if (!PCONbits.nPOR) {
         g_resetReason = RESET_POWER;        
     } else if (!PCONbits.nBOR) {
-	g_resetReason = RESET_BROWNOUT;
+        g_resetReason = RESET_BROWNOUT;
     } else if (!(__resetbits & nTObit)) {
-	g_resetReason = RESET_WATCHDOG;
+        g_resetReason = RESET_WATCHDOG;
     } else if (!PCONbits.nRMCLR) {
-	g_resetReason = RESET_MCLR;
+        g_resetReason = RESET_MCLR;
     } else if (!PCONbits.nRI) {
-	g_resetReason = RESET_EXC;
-	g_lastException = g_exceptionPtr;
+        g_resetReason = RESET_EXC;
+        g_lastException = g_exceptionPtr;
     } else if (PCONbits.STKOVF || PCONbits.STKUNF) {
-	g_resetReason = RESET_STACKFAIL;
+        g_resetReason = RESET_STACKFAIL;
     }
 
     PCON = 0xf; // reset all reset reasons

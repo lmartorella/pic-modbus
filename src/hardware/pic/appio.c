@@ -1,7 +1,7 @@
 #include "net/net.h"
 #include "cm1602.h"
 
-LAST_EXC_TYPE g_lastException = 0;
+EXC_STRING_T g_lastException = EXC_STRING_NULL;
 RESET_REASON g_resetReason;
 
 #if defined(HAS_CM1602)

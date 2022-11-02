@@ -126,10 +126,11 @@
 //#define EXC_TEST
 
 // persistent char* are not supported by xc8 1.37
-#define LAST_EXC_TYPE uint16_t
-extern __persistent LAST_EXC_TYPE g_exceptionPtr;
+#define EXC_STRING_T uint16_t
+
+extern __persistent EXC_STRING_T g_exceptionPtr;
 // Reset the device with fatal error
-#define fatal(msg) { g_exceptionPtr = (LAST_EXC_TYPE)msg; RESET(); }
+#define fatal(msg) { g_exceptionPtr = (EXC_STRING_T)msg; RESET(); }
 
 #define INIT_PORTS() \
      ANSELBbits.ANSB2 = 0;\

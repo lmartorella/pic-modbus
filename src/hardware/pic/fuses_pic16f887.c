@@ -15,7 +15,7 @@ extern __bank0 unsigned char __resetbits;
 
 // The pointer is pointing to ROM space that will not be reset
 // otherwise after the RESET the variable content can be lost.
-__persistent uint8_t g_exceptionPtr;
+__persistent EXC_STRING_T g_exceptionPtr;
 
 void sys_storeResetReason()
 {
@@ -30,7 +30,7 @@ void sys_storeResetReason()
                 // Watchdog is used for RESET() on pic16!
                 if (g_exceptionPtr != 0) { 
                     g_resetReason = RESET_EXC;
-                    g_lastException = (LAST_EXC_TYPE)g_exceptionPtr;
+                    g_lastException = g_exceptionPtr;
                 }
                 else {
                     g_resetReason = RESET_WATCHDOG;
