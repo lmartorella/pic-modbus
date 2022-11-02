@@ -8,7 +8,7 @@
 /**
  * Init sinks
  */
-void sinks_init(_Bool isPrimary);
+void sinks_init();
 
 /**
  * Poll sinks

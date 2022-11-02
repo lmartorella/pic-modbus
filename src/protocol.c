@@ -290,12 +290,9 @@ _Bool prot_prim_poll() {
             // TCP is still polled by bus
             return true;
         case BUS_STATE_SOCKET_TIMEOUT:
-            // drop the TCP connection        
-            prot_control_abort();
-            break;
         case BUS_STATE_SOCKET_FRAME_ERR:
             // drop the TCP connection        
-            prot_control_abort();
+            prot_prim_control_abort();
             break;
     }
     return pollProtocol_prim();

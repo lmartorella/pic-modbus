@@ -275,7 +275,7 @@ _Bool bus_prim_poll() {
                 // Timeout. Dead bean?
                 // Drop the TCP connection and reset the channel
                 bus_prim_disconnectSocket(SOCKET_ERR_TIMEOUT);
-                prot_control_abort();
+                prot_prim_control_abort();
             } else {
                 socketPoll();
             }

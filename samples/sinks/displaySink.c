@@ -3,10 +3,7 @@
 #include "../../../src/nodes/include/appio.h"
 #include "displaySink.h"
 
-#if (defined(HAS_CM1602) || defined(_CONF_POSIX))
-
-#ifdef HAS_CM1602
-#elif defined(_CONF_POSIX)
+#ifndef CM1602_COL_COUNT
 #define CM1602_COL_COUNT 80
 #define CM1602_LINE_COUNT 25
 #endif
@@ -63,5 +60,3 @@ __bit line_write()
    // Done
    return false;
 }
-
-#endif

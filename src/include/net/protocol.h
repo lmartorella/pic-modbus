@@ -39,13 +39,13 @@ typedef enum {
 
 #define UNASSIGNED_SUB_ADDRESS 0xff
 
-void prot_control_abort();
-
 void prot_init();
 /**
  * Returns true if active and require polling
  */
-_Bool prot_poll();
+_Bool prot_prim_poll();
+_Bool prot_sec_poll();
+
 // Has the slow timer ticked?
 extern __bit prot_slowTimer;
 extern __bit prot_registered;
@@ -75,5 +75,6 @@ uint16_t prot_prim_control_readAvail();
 uint16_t prot_prim_control_writeAvail();
 #define prot_prim_control_isConnected() ip_isConnected()
 #define prot_prim_control_close() ip_flush()
+void prot_prim_control_abort();
 
 #endif	/* PROTOCOL_H */
