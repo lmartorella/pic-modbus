@@ -4,67 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/include/hardware/pic/eeprom.h</itemPath>
-        <itemPath>../../../src/nodes/include/leds.h</itemPath>
-        <itemPath>../../../src/nodes/include/timers.h</itemPath>
-        <itemPath>../../../src/nodes/include/uart.h</itemPath>
-        <itemPath>../hardware/fuses_eth_card.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
-        <logicalFolder name="Include" displayName="Include" projectFiles="true">
-          <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Announce.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ARP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/AutoIP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/BerkeleyAPI.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/BigInt.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Delay.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/DHCP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/DNS.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ETH97J60.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/FTP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Hashes.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Helpers.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/HTTP2.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/ICMP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/IP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/MAC.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/MPFS2.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/NBNS.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Random.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/Reboot.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/regdef.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SMTP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNMP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNMPv3.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/SNTP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/StackTsk.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/TCP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/TCPIP.h</itemPath>
-            <itemPath>../../../src/nodes/tcpipstack/Include/TCPIPStack/UDP.h</itemPath>
-          </logicalFolder>
-          <itemPath>../../../src/nodes/tcpipstack/Include/Compiler.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/debug.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/GenericTypeDefs_old.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/struct_queue.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/TimeDelay.h</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/Include/timers.h</itemPath>
-        </logicalFolder>
-        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
-        </logicalFolder>
-        <itemPath>../../../src/nodes/tcpipstack/HardwareProfile.h</itemPath>
-        <itemPath>../../../src/nodes/tcpipstack/TCPIPConfig.h</itemPath>
-      </logicalFolder>
-      <itemPath>../../../src/nodes/include/appio.h</itemPath>
-      <itemPath>../../../src/nodes/include/bus_primary.h</itemPath>
-      <itemPath>../../../src/nodes/include/guid.h</itemPath>
-      <itemPath>../../../src/nodes/include/ip_client.h</itemPath>
-      <itemPath>../../../src/nodes/include/net.h</itemPath>
-      <itemPath>../../../src/nodes/include/persistence.h</itemPath>
-      <itemPath>../../../src/nodes/include/protocol.h</itemPath>
-      <itemPath>../../../src/nodes/include/rs485.h</itemPath>
-      <itemPath>../../../src/nodes/include/sinks.h</itemPath>
+      <itemPath>../samples.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -73,14 +13,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../../../src/nodes/hardware/pic/eeprom_pic18.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/tick_pic18.c</itemPath>
-        <itemPath>../hardware/cm1602.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/fuses_pic18f87j60.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.c</itemPath>
         <itemPath>../sinks/dht11.c</itemPath>
@@ -92,28 +24,8 @@
         <itemPath>../hardware/max232_sw.c</itemPath>
         <itemPath>../hardware/i2c.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="tcpipstack" displayName="tcpipstack" projectFiles="true">
-        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ARP.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/DHCP.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/DNS.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ETH97J60.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/Hashes.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/Helpers.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/ICMP.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/IP.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/StackTsk.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/TCP.c</itemPath>
-          <itemPath>../../../src/nodes/tcpipstack/TCPIPStack/UDP.c</itemPath>
-        </logicalFolder>
-      </logicalFolder>
       <itemPath>../main.c</itemPath>
-      <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
-      <itemPath>../../../src/nodes/bus_primary.c</itemPath>
-      <itemPath>../../../src/nodes/ip_client.c</itemPath>
       <itemPath>../../../src/nodes/sinks.c</itemPath>
-      <itemPath>../../../src/nodes/rs485.c</itemPath>
-      <itemPath>../../../src/nodes/protocol.c</itemPath>
       <itemPath>../samples.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -147,6 +59,23 @@
       <compileType>
         <linkerTool>
           <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../src/nodes/net.X"
+                            CT="3"
+                            CN="master_bean"
+                            AC="true"
+                            BL="true"
+                            WD="../../../src/nodes/net.X"
+                            BC="${MAKE}  -f Makefile CONF=master_bean"
+                            DBC="${MAKE}  -f Makefile CONF=master_bean TYPE_IMAGE=DEBUG_RUN"
+                            CC="rm -rf &quot;build/master_bean&quot; &quot;dist/master_bean&quot;"
+                            OP="dist/master_bean/production/net.X.a"
+                            DOP="dist/master_bean/debug/net.X.a"
+                            FL="dist/master_bean/production/net.X.a"
+                            PD="dist/master_bean/production/net.X.a"
+                            DD="dist/master_bean/debug/net.X.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>
@@ -170,10 +99,34 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../hardware/counter.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/i2c.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/max232_sw.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../sinks/bmp180.c" ex="true" overriding="false">
         <HI-TECH-COMP>
@@ -231,9 +184,9 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value="_CONF_ETH_CARD;HAS_IP"/>
+        <property key="define-macros" value="_CONF_ETH_CARD;HAS_RS485_BUS_PRIMARY"/>
         <property key="disable-optimizations" value="false"/>
-        <property key="extra-include-directories" value=""/>
+        <property key="extra-include-directories" value="..\..\..\src\nodes\include"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -385,6 +338,23 @@
       <compileType>
         <linkerTool>
           <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../src/nodes/net.X"
+                            CT="3"
+                            CN="master_bean"
+                            AC="true"
+                            BL="true"
+                            WD="../../../src/nodes/net.X"
+                            BC="${MAKE}  -f Makefile CONF=master_bean"
+                            DBC="${MAKE}  -f Makefile CONF=master_bean TYPE_IMAGE=DEBUG_RUN"
+                            CC="rm -rf &quot;build/master_bean&quot; &quot;dist/master_bean&quot;"
+                            OP="dist/master_bean/production/net.X.a"
+                            DOP="dist/master_bean/debug/net.X.a"
+                            FL="dist/master_bean/production/net.X.a"
+                            PD="dist/master_bean/production/net.X.a"
+                            DD="dist/master_bean/debug/net.X.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>

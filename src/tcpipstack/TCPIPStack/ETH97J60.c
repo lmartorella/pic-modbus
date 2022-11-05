@@ -57,8 +57,6 @@
 ********************************************************************/
 #define __ETH97J60_C
 
-#ifdef HAS_IP
-
 #include "../HardwareProfile.h"
 
 // Make sure that this hardware profile has a PIC18F97J60 family device in it
@@ -1516,4 +1514,3 @@ void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 
 
 #endif //#if (defined(__18F97J60) || defined(__18F96J65) || defined(__18F96J60) || defined(__18F87J60) || defined(__18F86J65) || defined(__18F86J60) || defined(__18F67J60) || defined(__18F66J65) || defined(__18F66J60)) || defined(HI_TECH_C)
-#endif

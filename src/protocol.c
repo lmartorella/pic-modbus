@@ -110,7 +110,7 @@ static void SELE_prim_command() {
     // Select subnode.
     if (w > 0) {
         // Otherwise connect the socket
-        bus_prim_connectSocket(w - 1);
+        bus_prim_connectSocket((int8_t)(w - 1));
     }
     prot_registered = true;
 }

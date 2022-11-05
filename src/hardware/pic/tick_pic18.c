@@ -1,5 +1,4 @@
 #include "net/net.h"
-#include "timers.h"
 
 // Internal counter to store Ticks.  This variable is incremented in an ISR and
 // therefore must be marked volatile to prevent the compiler optimizer from
@@ -100,8 +99,7 @@ static void GetTickCopy(void)
 	measurement code to be written in a non-blocking fashion.  This function
 	retrieves the least significant 32 bits of the internal tick counter,
 	and is useful for measuring time increments ranging from a few
-	microseconds to a few hours.  Use TickGetDiv256 or TickGetDiv64K for
-	longer periods of time.
+	microseconds to a few hours.  
 
   Precondition:
 	None
@@ -112,7 +110,7 @@ static void GetTickCopy(void)
   Returns:
   	Lower 32 bits of the current Tick value.
   ***************************************************************************/
-uint32_t TickGet(void)
+uint32_t timers_get()
 {
 	GetTickCopy();
 	return *((uint32_t*)&vTickReading[0]);
@@ -130,8 +128,7 @@ uint32_t TickGet(void)
 	measurement code to be written in a non-blocking fashion.  This function
 	retrieves the middle 32 bits of the internal tick counter,
 	and is useful for measuring time increments ranging from a few
-	minutes to a few weeks.  Use TickGet for shorter periods or TickGetDiv64K
-	for longer ones.
+	minutes to a few weeks.
 
   Precondition:
 	None
@@ -151,43 +148,6 @@ uint32_t TickGetDiv256(void)
 	((uint8_t*)&dw)[1] = vTickReading[2];	// byte at a time to prevent misaligned
 	((uint8_t*)&dw)[2] = vTickReading[3];	// memory reads, which will reset the PIC.
 	((uint8_t*)&dw)[3] = vTickReading[4];
-
-	return dw;
-}
-
-/*****************************************************************************
-  Function:
-	uint32_t TickGetDiv64K(void)
-
-  Summary:
-	Obtains the current Tick value divided by 64K.
-
-  Description:
-	This function retrieves the current Tick value, allowing timing and
-	measurement code to be written in a non-blocking fashion.  This function
-	retrieves the most significant 32 bits of the internal tick counter,
-	and is useful for measuring time increments ranging from a few
-	days to a few years, or for absolute time measurements.  Use TickGet or
-	TickGetDiv256 for shorter periods of time.
-
-  Precondition:
-	None
-
-  Parameters:
-	None
-
-  Returns:
-  	Upper 32 bits of the current Tick value.
-  ***************************************************************************/
-uint32_t TickGetDiv64K(void)
-{
-	uint32_t dw;
-
-	GetTickCopy();
-	((uint8_t*)&dw)[0] = vTickReading[2];	// Note: This copy must be done one
-	((uint8_t*)&dw)[1] = vTickReading[3];	// byte at a time to prevent misaligned
-	((uint8_t*)&dw)[2] = vTickReading[4];	// memory reads, which will reset the PIC.
-	((uint8_t*)&dw)[3] = vTickReading[5];
 
 	return dw;
 }

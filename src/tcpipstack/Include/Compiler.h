@@ -300,7 +300,7 @@ typedef union _DWORD_VAL
     #define __PERSISTENT __attribute__((persistent))
 #endif
 
-#include "timers.h"
+#include "net/timers.h"
 #define TickGet timers_get
 
 #endif

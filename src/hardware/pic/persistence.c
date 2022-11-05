@@ -1,7 +1,4 @@
 #include "net/net.h"
-#include "persistence.h"
-#include "protocol.h"
-#include "appio.h"
 #include "./eeprom.h"
 
 /**
@@ -11,11 +8,11 @@ PersistentData pers_data;
 
 #ifdef _IS_ETH_CARD
 #   define __ADDRESS __at(0x1F800)
-#   define PERSISTENT_SIZE 0x10
 #else
-#   define __ADDRESS
-#   define PERSISTENT_SIZE (sizeof(PersistentData))
+#   define __ADDRESS __at(0)
 #endif
+
+#define PERSISTENT_SIZE (sizeof(PersistentData))
 
 static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = { 
     // Zero GUID by default, it means unassigned
@@ -25,11 +22,7 @@ static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = {
     {
         UNASSIGNED_SUB_ADDRESS, 
         0xff
-    },
-    
-#ifdef HAS_PERSISTENT_SINK_DATA
-    PERSISTENT_SINK_DATA_DEFAULT_DATA
-#endif
+    }   
 };
 
 
@@ -40,12 +33,10 @@ static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] __at
 #define ROM_ADDR 0
 #endif
 
-void pers_load()
-{
+void pers_load() {
     rom_read(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
 }
 
-void pers_save()
-{
+void pers_save() {
     rom_write(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
 }

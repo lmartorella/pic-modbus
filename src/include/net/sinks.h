@@ -6,17 +6,6 @@
  */
 
 /**
- * Init sinks
- */
-void sinks_init();
-
-/**
- * Poll sinks
- * Returns true if active and require polling
- */
-_Bool sinks_poll();
-
-/**
  * The system sink type ID
  */
 #define SINK_SYS_ID "SYS "

@@ -1,7 +1,5 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
-#include "../../../src/nodes/include/appio.h"
-#include "displaySink.h"
+#include <net/net.h>
+#include "./displaySink.h"
 
 #ifndef CM1602_COL_COUNT
 #define CM1602_COL_COUNT 80

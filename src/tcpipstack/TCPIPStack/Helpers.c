@@ -55,7 +55,6 @@
  ********************************************************************/
 #define __HELPERS_C
 
-#ifdef HAS_IP
 #include <stdarg.h>
 #include "../Include/TCPIPStack/TCPIP.h"
 
@@ -2176,5 +2175,4 @@ int16_t Replace(uint8_t *vExpression, ROM uint8_t *vFind, ROM uint8_t *vReplacem
 	}
 	return wFindCount;
 }
-#endif
 #endif

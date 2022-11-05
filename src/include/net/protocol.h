@@ -77,4 +77,19 @@ uint16_t prot_prim_control_writeAvail();
 #define prot_prim_control_close() ip_flush()
 void prot_prim_control_abort();
 
+
+#if defined(HAS_RS485_BUS_PRIMARY)
+#define prot_control_write prot_prim_control_write
+#define prot_control_writeW prot_prim_control_writeW
+#define prot_control_readAvail prot_prim_control_readAvail
+#define prot_control_read prot_prim_control_read
+#define prot_control_readW prot_prim_control_readW
+#elif defined(HAS_RS485_BUS_SECONDARY)
+#define prot_control_write prot_sec_control_write
+#define prot_control_writeW prot_sec_control_writeW
+#define prot_control_readAvail prot_sec_control_readAvail
+#define prot_control_read prot_sec_control_read
+#define prot_control_readW prot_sec_control_readW
+#endif
+
 #endif	/* PROTOCOL_H */

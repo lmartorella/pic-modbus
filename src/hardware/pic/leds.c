@@ -1,5 +1,4 @@
 #include "net/net.h"
-#include "leds.h"
 
 void led_init() { 
 #ifdef LED_PORTBIT

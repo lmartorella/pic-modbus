@@ -60,7 +60,6 @@
  ********************************************************************/
 #define __IP_C
 
-#ifdef HAS_IP
 #include "../Include/TCPIPStack/TCPIP.h"
 
 // This is left shifted by 4.  Actual value is 0x04.
@@ -310,5 +309,3 @@ static void SwapIPHeader(IP_HEADER* h)
     h->Identification   = swaps(h->Identification);
     h->HeaderChecksum   = swaps(h->HeaderChecksum);
 }
-
-#endif

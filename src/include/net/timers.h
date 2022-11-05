@@ -23,11 +23,6 @@ TICK_TYPE timers_get();
 TICK_TYPE TickGetDiv256();
 
 /**
- * Used by ETH code
- */
-TICK_TYPE TickGetDiv64K();
-
-/**
  * Poll the interrupt flag of the timer for overflow, and in case increments the MSB tick bytes
  */
 void timers_poll();

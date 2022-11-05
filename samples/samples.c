@@ -1,6 +1,4 @@
-#include "../../src/nodes/include/net.h"
-#include "../../src/nodes/include/sinks.h"
-#include "../../src/nodes/include/protocol.h"
+#include <net/net.h>
 #include "sinks/displaySink.h"
 #include "sinks/digio.h"
 #include "sinks/dht11.h"
@@ -75,7 +73,11 @@ const int SINK_IDS_COUNT =
 ;
 
 const SinkFunction sink_readHandlers[] = {
-    sys_read
+#ifdef _CONF_ETH_CARD
+    sys_read_prim
+#else
+    sys_read_sec
+#endif            
 #ifdef HAS_DIGIO_OUT
     ,digio_out_read
 #endif
@@ -103,7 +105,11 @@ const SinkFunction sink_readHandlers[] = {
 };
 
 const SinkFunction sink_writeHandlers[] = {
-    sys_write
+#ifdef _CONF_ETH_CARD
+    sys_write_prim
+#else
+    sys_write_sec
+#endif            
 #ifdef HAS_DIGIO_OUT
     ,digio_out_write
 #endif

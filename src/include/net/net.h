@@ -52,19 +52,23 @@ typedef unsigned char __bit;
 /**
  * CONSTANTS
  */
-
-#ifdef DEBUG
-// 17008 is the debug port
-#define SERVER_CONTROL_UDP_PORT 17008
-#else
-// 17007 is the release port
-#define SERVER_CONTROL_UDP_PORT 17007
-#endif
-
-#define CLIENT_TCP_PORT 20000
 #define MASTER_MAX_CHILDREN 16
 
 #define RS485_BAUD 19200
+
+void net_prim_init();
+void net_sec_init();
+_Bool net_prim_poll();
+_Bool net_sec_poll();
+
+#if defined(HAS_RS485_BUS_PRIMARY)
+#define net_init net_prim_init
+#define net_poll net_prim_poll
+#elif defined(HAS_RS485_BUS_SECONDARY)
+#define net_init net_sec_init
+#define net_poll net_sec_poll
+#endif
+
 
 /**
  * API

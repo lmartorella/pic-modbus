@@ -17,7 +17,7 @@ static TICK_TYPE s_lastScanTime;
 static TICK_TYPE s_lastTime;
 
 // Socket connected to child, or SOCKET_STATE
-static int s_socketConnected;
+static int8_t s_socketConnected;
 
 #define BUS_SCAN_TIMEOUT (TICK_TYPE)(TICKS_PER_SECOND * 1.5) // 1500ms 
 #define BUS_SOCKET_TIMEOUT (TICK_TYPE)(TICKS_PER_SECOND * 2)  // 2000ms, SOLAR bean needs some time to sync wait for RS232 data
@@ -285,13 +285,13 @@ _Bool bus_prim_poll() {
 }
 
 // The command starts when the bus is idle
-void bus_prim_connectSocket(int nodeIdx)
+void bus_prim_connectSocket(int8_t nodeIdx)
 {
     s_socketConnected = nodeIdx;
     // Next IDLE will start the connection
 }
 
-void bus_prim_disconnectSocket(int val)
+void bus_prim_disconnectSocket(int8_t val)
 {
     if (s_socketConnected >= 0) {
         // Send break char
@@ -320,7 +320,7 @@ static void socketCreate()
 {
     // Bus is idle. Start transmitting/receiving.
     uint8_t buffer[4] = { 0x55, 0xaa };
-    buffer[2] = s_socketConnected;
+    buffer[2] = (uint8_t)s_socketConnected;
     buffer[3] = BUS_MSG_TYPE_CONNECT;
     rs485_write(true, buffer, 4);
 

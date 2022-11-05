@@ -20,10 +20,6 @@ typedef struct
         uint8_t address;
         uint8_t filler;
     } sec;
-
-#ifdef HAS_PERSISTENT_SINK_DATA
-    PERSISTENT_SINK_DATA sinkData;
-#endif    
 } PersistentData;
 
 // The cached copy of the EEPROM data, read at startup/init

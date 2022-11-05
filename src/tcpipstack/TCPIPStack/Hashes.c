@@ -72,7 +72,6 @@
 
   ***************************************************************************/
 
-#ifdef HAS_IP
 #include "../Include/TCPIPStack/TCPIP.h"
 
 /****************************************************************************
@@ -839,4 +838,3 @@ void SHA1Calculate(HASH_SUM* theSum, uint8_t* result)
 }
 
 #endif	//#end SHA-1
-#endif

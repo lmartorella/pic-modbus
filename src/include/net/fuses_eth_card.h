@@ -66,13 +66,6 @@
 // IP: uses PORTA0,1 (leds)
 // ******
 
-#ifdef PROTO_PINOUT
-#define SERVER_CONTROL_UDP_PORT 17008
-#else
-#define SERVER_CONTROL_UDP_PORT 17007
-#endif
-#define CLIENT_TCP_PORT 20000
-
 // ******
 // IO: power line on/off
 // ******

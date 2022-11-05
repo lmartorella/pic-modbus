@@ -23,8 +23,8 @@ typedef struct {
 extern BUS_PRIMARY_STATS bus_prim_busStats;
 
 // Select a child, and start a private communication bridging the IP protocol socket.
-void bus_prim_connectSocket(int nodeIdx);
-void bus_prim_disconnectSocket(int val);
+void bus_prim_connectSocket(int8_t nodeIdx);
+void bus_prim_disconnectSocket(int8_t val);
 
 typedef enum {
     BUS_STATE_NONE,

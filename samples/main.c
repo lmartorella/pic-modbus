@@ -1,4 +1,5 @@
 #include <net/net.h>
+#include "./samples.h"
 
 #ifdef BEAN_INTERRUPT_VECTOR
 extern void BEAN_INTERRUPT_VECTOR();
@@ -19,21 +20,7 @@ void main()
     // Analyze RESET reason
     sys_storeResetReason();
 
-    // Init Ticks on timer0 (low prio) module
-    timers_init();
-    io_init();
-    led_init();
-
-    pers_load();
-
-#if defined(HAS_RS485_BUS_SECONDARY)
-    bus_sec_init();
-#elif defined(HAS_RS485_BUS_PRIMARY)
-    bus_prim_init();
-#endif
-    prot_init();
-
-    rs485_init();
+    net_init();
 
 #ifdef BUSPOWER_PORT
     // Enable bus power to slaves
@@ -51,20 +38,8 @@ void main()
 
     // I'm alive
     while (1) {   
-        CLRWDT();
-
-#if defined(HAS_RS485_BUS_SECONDARY)
-        bus_sec_poll();
-#endif
-#if defined(HAS_RS485_BUS_PRIMARY)
-        bus_prim_poll();
-#endif
-        prot_poll();
-        rs485_poll();
-
-        sinks_poll();
-        
-        pers_poll();
+        net_poll();
+        sinks_poll();      
     }
 }
 

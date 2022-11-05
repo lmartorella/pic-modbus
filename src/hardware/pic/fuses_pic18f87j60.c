@@ -1,5 +1,4 @@
 #include "net/net.h"
-#include "appio.h"
     
 // ==== ETH CARD based on 18f87j60
 

@@ -1,5 +1,4 @@
 #include "net/net.h"
-#include "appio.h"
 #include "./eeprom.h"
 
 /**
@@ -119,4 +118,8 @@ void rom_write(const void* destination, const void* source, uint16_t length)
 	loadWData(source, length);
 	setWTablePtr(&ptr); 
 	rowWrite(); 
+}
+
+_Bool pers_poll() {
+    return false;
 }
