@@ -1,15 +1,12 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/bus_secondary.h"
+#include <net/net.h>
 #include "max232.h"
 
-// Debug when RS232 RX line is sampled
-#undef TIMING_DEBUG
+#ifdef HAS_MAX232_SOFTWARE
 
 uint8_t max232_buffer1[MAX232_BUFSIZE1];
 uint8_t max232_buffer2[MAX232_BUFSIZE2];
 
 void max232_init() {
-#ifdef HAS_MAX232_SOFTWARE
     // Init I and O bits
     RS232_RX_TRIS = 1;
     RS232_TX_TRIS = 0;
@@ -18,10 +15,8 @@ void max232_init() {
     
     RS232_TCON = RS232_TCON_OFF;
     RS232_TCON_REG = RS232_TCON_VALUE; 
-#endif
 }
 
-#ifdef HAS_MAX232_SOFTWARE
 #define RESETTIMER(t) { RS232_TCON_REG = t; RS232_TCON_ACC = 0; RS232_TCON_IF = 0; }
 #define WAITBIT() { while(!RS232_TCON_IF) { CLRWDT(); } RS232_TCON_IF = 0; }
 // Timeout to wait to receive the first byte: 0.5 seconds
@@ -47,14 +42,12 @@ static void send(uint8_t b) {
     WAITBIT()
     RS232_TX_PORT = 1;
 }
-#endif
 
 void max232_send(signed char size) {
     if (size > MAX232_BUFSIZE1 + MAX232_BUFSIZE2) {
         fatal("UAs.ov");
     }
 
-#ifdef HAS_MAX232_SOFTWARE
     INTCONbits.GIE = 0;
 
     RESETTIMER(RS232_TCON_VALUE)
@@ -74,7 +67,6 @@ void max232_send(signed char size) {
     }
     
     INTCONbits.GIE = 1;
-#endif
 }
 
 // Write sync, disable interrupts
@@ -82,7 +74,6 @@ signed char max232_sendReceive(signed char size) {
 
     max232_send(size);
 
-#ifdef HAS_MAX232_SOFTWARE
     INTCONbits.GIE = 0;
 
     // Now receive
@@ -117,13 +108,7 @@ signed char max232_sendReceive(signed char size) {
 
             if (RS232_RX_PORT) {
                 b = b | 0x80;
-            }
-            
-#ifdef TIMING_DEBUG
-            led_on();
-            __delay_us(10); // 10% of the wave
-            led_off();
-#endif
+            }           
         }
 
         // Wait for the stop bit
@@ -154,6 +139,7 @@ signed char max232_sendReceive(signed char size) {
         // Now change the timeout: use the shorter one now that at least 1 byte is received
         CLRWDT();
         timeoutCount = TIMEOUT_LAST;
-    }   
-#endif
+    }  
 }
+
+#endif

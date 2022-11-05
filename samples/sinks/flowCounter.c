@@ -1,5 +1,4 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
+#include <net/net.h>
 #include "../hardware/counter.h"
 #include "flowCounter.h"
 

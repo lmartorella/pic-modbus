@@ -1,6 +1,5 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
-#include "bmp180.h"
+#include <net/net.h>
+#include "./bmp180.h"
 #include "../hardware/i2c.h"
 
 // BPM180 I2C module to read barometric data (air pressure)

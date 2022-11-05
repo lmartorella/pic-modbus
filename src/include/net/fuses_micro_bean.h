@@ -123,10 +123,9 @@
     ADCON1bits.ADNREF = 0;  \
     ADCON1bits.ADPREF = 3;  \
 
-//#define EXC_TEST
-
 // persistent char* are not supported by xc8 1.37
 #define EXC_STRING_T uint16_t
+#define EXC_STRING_NULL (0)
 
 extern __persistent EXC_STRING_T g_exceptionPtr;
 // Reset the device with fatal error

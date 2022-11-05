@@ -1,5 +1,4 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/timers.h"
+#include <net/net.h>
 #include "an_integrator.h"
 
 #ifdef HAS_ANALOG_INTEGRATOR

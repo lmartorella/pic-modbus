@@ -1,6 +1,5 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
-#include "dht11.h"
+#include <net/net.h>
+#include "./dht11.h"
 
 #ifdef HAS_DHT11
 

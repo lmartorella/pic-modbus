@@ -1,6 +1,4 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/sinks.h"
-#include "../../../src/nodes/include/protocol.h"    
+#include <net/net.h>
 #include "integratorSink.h"
 #include "../hardware/an_integrator.h"
 

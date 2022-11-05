@@ -1,4 +1,4 @@
-#include "../../../src/nodes/include/net.h"
+#include <net/net.h>
 #include "i2c.h"
 
 #ifdef HAS_I2C

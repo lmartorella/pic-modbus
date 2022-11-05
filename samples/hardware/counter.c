@@ -1,6 +1,5 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/persistence.h"
-#include "counter.h"
+#include <net/net.h>
+#include "./counter.h"
 
 #ifdef HAS_DIGITAL_COUNTER
 

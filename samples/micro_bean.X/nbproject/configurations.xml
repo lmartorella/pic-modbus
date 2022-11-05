@@ -5,29 +5,10 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../hardware/fuses_micro_bean.h</itemPath>
-        <itemPath>../hardware/cm1602.h</itemPath>
         <itemPath>../hardware/counter.h</itemPath>
         <itemPath>../hardware/i2c.h</itemPath>
         <itemPath>../hardware/max232.h</itemPath>
         <itemPath>../hardware/an_integrator.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f1" displayName="sdk" projectFiles="true">
-        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/pic/eeprom.h</itemPath>
-          <itemPath>../../../src/nodes/include/leds.h</itemPath>
-          <itemPath>../../../src/nodes/include/timers.h</itemPath>
-          <itemPath>../../../src/nodes/include/uart.h</itemPath>
-        </logicalFolder>
-        <itemPath>../../../src/nodes/include/ip_client.h</itemPath>
-        <itemPath>../../../src/nodes/include/net.h</itemPath>
-        <itemPath>../../../src/nodes/include/persistence.h</itemPath>
-        <itemPath>../../../src/nodes/include/protocol.h</itemPath>
-        <itemPath>../../../src/nodes/include/rs485.h</itemPath>
-        <itemPath>../../../src/nodes/include/appio.h</itemPath>
-        <itemPath>../../../src/nodes/include/bus_secondary.h</itemPath>
-        <itemPath>../../../src/nodes/include/guid.h</itemPath>
-        <itemPath>../../../src/nodes/include/sinks.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.h</itemPath>
@@ -47,26 +28,10 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../hardware/cm1602.c</itemPath>
         <itemPath>../hardware/counter.c</itemPath>
         <itemPath>../hardware/i2c.c</itemPath>
         <itemPath>../hardware/max232_sw.c</itemPath>
         <itemPath>../hardware/an_integrator.c</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f1" displayName="sdk" projectFiles="true">
-        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
-          <itemPath>../../../src/nodes/hardware/pic/fuses_pic16f1827.c</itemPath>
-        </logicalFolder>
-        <itemPath>../main.c</itemPath>
-        <itemPath>../../../src/nodes/bus_secondary.c</itemPath>
-        <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
-        <itemPath>../../../src/nodes/protocol.c</itemPath>
-        <itemPath>../../../src/nodes/rs485.c</itemPath>
-        <itemPath>../../../src/nodes/sinks.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
         <itemPath>../sinks/bmp180.c</itemPath>
@@ -78,6 +43,7 @@
         <itemPath>../sinks/integratorSink.c</itemPath>
       </logicalFolder>
       <itemPath>../samples.c</itemPath>
+      <itemPath>../main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -91,7 +57,7 @@
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="MicroBean" type="2">
+    <conf name="release" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC16F1827</targetDevice>
@@ -110,6 +76,23 @@
       <compileType>
         <linkerTool>
           <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../src/nodes/net.X"
+                            CT="3"
+                            CN="micro_bean"
+                            AC="false"
+                            BL="true"
+                            WD="../../../src/nodes/net.X"
+                            BC="${MAKE}  -f Makefile CONF=micro_bean"
+                            DBC="${MAKE}  -f Makefile CONF=micro_bean TYPE_IMAGE=DEBUG_RUN"
+                            CC="rm -rf &quot;build/micro_bean&quot; &quot;dist/micro_bean&quot;"
+                            OP="dist/micro_bean/production/net.X.a"
+                            DOP="dist/micro_bean/debug/net.X.a"
+                            FL="dist/micro_bean/production/net.X.a"
+                            PD="dist/micro_bean/production/net.X.a"
+                            DD="dist/micro_bean/debug/net.X.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>
@@ -138,9 +121,9 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value="_CONF_MICRO_BEAN"/>
+        <property key="define-macros" value="_CONF_MICRO_BEAN;HAS_RS485_BUS_SECONDARY"/>
         <property key="disable-optimizations" value="false"/>
-        <property key="extra-include-directories" value=""/>
+        <property key="extra-include-directories" value="..\..\..\src\nodes\include"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>

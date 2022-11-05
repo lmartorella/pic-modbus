@@ -1,5 +1,4 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
+#include <net/net.h>
 #include "digio.h"
 
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)

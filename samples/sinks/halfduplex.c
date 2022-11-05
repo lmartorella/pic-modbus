@@ -1,6 +1,7 @@
-#include "../../../src/nodes/include/net.h"
-#include "../../../src/nodes/include/protocol.h"
+#include <net/net.h>
 #include "halfduplex.h"
+
+#ifdef HAS_MAX232_SOFTWARE
 
 static struct {
     // 0xff -> echo data
@@ -143,3 +144,5 @@ __bit halfduplex_write()
         return 0;
     }
 }
+
+#endif

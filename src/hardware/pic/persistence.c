@@ -9,7 +9,7 @@ PersistentData pers_data;
 #ifdef _IS_ETH_CARD
 #   define __ADDRESS __at(0x1F800)
 #else
-#   define __ADDRESS __at(0)
+#   define __ADDRESS
 #endif
 
 #define PERSISTENT_SIZE (sizeof(PersistentData))
