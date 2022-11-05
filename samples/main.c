@@ -1,17 +1,12 @@
 #include <net/net.h>
 #include "./samples.h"
 
-#ifdef BEAN_INTERRUPT_VECTOR
-extern void BEAN_INTERRUPT_VECTOR();
-#endif
-
-void __interrupt(PRIO_TYPE) low_isr()
-{
+void __interrupt(PRIO_TYPE) low_isr() {
     // Update tick timers at ~Khz freq
     timers_poll();
     rs485_interrupt();
 #ifdef BEAN_INTERRUPT_VECTOR
-    BEAN_INTERRUPT_VECTOR();
+    dcnt_interrupt();
 #endif
 }
 

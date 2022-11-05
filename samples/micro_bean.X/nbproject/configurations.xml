@@ -19,6 +19,7 @@
         <itemPath>../sinks/halfduplex.h</itemPath>
         <itemPath>../sinks/integratorSink.h</itemPath>
       </logicalFolder>
+      <itemPath>../samples.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -115,6 +116,16 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../sinks/bmp180.c" ex="true" overriding="false">
+      </item>
+      <item path="../sinks/dht11.c" ex="true" overriding="false">
+      </item>
+      <item path="../sinks/digio.c" ex="true" overriding="false">
+      </item>
+      <item path="../sinks/displaySink.c" ex="true" overriding="false">
+      </item>
+      <item path="../sinks/halfduplex.c" ex="true" overriding="false">
+      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>

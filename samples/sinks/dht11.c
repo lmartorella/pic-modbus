@@ -1,10 +1,14 @@
 #include <net/net.h>
 #include "./dht11.h"
 
-#ifdef HAS_DHT11
+#define DHT11_PORT_PULLUPS_INIT() { /*OPTION_REGbits.nRBPU = 0;*/ }
+#define DHT11_PORT PORTBbits.RB5
+#define DHT11_PORT_TRIS TRISBbits.TRISB5
+#define US_TIMER TMR1L
+    // Prescaler 1:1, = 1MHz timer (us), started
+#define US_TIMER_INIT() { T1CON = 1; }
 
-void dht11_init()
-{
+void dht11_init() {
     // Port high, pullups, output
     DHT11_PORT_PULLUPS_INIT();
     DHT11_PORT = 1;
@@ -13,7 +17,7 @@ void dht11_init()
     US_TIMER_INIT();
     
     // wait for sensor to stabilize
-    // __delaywdt_ms(1000);
+    __delaywdt_ms(1000);
 }
 
 typedef enum {
@@ -23,8 +27,7 @@ typedef enum {
     ERR_AT_BYTE = 0x10,         // Err at byte 0x10 + N
 } ERR_BYTE;
 
-ERR_BYTE dht11_read(uint8_t* buffer)
-{   
+ERR_BYTE dht11_read(uint8_t* buffer) {   
     DHT11_PORT = 0;     // low
     
     // Low for at least 25ms to wake up DHT11
@@ -94,5 +97,3 @@ __bit dht11_write() {
     // Finish data
     return false;
 }
-
-#endif

@@ -1,7 +1,8 @@
 #include <net/net.h>
 #include "an_integrator.h"
 
-#ifdef HAS_ANALOG_INTEGRATOR
+// 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
+#define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
 
 static int32_t _accumulator;
 static int16_t _count;
@@ -17,7 +18,16 @@ void anint_init() {
     _state = IDLE;
     _lastSample = timers_get();
     
-    INIT_ANALOG_INTEGRATOR();
+    // Uses RB1, range from 0V to 1.024V
+    ANSELBbits.ANSB1 = 1;
+    TRISBbits.TRISB1 = 1;
+    FVRCONbits.ADFVR = 1;
+    FVRCONbits.CDAFVR = 0;
+    FVRCONbits.FVREN = 1;
+    while (!FVRCONbits.FVRRDY);
+    ADCON0bits.CHS = 11;
+    ADCON1bits.ADNREF = 0;
+    ADCON1bits.ADPREF = 3;
     ADCON1bits.ADFM = 1; // LSB
     ADCON1bits.ADCS = 7; // internal OSC
     NOP();
@@ -63,6 +73,3 @@ void anint_read(ANALOG_INTEGRATOR_DATA* data) {
     _count = 0;
     _accumulator = 0;
 }
-
-
-#endif

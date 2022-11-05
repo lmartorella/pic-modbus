@@ -2,7 +2,17 @@
 #include "integratorSink.h"
 #include "../hardware/an_integrator.h"
 
-#ifdef HAS_ANALOG_INTEGRATOR
+// Uses RB1, range from 0V to 1.024V
+#define INIT_ANALOG_INTEGRATOR() \
+    ANSELBbits.ANSB1 = 1;   \
+    TRISBbits.TRISB1 = 1;   \
+    FVRCONbits.ADFVR = 1;   \
+    FVRCONbits.CDAFVR = 0;  \
+    FVRCONbits.FVREN = 1;   \
+    while (!FVRCONbits.FVRRDY); \
+    ADCON0bits.CHS = 11;    \
+    ADCON1bits.ADNREF = 0;  \
+    ADCON1bits.ADPREF = 3;  \
 
 // The transfer message
 typedef struct {
@@ -27,5 +37,3 @@ __bit anint_sinkWrite() {
     prot_control_write(&msg, sizeof(msg));
     return 0;
 }
-
-#endif

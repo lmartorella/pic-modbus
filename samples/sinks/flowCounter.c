@@ -1,8 +1,6 @@
 #include <net/net.h>
 #include "../hardware/counter.h"
-#include "flowCounter.h"
-
-#ifdef HAS_DIGITAL_COUNTER
+#include "./flowCounter.h"
 
 __bit flow_write() {
     // Write counter
@@ -17,5 +15,3 @@ __bit flow_write() {
     // Done
     return false;
 }
-
-#endif

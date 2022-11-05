@@ -1,11 +1,21 @@
 #include <net/net.h>
 #include "./counter.h"
 
-#ifdef HAS_DIGITAL_COUNTER
-
 static DCNT_DATA s_data;
 static __bit s_counterDirty;
 static uint32_t s_lastCounter;
+
+#define DCNT_IF INTCONbits.INTF
+#define DCNT_IE INTCONbits.INTE
+
+// Custom persistence data
+typedef struct {
+    // Used by counter
+    uint32_t dcnt_counter;
+} PERSISTENT_SINK_DATA;
+static EEPROM_MODIFIER PERSISTENT_SINK_DATA s_persistentData /*__DATA_ADDRESS*/ = { 
+    0
+};
 
 // Only save once every 255 seconds (4 minutes), a good balance between EEPROM data endurance and potential data 
 // loss due to reset. Obviously no flow -> no write
@@ -24,7 +34,8 @@ void dcnt_interrupt() {
 }
 
 void dcnt_init() {
-    s_lastCounter = s_data.counter = pers_data.sinkData.dcnt_counter;
+    pers_load(&s_data.counter);
+    s_lastCounter = s_data.counter;
     s_data.flow = 0;
     s_counterDirty = 0;
     s_persTimer = 0;
@@ -47,12 +58,11 @@ void dcnt_poll() {
         uint32_t currCounter = s_data.counter;
         DCNT_IE = 1;
         
-        s_data.flow = currCounter - s_lastCounter;
+        s_data.flow = (uint16_t)(currCounter - s_lastCounter);
         s_lastCounter = currCounter;
         
         if ((++s_persTimer) == 0) {          
-            pers_data.sinkData.dcnt_counter = s_lastCounter;
-            pers_save();
+            pers_save(&s_lastCounter);
             s_counterDirty = 0;
         }
     } else {
@@ -66,6 +76,3 @@ void dcnt_getDataCopy(DCNT_DATA* data) {
     *data = s_data;
     DCNT_IE = 1;
 }
-
-
-#endif

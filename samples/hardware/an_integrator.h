@@ -1,7 +1,8 @@
 #ifndef _AN_INTEGRATOR_H
 #define _AN_INTEGRATOR_H
 
-#ifdef HAS_ANALOG_INTEGRATOR
+// 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
+#define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
 
 typedef struct {
     // The integrated A/D value for the last period. Single reading is unsigned 10bits.
@@ -16,5 +17,4 @@ void anint_poll();
 // Read data and reset counters
 void anint_read(ANALOG_INTEGRATOR_DATA* data);
 
-#endif
 #endif

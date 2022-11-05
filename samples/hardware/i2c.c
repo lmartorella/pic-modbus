@@ -1,7 +1,28 @@
 #include <net/net.h>
 #include "i2c.h"
 
-#ifdef HAS_I2C
+#define I2C_PORT_SDA PORTBbits.RB1
+#define I2C_TRIS_SDA TRISBbits.TRISB1
+#define I2C_PORT_SCL PORTBbits.RB4
+#define I2C_TRIS_SCL TRISBbits.TRISB4
+#define I2C_SSPADD SSP1ADD
+#define I2C_SSPBUF SSP1BUF
+#define I2C_SSPCON2 SSP1CON2
+#define I2C_PIR_SSP1IF PIR1bits.SSP1IF
+#define I2C_SSPSTAT_SMP SSP1STATbits.SMP
+#define I2C_SSPSTAT_CKE SSP1STATbits.CKE
+#define I2C_SSPSTAT_BF SSP1STATbits.BF
+#define I2C_SSPCON1_WCOL SSP1CON1bits.WCOL
+#define I2C_SSPCON1_SSPOV SSP1CON1bits.SSPOV
+#define I2C_SSPCON1_SSPM SSP1CON1bits.SSPM
+#define I2C_SSPCON1_SSPEN SSP1CON1bits.SSPEN
+#define I2C_SSPCON2_SEN SSP1CON2bits.SEN
+#define I2C_SSPCON2_ACKSTAT SSP1CON2bits.ACKSTAT
+#define I2C_SSPCON2_RCEN SSP1CON2bits.RCEN
+#define I2C_SSPCON2_PEN SSP1CON2bits.PEN
+#define I2C_SSPCON2_ACKEN SSP1CON2bits.ACKEN
+#define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
+#define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
 
 // I2C status bytes
 static uint8_t s_addr;
@@ -186,5 +207,3 @@ loop:
     // It is possible that the IF flag is ready right now
     goto loop;
 }
-        
-#endif

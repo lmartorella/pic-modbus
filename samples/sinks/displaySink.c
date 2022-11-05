@@ -2,8 +2,8 @@
 #include "./displaySink.h"
 
 #ifndef CM1602_COL_COUNT
-#define CM1602_COL_COUNT 80
-#define CM1602_LINE_COUNT 25
+#define CM1602_COL_COUNT 20
+#define CM1602_LINE_COUNT 2
 #endif
 
 static uint8_t s_buf[CM1602_COL_COUNT];
@@ -45,8 +45,7 @@ __bit line_read()
     return 0;
 }
 
-__bit line_write()
-{
+__bit line_write() {
     // Num of lines
     uint16_t l = CM1602_LINE_COUNT - 1;
     prot_control_writeW(l);

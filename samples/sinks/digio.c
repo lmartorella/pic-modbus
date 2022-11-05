@@ -1,6 +1,15 @@
 #include <net/net.h>
 #include "digio.h"
 
+// Digital event-based input
+#define DIGIO_PORT_IN_BIT PORTBbits.RB3
+#define DIGIO_EVENT_BUFFER_SIZE 32
+#define INIT_DIGIO_IN_PORT() \
+     ANSELBbits.ANSB3 = 0;   \
+     TRISBbits.TRISB3 = 1;   
+#define BEAN_INTERRUPT_VECTOR dcnt_interrupt
+#define HAS_DIGIO_IN
+
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
 
 // Debounce at 0.1s

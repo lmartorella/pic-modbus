@@ -1,7 +1,28 @@
 #include <net/net.h>
 #include "max232.h"
 
-#ifdef HAS_MAX232_SOFTWARE
+// Solar needs 0x48 for the biggest message(get fw version)
+#define MAX232_BUFSIZE1 0x30
+#define MAX232_BUFSIZE2 0x30
+
+#define RS232_RX_TRIS TRISBbits.TRISB3
+#define RS232_TX_TRIS TRISBbits.TRISB4
+#define RS232_RX_PORT PORTBbits.RB3
+#define RS232_TX_PORT PORTBbits.RB4
+// Timer for SW RS232: TMR2
+// Timer on, 1:1 prescaler and postscaler
+#define RS232_TCON T2CON
+#define RS232_TCON_ON 0x04
+#define RS232_TCON_OFF 0x00
+#define RS232_TCON_REG PR2
+#define RS232_TCON_IF PIR1bits.TMR2IF
+#define RS232_TCON_ACC TMR2
+#define RS232_BAUD 9600
+#define RS232_TCON_VALUE ((SYSTEM_CLOCK/4) / RS232_BAUD)   // 104
+#define RS232_TCON_VALUE_HALF ((SYSTEM_CLOCK/4) / RS232_BAUD / 2 - 38)  // 52-38. 38 Here is the result of checking with oscilloscope the exact poll point
+// Solar needs 0x48 for the biggest message(get fw version)
+#define MAX232_BUFSIZE1 0x30
+#define MAX232_BUFSIZE2 0x30
 
 uint8_t max232_buffer1[MAX232_BUFSIZE1];
 uint8_t max232_buffer2[MAX232_BUFSIZE2];
@@ -141,5 +162,3 @@ signed char max232_sendReceive(signed char size) {
         timeoutCount = TIMEOUT_LAST;
     }  
 }
-
-#endif

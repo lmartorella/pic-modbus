@@ -3,7 +3,6 @@
 #include "../hardware/i2c.h"
 
 // BPM180 I2C module to read barometric data (air pressure)
-#ifdef HAS_BMP180
 
 #define REG_READ 0xef
 #define REG_WRITE 0xee
@@ -213,5 +212,3 @@ __bit bmp180_sinkRead() {
     s_sinkStateOrSize = SINK_STATE_IDLE;
     return 0;
 }
-
-#endif

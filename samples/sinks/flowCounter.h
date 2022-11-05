@@ -2,14 +2,11 @@
 #define	FLOWCOUNTER_H
 
 // Implement a flow counter using a interrupt counter.
-#ifdef HAS_DIGITAL_COUNTER 
 #include "../hardware/counter.h"
 
 #define SINK_FLOW_COUNTER_ID "FLOW"
 
-bit flow_write();
-
-#endif
+__bit flow_write();
 
 #endif	/* FLOWCOUNTER_H */
 
