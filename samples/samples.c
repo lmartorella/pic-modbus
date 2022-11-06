@@ -36,7 +36,7 @@ const char* const SINK_IDS =
 #endif
 ;
 
-const int SINK_IDS_COUNT = 
+const uint16_t SINK_IDS_COUNT = 
     1
 #ifdef HAS_DIGIO_OUT
     + 1

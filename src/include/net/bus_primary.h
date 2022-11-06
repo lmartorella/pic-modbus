@@ -43,7 +43,7 @@ extern uint8_t bus_prim_knownChildren[];
 void bus_prim_resetDirtyChildren();
 
 // Get active children mask & size
-int bus_prim_getChildrenMaskSize();
+uint8_t bus_prim_getChildrenMaskSize();
 const uint8_t* bus_prim_getChildrenMask();
 
 #endif	/* BUS_H */

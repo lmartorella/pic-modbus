@@ -1,5 +1,4 @@
 #include "net/net.h"
-#include "appio.h"
 
 // CONFIG1
 #pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
@@ -34,8 +33,7 @@ extern __bank0 unsigned char __resetbits;
 // otherwise after the RESET the variable content can be lost.
 __persistent EXC_STRING_T g_exceptionPtr;
 
-void sys_storeResetReason()
-{
+void sys_storeResetReason() {
     // Set 4MHz oscillator
     OSCCON = 0xea;// b11101010; = PLL en, 4Mhz, internal
 

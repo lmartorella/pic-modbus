@@ -1,14 +1,13 @@
 #include "net/net.h"
-#include "appio.h"
-#include "eeprom.h"
+#include "./eeprom.h"
 
 /**
  * This module defines the virtualization layer for data persistence
  * (e.g. saves node ID)
  */
 
-void rom_read(uint8_t sourceAddress, uint8_t* destination, uint8_t length)
-{
+void rom_read(uint8_t sourceAddress, void* destination, uint8_t length) {
+    uint8_t* dest = destination;
 #ifdef _IS_PIC16F887_CARD
     EECON1bits.EEPGD = 0;
 #endif
@@ -17,7 +16,7 @@ void rom_read(uint8_t sourceAddress, uint8_t* destination, uint8_t length)
         while (EECON1bits.WR);
         EEADR = sourceAddress++;
         EECON1bits.RD = 1;
-        *(destination++) = EEDATA;
+        *(dest++) = EEDATA;
         CLRWDT();
     }
 }
@@ -28,8 +27,7 @@ static uint8_t s_destinationAddr;
 static const uint8_t* s_source;
 
 // Since writing is slow, cannot lose protocol data. Hence polling
-void pers_poll() 
-{
+_Bool pers_poll() {
     // Data to write and previous write operation finished?
     if (s_length > 0 && !EECON1bits.WR) {
         INTCONbits.GIE = 0;
@@ -46,10 +44,13 @@ void pers_poll()
 
         INTCONbits.GIE = 1;
         EECON1bits.WREN = 0;
+        return true;
+    } else {
+        return false;
     }
 }
 
-void rom_write(uint8_t destinationAddr, const uint8_t* source, uint8_t length)
+void rom_write(uint8_t destinationAddr, const void* source, uint8_t length)
 {
     s_length = length;
     s_destinationAddr = destinationAddr;

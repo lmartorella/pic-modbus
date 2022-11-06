@@ -4,7 +4,7 @@
 /**
  * The RAM backed-up data for writings and readings
  */
-PersistentData pers_data;
+PersistentNetData pers_net_data;
 
 #ifdef _IS_ETH_CARD
 #   define __ADDRESS __at(0x1F800)
@@ -12,9 +12,9 @@ PersistentData pers_data;
 #   define __ADDRESS
 #endif
 
-#define PERSISTENT_SIZE (sizeof(PersistentData))
+#define PERSISTENT_SIZE (sizeof(PersistentNetData))
 
-static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = { 
+static EEPROM_MODIFIER PersistentNetData s_persistentData __ADDRESS = { 
     // Zero GUID by default, it means unassigned
     { 0, 0, 0, 0, 0 }, 
 
@@ -33,10 +33,18 @@ static EEPROM_MODIFIER char s_persistentDataFiller[0x400 - PERSISTENT_SIZE] __at
 #define ROM_ADDR 0
 #endif
 
-void pers_load() {
-    rom_read(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
+void pers_net_load() {
+    rom_read(ROM_ADDR, (void*)&pers_net_data, PERSISTENT_SIZE);
 }
 
-void pers_save() {
-    rom_write(ROM_ADDR, (uint8_t*)&pers_data, PERSISTENT_SIZE);
+void pers_net_save() {
+    rom_write(ROM_ADDR, (void*)&pers_net_data, PERSISTENT_SIZE);
+}
+
+void pers_data_load(void* buffer, uint8_t size) {
+    
+}
+
+void pers_data_save(void* buffer, uint8_t size) {
+    
 }

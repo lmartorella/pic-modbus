@@ -34,7 +34,7 @@ extern const char* const SINK_IDS;
 /**
  * The sink count
  */
-extern const int SINK_IDS_COUNT;
+extern const uint16_t SINK_IDS_COUNT;
 
 /**
  * The sink read handlers
@@ -44,5 +44,14 @@ extern const SinkFunction sink_readHandlers[];
  * The sink write handlers
  */
 extern const SinkFunction sink_writeHandlers[];
+
+#if defined(HAS_RS485_BUS_PRIMARY)
+#define sys_read sys_read_prim
+#define sys_write sys_write_prim
+#elif defined(HAS_RS485_BUS_SECONDARY)
+#define sys_read sys_read_sec
+#define sys_write sys_write_sec
+#endif
+
 
 #endif

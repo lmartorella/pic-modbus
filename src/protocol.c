@@ -56,11 +56,11 @@ static void SINK_sec_command() {
 }
 
 #define GUID_IMPL(IMPL) \
-    if (!prot_ ## IMPL ## _control_read(&pers_data.deviceId, sizeof(GUID))) { \
+    if (!prot_ ## IMPL ## _control_read(&pers_net_data.deviceId, sizeof(GUID))) { \
         fatal("GU.u"); \
     } \
     /* Have new GUID! Program it. */ \
-    pers_save(); \
+    pers_net_save(); \
 
 /* 16 bytes to receive */
 static void GUID_prim_command() {
@@ -132,7 +132,7 @@ static void CHIL_prim_command()
 {
     // Fetch my GUID
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
-    prot_prim_control_write(&pers_data.deviceId, sizeof(GUID));
+    prot_prim_control_write(&pers_net_data.deviceId, sizeof(GUID));
     
     // Propagate the request to all children to fetch their GUIDs
     uint16_t count = bus_prim_getChildrenMaskSize();
@@ -150,7 +150,7 @@ static void CHIL_sec_command()
 {
     // Fetch my GUID
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
-    prot_sec_control_write(&pers_data.deviceId, sizeof(GUID));
+    prot_sec_control_write(&pers_net_data.deviceId, sizeof(GUID));
     
     // No children
     uint16_t count = 0;
@@ -185,7 +185,7 @@ static _Bool memcmp2(char c1, char c2, char d1, char d2) {
         return true; \
     } \
     \
-    uint8_t s = prot_ ## IMPL ## _control_readAvail(); \
+    uint8_t s = (uint8_t)prot_ ## IMPL ## _control_readAvail(); \
     if (s_commandToRun != CMD_NONE) { \
         uint8_t needed = 2; \
         if (s_commandToRun <= CMD_CHIL) { \

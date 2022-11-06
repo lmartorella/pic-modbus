@@ -86,9 +86,9 @@ extern EXC_STRING_T g_lastException;
 /**
  * This should be called as very first line of code in MCUs to analyze the reset flags
  */
-void sys_storeResetReason();
+void sys_storeResetReason(void);
 
-void sys_enableInterrupts();
+void sys_enableInterrupts(void);
 
 #ifdef _CONF_POSIX
 /**

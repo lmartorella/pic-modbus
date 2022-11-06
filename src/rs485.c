@@ -36,7 +36,7 @@ static TICK_TYPE s_lastTick;
 // but let's wait an additional byte since USART is free when still transmitting the last byte.
 #define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_BYTE * (2 + 1))
 
-static void rs485_startRead();
+static void rs485_startRead(void);
 
 void rs485_init()
 {

@@ -27,13 +27,13 @@
 /**
  * Init sinks
  */
-void sinks_init();
+void sinks_init(void);
 
 /**
  * Poll sinks
  * Returns true if active and require polling
  */
-void sinks_poll();
+void sinks_poll(void);
 
 #endif	/* SAMPLES_H */
 

@@ -13,6 +13,7 @@ typedef struct {
     // Used by counter
     uint32_t dcnt_counter;
 } PERSISTENT_SINK_DATA;
+
 static EEPROM_MODIFIER PERSISTENT_SINK_DATA s_persistentData /*__DATA_ADDRESS*/ = { 
     0
 };
@@ -34,7 +35,7 @@ void dcnt_interrupt() {
 }
 
 void dcnt_init() {
-    pers_load(&s_data.counter);
+    pers_data_load(&s_data.counter, sizeof(PERSISTENT_SINK_DATA));
     s_lastCounter = s_data.counter;
     s_data.flow = 0;
     s_counterDirty = 0;
@@ -62,7 +63,7 @@ void dcnt_poll() {
         s_lastCounter = currCounter;
         
         if ((++s_persTimer) == 0) {          
-            pers_save(&s_lastCounter);
+            pers_data_save(&s_lastCounter, sizeof(PERSISTENT_SINK_DATA));
             s_counterDirty = 0;
         }
     } else {

@@ -55,25 +55,25 @@ void bus_sec_init()
 #endif
     ) {
         // Reset address
-        pers_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
-        pers_save();
+        pers_net_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
+        pers_net_save();
         s_availForAddressAssign = true;
     } 
 
-    if (pers_data.sec.address == UNASSIGNED_SUB_ADDRESS) {
+    if (pers_net_data.sec.address == UNASSIGNED_SUB_ADDRESS) {
         // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
 
-    s_header[2] = pers_data.sec.address;
+    s_header[2] = pers_net_data.sec.address;
 
     reinit_quick();
 }
 
 static void storeAddress()
 {
-    pers_data.sec.address = s_header[2] = s_tempAddressForAssignment;
-    pers_save();
+    pers_net_data.sec.address = s_header[2] = s_tempAddressForAssignment;
+    pers_net_save();
     
     s_availForAddressAssign = false;
     led_off();

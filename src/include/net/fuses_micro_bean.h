@@ -5,10 +5,12 @@
 #define _XTAL_FREQ SYSTEM_CLOCK
 
 // Internal core clock drives timer with 1:256 prescaler
+typedef uint16_t TICK_TYPE; 
 #define TICKS_PER_SECOND		(TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
 #define TICKS_PER_MILLISECOND		(TICK_TYPE)(TICKS_PER_SECOND / 1000)
 
 #define PRIO_TYPE
+#define EEPROM_MODIFIER __eeprom
 
 // *****
 // Tick timer source. Uses TMR0 (8-bit prescales to 1:256), that resolve from 0.25ms to 16.7secs
@@ -25,8 +27,6 @@
 #define TICK_INTCON_IE INTCONbits.T0IE
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK / 4)
 #define TICK_PRESCALER 256
-
-#define TICK_TYPE uint16_t
 
 #define HAS_LED
 #define LED_PORTBIT PORTAbits.RA7
@@ -64,65 +64,6 @@
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5
 
-#undef HAS_I2C
-/*
-#define I2C_PORT_SDA PORTBbits.RB1
-#define I2C_TRIS_SDA TRISBbits.TRISB1
-#define I2C_PORT_SCL PORTBbits.RB4
-#define I2C_TRIS_SCL TRISBbits.TRISB4
-#define I2C_SSPADD SSP1ADD
-#define I2C_SSPBUF SSP1BUF
-#define I2C_SSPCON2 SSP1CON2
-#define I2C_PIR_SSP1IF PIR1bits.SSP1IF
-#define I2C_SSPSTAT_SMP SSP1STATbits.SMP
-#define I2C_SSPSTAT_CKE SSP1STATbits.CKE
-#define I2C_SSPSTAT_BF SSP1STATbits.BF
-#define I2C_SSPCON1_WCOL SSP1CON1bits.WCOL
-#define I2C_SSPCON1_SSPOV SSP1CON1bits.SSPOV
-#define I2C_SSPCON1_SSPM SSP1CON1bits.SSPM
-#define I2C_SSPCON1_SSPEN SSP1CON1bits.SSPEN
-#define I2C_SSPCON2_SEN SSP1CON2bits.SEN
-#define I2C_SSPCON2_ACKSTAT SSP1CON2bits.ACKSTAT
-#define I2C_SSPCON2_RCEN SSP1CON2bits.RCEN
-#define I2C_SSPCON2_PEN SSP1CON2bits.PEN
-#define I2C_SSPCON2_ACKEN SSP1CON2bits.ACKEN
-#define I2C_SSPCON2_ACKDT SSP1CON2bits.ACKDT
-#define I2C_SSPCON2_BUSY_MASK (_SSPCON2_SEN_MASK | _SSPCON2_RSEN_MASK | _SSPCON2_PEN_MASK | _SSPCON2_RCEN_MASK | _SSPCON2_ACKEN_MASK)
-#define HAS_BMP180
-*/
-
-// Digital flow counter
-#undef HAS_DIGITAL_COUNTER
-//#define DCNT_IF INTCONbits.INTF
-//#define DCNT_IE INTCONbits.INTE
-
-// Digital event-based input
-#undef HAS_DIGIO_IN
-/*
-#define DIGIO_PORT_IN_BIT PORTBbits.RB3
-#define DIGIO_EVENT_BUFFER_SIZE 32
-#define INIT_DIGIO_IN_PORT() \
-     ANSELBbits.ANSB3 = 0;   \
-     TRISBbits.TRISB3 = 1;   \
-#define BEAN_INTERRUPT_VECTOR dcnt_interrupt
-*/
-
-// Analog integrator
-#define HAS_ANALOG_INTEGRATOR
-// 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale
-#define ANALOG_INTEGRATOR_FACTOR (1.0f/39.0f)
-// Uses RB1, range from 0V to 1.024V
-#define INIT_ANALOG_INTEGRATOR() \
-    ANSELBbits.ANSB1 = 1;   \
-    TRISBbits.TRISB1 = 1;   \
-    FVRCONbits.ADFVR = 1;   \
-    FVRCONbits.CDAFVR = 0;  \
-    FVRCONbits.FVREN = 1;   \
-    while (!FVRCONbits.FVRRDY); \
-    ADCON0bits.CHS = 11;    \
-    ADCON1bits.ADNREF = 0;  \
-    ADCON1bits.ADPREF = 3;  \
-
 // persistent char* are not supported by xc8 1.37
 #define EXC_STRING_T uint16_t
 #define EXC_STRING_NULL (0)
@@ -134,15 +75,6 @@ extern __persistent EXC_STRING_T g_exceptionPtr;
 #define INIT_PORTS() \
      ANSELBbits.ANSB2 = 0;\
      ANSELBbits.ANSB5 = 0;\
-
-// Custom persistence data
-#define HAS_PERSISTENT_SINK_DATA
-typedef struct
-{
-    // Used by counter
-    uint32_t dcnt_counter;
-} PERSISTENT_SINK_DATA;
-#define PERSISTENT_SINK_DATA_DEFAULT_DATA { 0 }
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

@@ -22,12 +22,15 @@
 #define _XTAL_FREQ (SYSTEM_CLOCK)
 
 // Internal core clock drives timer with 1:256 prescaler
+typedef uint32_t TICK_TYPE; 
 #define TICKS_PER_SECOND		(TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
 #define TICKS_PER_MILLISECOND		(TICK_TYPE)(TICKS_PER_SECOND / 1000)
 
 #define PRIO_TYPE low_priority
+#define EEPROM_MODIFIER const
 
 #define MASTER_MAX_CHILDREN 16
+
 
 // ******* 
 // DISPLAY
@@ -69,7 +72,6 @@
 // ******
 // IO: power line on/off
 // ******
-#undef HAS_DIGIO
 #ifdef PROTO_PINOUT
     #define HAS_LED
     #define LED_PORTBIT PORTHbits.RH0
@@ -154,8 +156,6 @@
 #define TICK_INTCON_IE INTCONbits.TMR0IE
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK/4ull)
 #define TICK_PRESCALER 256ull
-
-#define TICK_TYPE uint32_t
 
 #define EXC_STRING_T const char*
 #define EXC_STRING_NULL (void*)0

@@ -22,7 +22,7 @@ typedef struct {
     ANALOG_INTEGRATOR_DATA data;
 } SINK_MSG;
 // Ensure float are 32bits
-static char x[sizeof(float) - 4];
+//static char x[sizeof(float) - 4];
 
 __bit anint_sinkWrite() {
     if (prot_control_writeAvail() < sizeof(SINK_MSG)) {

@@ -15,21 +15,21 @@
 // Represents one second in Ticks
 #define TICK_SECOND (TICK_TYPE)(TICKS_PER_SECOND)
 
-TICK_TYPE timers_get();
+TICK_TYPE timers_get(void);
 
 /**
  * Used by ETH code
  */
-TICK_TYPE TickGetDiv256();
+TICK_TYPE TickGetDiv256(void);
 
 /**
  * Poll the interrupt flag of the timer for overflow, and in case increments the MSB tick bytes
  */
-void timers_poll();
+void timers_poll(void);
 
 /**
  * Init tick timers
  */
-void timers_init();
+void timers_init(void);
 
 #endif

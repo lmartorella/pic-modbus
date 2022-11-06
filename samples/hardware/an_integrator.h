@@ -11,8 +11,8 @@ typedef struct {
     uint16_t count;
 } ANALOG_INTEGRATOR_DATA;
 
-void anint_init();
-void anint_poll();
+void anint_init(void);
+void anint_poll(void);
 
 // Read data and reset counters
 void anint_read(ANALOG_INTEGRATOR_DATA* data);

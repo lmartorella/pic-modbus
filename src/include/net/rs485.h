@@ -26,18 +26,18 @@ extern RS485_STATE rs485_state;
 /**
  * Initialize asynchronous mode, but only half-duplex is used
  */
-void rs485_init();
+void rs485_init(void);
 
 /**
  * To feed/receive channel
  */
-void rs485_interrupt();
+void rs485_interrupt(void);
 
 /**
  * Poll as much as possible (internal timered)
  * Returns true if active and require polling
  */
-_Bool rs485_poll();
+_Bool rs485_poll(void);
 
 // Enqueue bytes to send. Use 9-bit address. Buffer is copied (max. 32 bytes)
 // Warning: the address bit is used immediately and not enqueued to the buffer
@@ -61,7 +61,7 @@ uint8_t rs485_readAvail();
 /**
  * Get count of available bytes in the write buffer
  */
-uint8_t rs485_writeAvail();
+uint8_t rs485_writeAvail(void);
 
 // Get the last bit9 received
 extern __bit rs485_lastRc9;
@@ -69,7 +69,7 @@ extern __bit rs485_lastRc9;
 extern __bit rs485_skipData;
 
 // Don't change the line status, but simulate a TX time for disengage
-void rs485_waitDisengageTime();
+void rs485_waitDisengageTime(void);
 
 // See OSI model document for timings.
 // TICKS_PER_SECOND = 3906 on PIC16 @4MHz

@@ -3,9 +3,9 @@
 
 // Used for flow counter. Uses interrupts to not lose any tick.
 
-void dcnt_interrupt();
-void dcnt_init();
-void dcnt_poll();
+void dcnt_interrupt(void);
+void dcnt_init(void);
+void dcnt_poll(void);
 
 typedef struct {
     // Copied from persistence to better control atomicity of accesses. 

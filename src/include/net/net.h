@@ -54,12 +54,10 @@ typedef unsigned char __bit;
  */
 #define MASTER_MAX_CHILDREN 16
 
-#define RS485_BAUD 19200
-
-void net_prim_init();
-void net_sec_init();
-_Bool net_prim_poll();
-_Bool net_sec_poll();
+void net_prim_init(void);
+void net_sec_init(void);
+_Bool net_prim_poll(void);
+_Bool net_sec_poll(void);
 
 #if defined(HAS_RS485_BUS_PRIMARY)
 #define net_init net_prim_init

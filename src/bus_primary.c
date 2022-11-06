@@ -350,7 +350,7 @@ static void socketPoll() {
         // Transfer rx bytes
         if (rx > 0) {
             prot_prim_control_read(buffer, rx);
-            rs485_write(false, buffer, rx);
+            rs485_write(false, buffer, (uint8_t)rx);
             s_lastTime = timers_get();
         }
     }
@@ -361,7 +361,7 @@ static void socketPoll() {
            
             // Read data and push it into IP
             tx = tx > sizeof(buffer) ? sizeof(buffer) : tx;
-            rs485_read(buffer, tx);
+            rs485_read(buffer, (uint8_t)tx);
             s_lastTime = timers_get();
                       
             if (rs485_lastRc9) {
@@ -413,7 +413,7 @@ static void socketPoll() {
     }
 }
 
-int bus_prim_getChildrenMaskSize() {
+uint8_t bus_prim_getChildrenMaskSize() {
     return BUFFER_MASK_SIZE;
 }
 
