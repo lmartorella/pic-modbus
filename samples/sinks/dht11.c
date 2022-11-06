@@ -17,7 +17,7 @@ void dht11_init() {
     US_TIMER_INIT();
     
     // wait for sensor to stabilize
-    __delaywdt_ms(1000);
+    __delay_ms(1000);
 }
 
 typedef enum {

@@ -5,12 +5,12 @@
  * Wired bus communication module, for primary (master) nodes
  */
 
-void bus_prim_init();
+void bus_prim_init(void);
 /**
  * Poll general bus activities
  * Returns true if the node is active and requires polling
  */
-_Bool bus_prim_poll();
+_Bool bus_prim_poll(void);
 
 // 8*8 = 63 max children (last is broadcast)
 #define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
@@ -34,17 +34,17 @@ typedef enum {
 } BUS_PRIMARY_STATE;
 
 // Is still in command execution, waiting for command data receive complete?
-BUS_PRIMARY_STATE bus_prim_getState();
+BUS_PRIMARY_STATE bus_prim_getState(void);
 
 // Dirty children
 extern __bit bus_prim_hasDirtyChildren;
 extern uint8_t bus_prim_dirtyChildren[];
 extern uint8_t bus_prim_knownChildren[];
-void bus_prim_resetDirtyChildren();
+void bus_prim_resetDirtyChildren(void);
 
 // Get active children mask & size
-uint8_t bus_prim_getChildrenMaskSize();
-const uint8_t* bus_prim_getChildrenMask();
+uint8_t bus_prim_getChildrenMaskSize(void);
+const uint8_t* bus_prim_getChildrenMask(void);
 
 #endif	/* BUS_H */
 

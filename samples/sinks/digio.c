@@ -1,14 +1,18 @@
 #include <net/net.h>
+#include "../samples.h"
 #include "digio.h"
 
 // Digital event-based input
-#define DIGIO_PORT_IN_BIT PORTBbits.RB3
-#define DIGIO_EVENT_BUFFER_SIZE 32
+#define DIGIO_TRIS_IN_BIT TRISAbits.TRISA1
+#define DIGIO_PORT_IN_BIT PORTAbits.RA1
+#define DIGIO_TRIS_OUT_BIT TRISAbits.TRISA0
+#define DIGIO_PORT_OUT_BIT PORTAbits.RA0
+
+#define DIGIO_EVENT_BUFFER_SIZE 16
 #define INIT_DIGIO_IN_PORT() \
      ANSELBbits.ANSB3 = 0;   \
      TRISBbits.TRISB3 = 1;   
 #define BEAN_INTERRUPT_VECTOR dcnt_interrupt
-#define HAS_DIGIO_IN
 
 #if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
 
