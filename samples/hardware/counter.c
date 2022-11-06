@@ -14,10 +14,6 @@ typedef struct {
     uint32_t dcnt_counter;
 } PERSISTENT_SINK_DATA;
 
-static EEPROM_MODIFIER PERSISTENT_SINK_DATA s_persistentData /*__DATA_ADDRESS*/ = { 
-    0
-};
-
 // Only save once every 255 seconds (4 minutes), a good balance between EEPROM data endurance and potential data 
 // loss due to reset. Obviously no flow -> no write
 static uint8_t s_persTimer;
@@ -35,8 +31,7 @@ void dcnt_interrupt() {
 }
 
 void dcnt_init() {
-    pers_data_load(&s_data.counter, sizeof(PERSISTENT_SINK_DATA));
-    s_lastCounter = s_data.counter;
+    s_lastCounter = s_data.counter = ((PERSISTENT_SINK_DATA*)&pers_data.custom)->dcnt_counter;
     s_data.flow = 0;
     s_counterDirty = 0;
     s_persTimer = 0;
@@ -62,8 +57,9 @@ void dcnt_poll() {
         s_data.flow = (uint16_t)(currCounter - s_lastCounter);
         s_lastCounter = currCounter;
         
-        if ((++s_persTimer) == 0) {          
-            pers_data_save(&s_lastCounter, sizeof(PERSISTENT_SINK_DATA));
+        if ((++s_persTimer) == 0) {
+            ((PERSISTENT_SINK_DATA*)&pers_data.custom)->dcnt_counter = s_lastCounter;
+            pers_save();
             s_counterDirty = 0;
         }
     } else {

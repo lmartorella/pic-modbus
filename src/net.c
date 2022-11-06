@@ -4,7 +4,7 @@
     timers_init(); \
     io_init(); \
     led_init(); \
-    pers_net_load(); \
+    pers_load(); \
     BUS_INIT(); \
     prot_init(); \
     rs485_init(); \

@@ -20,21 +20,23 @@ typedef struct
         uint8_t address;
         uint8_t filler;
     } sec;
-} PersistentNetData;
+    
+    /**
+     * Custom data (16 bytes)
+     */
+    struct {
+        uint8_t custom[16];        
+    } custom;
+} PersistentData;
 
 // The cached copy of the EEPROM data, read at startup/init
 // and then saved explicitly
-extern PersistentNetData pers_net_data;
+extern PersistentData pers_data;
 
 // Update copy of persistence (system space)
-void pers_net_load(void);
+void pers_load(void);
 // Program the new content of the syatem data
-void pers_net_save(void);
-
-// Update copy of user persistence
-void pers_data_load(void* buffer, uint8_t size);
-// Program the new content of the user data
-void pers_data_save(void* buffer, uint8_t size);
+void pers_save(void);
 
 /**
  * Poll long-running writing operations 
