@@ -1,6 +1,14 @@
 #include <net/net.h>
 #include "./samples.h"
 
+#ifdef PROTO_PINOUT
+// 17008 is the debug port
+#define SERVER_CONTROL_UDP_PORT 17008
+#else
+// 17007 is the release port
+#define SERVER_CONTROL_UDP_PORT 17007
+#endif
+
 void __interrupt(PRIO_TYPE) low_isr() {
     // Update tick timers at ~Khz freq
     timers_poll();
@@ -15,7 +23,7 @@ void main()
     // Analyze RESET reason
     sys_storeResetReason();
 
-    net_init();
+    net_init(SERVER_CONTROL_UDP_PORT);
 
 #ifdef BUSPOWER_PORT
     // Enable bus power to slaves

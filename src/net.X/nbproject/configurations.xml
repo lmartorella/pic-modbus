@@ -36,7 +36,6 @@
         <itemPath>../hardware/pic/cm1602.c</itemPath>
         <itemPath>../hardware/pic/eeprom_pic18.c</itemPath>
         <itemPath>../hardware/pic/leds.c</itemPath>
-        <itemPath>../hardware/pic/persistence.c</itemPath>
         <itemPath>../hardware/pic/tick_pic18.c</itemPath>
         <itemPath>../hardware/pic/fuses_pic16f1827.c</itemPath>
         <itemPath>../hardware/pic/fuses_pic18f87j60.c</itemPath>
@@ -65,6 +64,7 @@
       <itemPath>../rs485.c</itemPath>
       <itemPath>../sinks.c</itemPath>
       <itemPath>../net.c</itemPath>
+      <itemPath>../hardware/pic/persistence.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

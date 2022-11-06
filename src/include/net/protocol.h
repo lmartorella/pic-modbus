@@ -69,13 +69,13 @@ __bit prot_prim_control_readW(uint16_t* w);
 __bit prot_prim_control_read(void* data, uint16_t size);
 void prot_prim_control_writeW(uint16_t w);
 void prot_prim_control_write(const void* data, uint16_t size);
-void prot_prim_control_over();
+void prot_prim_control_over(void);
 #define prot_prim_control_idle()
-uint16_t prot_prim_control_readAvail();
-uint16_t prot_prim_control_writeAvail();
+uint16_t prot_prim_control_readAvail(void);
+uint16_t prot_prim_control_writeAvail(void);
 #define prot_prim_control_isConnected() ip_isConnected()
 #define prot_prim_control_close() ip_flush()
-void prot_prim_control_abort();
+void prot_prim_control_abort(void);
 
 
 #if defined(HAS_RS485_BUS_PRIMARY)
