@@ -54,7 +54,7 @@ typedef unsigned char __bit;
  */
 #define MASTER_MAX_CHILDREN 16
 
-void net_prim_init(void);
+void net_prim_init(uint16_t serverUdpPort);
 void net_sec_init(void);
 _Bool net_prim_poll(void);
 _Bool net_sec_poll(void);

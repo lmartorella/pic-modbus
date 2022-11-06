@@ -83,8 +83,8 @@ static void setChildDead(uint8_t i) {
     updateDisp();
 }
 
-void bus_prim_init() {
-    ip_prot_init();
+void bus_prim_init(uint16_t serverUdpPort) {
+    ip_init(serverUdpPort);
 
     // No beans are known, nor dirty
     memset(bus_prim_knownChildren, 0, BUFFER_MASK_SIZE);

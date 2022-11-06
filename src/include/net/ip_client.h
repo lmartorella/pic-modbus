@@ -8,29 +8,29 @@
 /**
  * Poll activities
  */
-void ip_poll();
+void ip_poll(void);
 
 /**
  * Initialize the IP module
  */
-void ip_prot_init();
+void ip_init(uint16_t serverUdpPort);
 
 /**
  * Called a slow timer (1 sec), for heartbeats
  */
-void ip_prot_slowTimer();
+void ip_slowTimer(void);
 
 /**
  * Flush socket data
  */
-void ip_flush();
+void ip_flush(void);
 
-__bit ip_isConnected();
+__bit ip_isConnected(void);
 
 /**
  * Do a select on the socket
  */ 
-void ip_waitEvent();
+void ip_waitEvent(void);
 
 #endif //#ifdef HAS_IP
 

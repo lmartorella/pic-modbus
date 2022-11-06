@@ -10,13 +10,6 @@
 APP_CONFIG AppConfig;
 #endif
     
-#ifdef DEBUG
-// 17008 is the debug port
-#define SERVER_CONTROL_UDP_PORT 17008
-#else
-// 17007 is the release port
-#define SERVER_CONTROL_UDP_PORT 17007
-#endif
 #define CLIENT_TCP_PORT 20000
 
 // UDP broadcast socket
@@ -79,10 +72,10 @@ uint16_t prot_prim_control_writeAvail() {
     return TCPIsPutReady(s_controlSocket);
 }
 
-void ip_prot_init() {
+void ip_init(uint16_t serverUdpPort) {
     io_println("IP/DHCP");
 #if defined(_CONF_POSIX)
-    printf("Listen port: %d\n", SERVER_CONTROL_UDP_PORT);
+    printf("Listen port: %d\n", serverUdpPort);
 #endif
     
 #ifdef __XC8
@@ -99,7 +92,7 @@ void ip_prot_init() {
     // Init ETH loop data
     StackInit();  
     
-    s_heloSocket = UDPOpenEx(0, UDP_OPEN_NODE_INFO, 0, SERVER_CONTROL_UDP_PORT);
+    s_heloSocket = UDPOpenEx(0, UDP_OPEN_NODE_INFO, 0, serverUdpPort);
     if (s_heloSocket == INVALID_UDP_SOCKET)
     {
         fatal("SOC.opn1");
@@ -118,7 +111,7 @@ void ip_prot_init() {
 /*
 	Manage slow timer (heartbeats)
 */
-void ip_prot_slowTimer() {
+void ip_slowTimer() {
     _Bool dhcpOk = DHCPIsBound(0);
 
     if (dhcpOk != s_lastDhcpState)

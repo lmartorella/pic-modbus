@@ -275,7 +275,7 @@ _Bool prot_prim_poll() {
     {
         s_slowTimer = now;
         prot_slowTimer = 1;
-        ip_prot_slowTimer();
+        ip_slowTimer();
     }
     ip_poll();
     

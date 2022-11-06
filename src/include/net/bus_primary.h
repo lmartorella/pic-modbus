@@ -5,7 +5,7 @@
  * Wired bus communication module, for primary (master) nodes
  */
 
-void bus_prim_init(void);
+void bus_prim_init(uint16_t serverUdpPort);
 /**
  * Poll general bus activities
  * Returns true if the node is active and requires polling

@@ -5,15 +5,15 @@
     io_init(); \
     led_init(); \
     pers_load(); \
-    BUS_INIT(); \
+    BUS_INIT; \
     prot_init(); \
     rs485_init(); \
 
-void net_prim_init() {
-    NET_INIT_IMPL(bus_prim_init);
+void net_prim_init(uint16_t serverUdpPort) {
+    NET_INIT_IMPL(bus_prim_init(serverUdpPort));
 }
 void net_sec_init() {
-    NET_INIT_IMPL(bus_sec_init);
+    NET_INIT_IMPL(bus_sec_init());
 }
 
 #define NET_POLL_IMPL(BUS_POLL, PROT_POLL) \
