@@ -1,8 +1,14 @@
 #include "net/net.h"
 
 /**
- * Wired bus communication module for master nodes
+ * Wired RS485 Modbus (RTU) communication module for server (primary) nodes.
+ * It implements children nodes auto-detection during idle periods.
  */
+
+// 8*8 = 63 max children (last is broadcast)
+#define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
+
+const uint8_t bus_prim_childrenMaskSize = BUFFER_MASK_SIZE;
 
 uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
 uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
@@ -22,7 +28,7 @@ static int8_t s_socketConnected;
 #define BUS_SCAN_TIMEOUT (TICK_TYPE)(TICKS_PER_SECOND * 1.5) // 1500ms 
 #define BUS_SOCKET_TIMEOUT (TICK_TYPE)(TICKS_PER_SECOND * 2)  // 2000ms, SOLAR bean needs some time to sync wait for RS232 data
 // ack time is due to engage+disengage time (of the slave) + ack_size
-#define BUS_ACK_TIMEOUT (TICK_TYPE)(TICKS_PER_BYTE * ACK_MSG_SIZE * 4) // 9.1ms (19200,9,1 4*3bytes = )
+#define BUS_ACK_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * ACK_MSG_SIZE * 4) // 9.1ms (19200,9,1 4*3bytes = )
 
 static enum {
     // To call next child
@@ -411,12 +417,4 @@ static void socketPoll() {
             }
         }
     }
-}
-
-uint8_t bus_prim_getChildrenMaskSize() {
-    return BUFFER_MASK_SIZE;
-}
-
-const uint8_t* bus_prim_getChildrenMask() {
-    return bus_prim_knownChildren;
 }

@@ -156,21 +156,22 @@ void ip_poll() {
     StackApplications();
 
     if (s_sendHelo) {
+        uint8_t maskSize = bus_prim_getChildrenMaskSize();
         // Still no HOME? Ping HELO
-        if (UDPIsPutReady(s_heloSocket) >= (sizeof(HOME_REQUEST) + BUFFER_MASK_SIZE + 2))
+        if (UDPIsPutReady(s_heloSocket) >= (sizeof(HOME_REQUEST) + maskSize + 2))
         {
             UDPPutString("HOME");
             UDPPutString(prot_registered ? (bus_prim_hasDirtyChildren ? "CCHN" : "HTB2") : "HEL4");
             UDPPutArray((uint8_t*)(&pers_data.deviceId), sizeof(GUID));
             UDPPutW(CLIENT_TCP_PORT);
             if (prot_registered) {
-                UDPPutW(BUFFER_MASK_SIZE);
+                UDPPutW(maskSize);
                 if (bus_prim_hasDirtyChildren) {
                     // CCHN: mask of changed children
-                    UDPPutArray(bus_prim_dirtyChildren, BUFFER_MASK_SIZE);
+                    UDPPutArray(bus_prim_dirtyChildren, maskSize);
                 } else {
                     // HTB2: list of alive children
-                    UDPPutArray(bus_prim_knownChildren, BUFFER_MASK_SIZE);
+                    UDPPutArray(bus_prim_knownChildren, maskSize);
                 }
             }
             UDPFlush();

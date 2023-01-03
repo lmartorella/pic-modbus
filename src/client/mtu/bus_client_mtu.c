@@ -1,115 +1,89 @@
 #include "net/net.h"
 
 /**
- * Wired bus communication module for secondary RS485 nodes
+ * Specific module for client Modbus RTU nodes (RS485), optimized
+ * for 8-bit CPUs with low memory.
  */
 
 static enum {
-    STATE_HEADER_0 = 0,         // header0, 55
-    STATE_HEADER_1 = 1,         // header1, aa
-    STATE_HEADER_2 = 2,         // header2, address
-    STATE_HEADER_ADDRESS = 2,   // header2
-    STATE_HEADER_3 = 3,         // msgtype
-            
-    STATE_SOCKET_OPEN = 10,
-    STATE_WAIT_TX
-            
+    // The client bus is idle, waiting for a frame request
+    STATE_IDLE,
+    // Request frame header decoding
+    STATE_REQ_HEADER,
+    // Request's frame header decoded and the current node was addressed: reading function type and register address 
+    STATE_REQ_FUNCTION_ADDRESS,
+    // Request: function type and register address valid, now reading input data stream and piping data to the sink. 
+    STATE_PIPE_READ,
+    // Request: function type and register address valid, wait for response to start (wait for line direction to change)
+    STATE_WAIT_RESPONSE,
+    // Writing response header
+    STATE_RESP_HEADER,
+    // In response body: writing output data stream
+    STATE_PIPE_WRITE,
+    // Writing response checksum
+    STATE_RESP_CHECKSUM,
+    // Read mode: skipping input data and waiting for the next idle state.
+    STATE_SKIP_DATA
 } s_state;
 
-static uint8_t s_header[3] = { 0x55, 0xAA, 0 };
-static __bit s_availForAddressAssign;
-// The master knows me
-static __bit s_known;
-static uint8_t s_tempAddressForAssignment;
+/**
+ * The current station address. It is 0 if the station still doesn't have an address (auto-configuration).
+ */
+static uint8_t s_stationAddress;
 
 /**
- * Wait for the channel to be free again and skip the glitch after a TX/RX switch (server DISENGAGE_CHANNEL_TIMEOUT time)
+ * Was the node be acknowledged by the server? (auto-configuration)
  */
-static void reinit_after_disengage()
-{
-    rs485_waitDisengageTime();
-    s_state = STATE_WAIT_TX;
-}
+static __bit s_acknowledged;
 
-/**
- * Quickly return in listen state, without waiting for the disengage time
- */
-static void reinit_quick()
-{
-    s_state = STATE_HEADER_0;
-    // Skip bit9 = 0
-    rs485_skipData = true;
-}
-
-void bus_sec_init()
-{
+void bus_cl_init() {
     // Prepare address
-    s_availForAddressAssign = 0;
-    s_known = 0;
+    s_stationAddress = pers_data.sec.address;
+    s_acknowledged = false;
 
     // Address should be reset?
     if (g_resetReason == RESET_MCLR
 #ifdef _IS_ETH_CARD
-            // Bug of HW?
+            // Bug of HW spec of PIC18?
             || g_resetReason == RESET_POWER
 #endif
     ) {
         // Reset address
-        pers_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
+        pers_data.sec.address = UNASSIGNED_STATION_ADDRESS;       
         pers_save();
         s_availForAddressAssign = true;
-    } 
+    }
 
-    if (pers_data.sec.address == UNASSIGNED_SUB_ADDRESS) {
+    if (s_stationAddress == UNASSIGNED_STATION_ADDRESS) {
         // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
 
-    s_header[2] = pers_data.sec.address;
-
-    reinit_quick();
+    // RS485 already in receive mode
+    s_state = STATE_SKIP_DATA;
 }
 
-static void storeAddress()
-{
-    pers_data.sec.address = s_header[2] = s_tempAddressForAssignment;
+static void storeAddress(uint8_t address) {
+    pers_data.sec.address = s_stationAddress;
     pers_save();
-    
-    s_availForAddressAssign = false;
     led_off();
 }
 
-static void sendAck(uint8_t ackCode) {
-    // Respond with a socket response
-    rs485_write(false, s_header, 3);
-    rs485_write(false, &ackCode, 1);
-    // And then wait for TX end before going idle
-    s_state = STATE_WAIT_TX;
-}
-
 // Called often
-__bit bus_sec_poll()
-{
-    uint8_t buf;
-
+__bit bus_cl_poll() {
+    if (s_state == STATE_WAIT_RESPONSE) {
+        // Line ready for transmission?
+        if (rs485_state == RS485_LINE_TX) {
+            s_state = STATE_RESP_HEADER;
+        }
+    }
+    uint8_t readSize = rs485_readAvail();
+    if (readSize == 0) {
+        // Nothing to do
+        return s_state == STATE_IDLE;
+    }
     switch (s_state) {
-        case STATE_SOCKET_OPEN: 
-            if (rs485_lastRc9) {
-                // Received a break char, go idle
-#ifdef DEBUGMODE
-                io_printChDbg('@');
-#endif
-                reinit_after_disengage();
-            }
-            // Else do nothing
-            break;
-        case STATE_WAIT_TX:
-            // When in read mode again, progress
-            if (rs485_state == RS485_LINE_RX) {
-                reinit_quick();
-            }
-            break;
-        default:
+        case 
             // Header decode
             if (rs485_readAvail() > 0) {            
 
@@ -138,12 +112,9 @@ __bit bus_sec_poll()
                     // Header correct. Now read the command and respond
                     switch (buf) { 
                         case BUS_MSG_TYPE_ADDRESS_ASSIGN:
-#ifdef DEBUGMODE
-                            io_printChDbg('^');
-#endif
                             if (s_availForAddressAssign) {
                                 // Master now knows me
-                                s_known = 1;
+                                s_acknowledged = 1;
                                 // Store the new address in memory
                                 storeAddress();
                                 sendAck(BUS_ACK_TYPE_HEARTBEAT);
@@ -152,12 +123,9 @@ __bit bus_sec_poll()
                             break;
 
                         case BUS_MSG_TYPE_HEARTBEAT:
-#ifdef DEBUGMODE
-                            io_printChDbg('"');
-#endif
                             // Only respond to heartbeat if has address
-                            if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
-                                sendAck(s_known ? 
+                            if (s_stationAddress != UNASSIGNED_STATION_ADDRESS) {
+                                sendAck(s_acknowledged ? 
                                     (g_resetReason == RESET_NONE ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_READ_STATUS) 
                                         : BUS_ACK_TYPE_HELLO);
                                 isManaged = true;
@@ -165,9 +133,6 @@ __bit bus_sec_poll()
                             break;
 
                         case BUS_MSG_TYPE_READY_FOR_HELLO:
-#ifdef DEBUGMODE
-                            io_printChDbg('?');
-#endif
                             // Only respond to hello if ready to program
                             if (s_availForAddressAssign) {
                                 sendAck(BUS_ACK_TYPE_HELLO);
@@ -176,12 +141,9 @@ __bit bus_sec_poll()
                             break;
 
                         case BUS_MSG_TYPE_CONNECT:
-#ifdef DEBUGMODE
-                            io_printChDbg('=');
-#endif
-                            if (s_header[2] != UNASSIGNED_SUB_ADDRESS) {
+                            if (s_stationAddress != UNASSIGNED_STATION_ADDRESS) {
                                 // Master now knows me
-                                s_known = 1;
+                                s_acknowledged = 1;
                                 // Start reading data with rc9 not set
                                 rs485_skipData = rs485_lastRc9 = false;
                                 // Socket, direct connect
@@ -190,18 +152,12 @@ __bit bus_sec_poll()
                             }
                             break;
                         default:
-#ifdef DEBUGMODE
-                            io_printChDbg('!');
-#endif
                             // Unknown command. Reset
                             // Restart from 0x55
                             reinit_after_disengage();
                             break;
                     }
                 
-#ifdef DEBUGMODE
-                    io_printChDbg('-');
-#endif
                     if (!isManaged) {
                         // If not managed, reinit bus for the next message
                         reinit_after_disengage();
@@ -211,19 +167,4 @@ __bit bus_sec_poll()
     }
 
     return s_state != STATE_HEADER_0;
-}
-
-// Close the socket
-void bus_sec_abort() {
-    // set_rs485_close
-    rs485_over = 1;
-    rs485_close = 1;
-    // And then wait for TX end before going idle
-    s_state = STATE_WAIT_TX;   
-}
-
-// Socket connected?
-__bit bus_sec_isConnected()
-{
-    return s_state == STATE_SOCKET_OPEN;
 }

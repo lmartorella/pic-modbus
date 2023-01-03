@@ -4,50 +4,53 @@ RS485_STATE rs485_state;
 
 #define ADJUST_PTR(x) while (x >= (s_buffer + RS485_BUF_SIZE)) x-= RS485_BUF_SIZE
 
+// Circular buffer
 static uint8_t s_buffer[RS485_BUF_SIZE];
 // Pointer of the writing head
 static uint8_t* s_writePtr;
 // Pointer of the reading head (if = write ptr, no bytes avail)
 static uint8_t* s_readPtr;
+#define _rs485_readAvail() ((uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE))
+#define _rs485_writeAvail() ((uint8_t)(((uint8_t)(s_readPtr - s_writePtr - 1)) % RS485_BUF_SIZE))
 
-// Status of address bit in the serie
-__bit rs485_lastRc9;
+/**
+ * Set when the incoming data can be safely skipped and won't trigger read buffer overrun
+ * if not processed
+ */
 __bit rs485_skipData;
-// Send a special OVER token to the bus when the transmission ends (if there are 
-// data in TX queue)
-__bit rs485_over;
-// When rs485_over is set, close will determine with char to send
-__bit rs485_close;
-// When set after a write operation, remain in TX state when data finishes until next write operation
-__bit rs485_master;
 
 static __bit s_lastTx;
 static __bit s_oerr;
 
 static TICK_TYPE s_lastTick;
 
-// time to wait before engaging the channel (after other station finished to transmit)
-#define ENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_BYTE * 1)  
-// additional time to wait after channel engaged to start transmit
-// Consider that the glitch produced engaging the channel can be observed as a FRAMEERR by other stations
-// So use a long time here to avoid FERR to consume valid data
-#define START_TRANSMIT_TIMEOUT (TICK_TYPE)(TICKS_PER_BYTE * 3)
-// time to wait before releasing the channel = 2 bytes,
-// but let's wait an additional byte since USART is free when still transmitting the last byte.
-#define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_BYTE * (2 + 1))
+// The following timings are required to avoid the two-wire RS485 line to remain floating, potentially
+// triggering frame errors. The line will be driven low by two stations at the same time.
+// The total time should be however less than 3.5 characters to avoid triggering timeout errors.
+
+// TICKS_PER_SECOND = 3906 on PIC16 @4MHz
+// TICKS_PER_SECOND = 24414 on PIC18 @25MHz
+// CHAR_PER_SECONDS = (BAUD / 11 (9+1+1)) = 1744 (round down) = 0.57ms
+#define CHAR_PER_SECONDS (uint32_t)((RS485_BAUD - 11) / 11)
+// 2 ticks per byte, but let's do 3 (round up) for PIC16 @4MHz
+// 14 ticks per byte (round up) on PIC18 @25MHz
+#define TICKS_PER_CHAR (TICK_TYPE)((TICKS_PER_SECOND + CHAR_PER_SECONDS) / CHAR_PER_SECONDS)
+
+// Time to wait before transmitting after channel switched from RX to TX.
+#define START_TRANSMIT_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 2)
+// time to wait before releasing the channel from transmit to receive
+// but let's wait an additional full byte since USART is free when still transmitting the last byte.
+#define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * (1.5 + 1))
 
 static void rs485_startRead(void);
 
-void rs485_init()
-{
+void rs485_init() {
     uart_init();
     uart_receive();
        
-    rs485_skipData = 0;
-    rs485_over = 0;
-    rs485_close = 0;
-    s_oerr  = 0;
-    s_lastTx = 0;
+    rs485_skipData = false;
+    s_oerr  = false;
+    s_lastTx = false;
     s_writePtr = s_readPtr = s_buffer;
     s_lastTick = timers_get();
     
@@ -55,25 +58,18 @@ void rs485_init()
     rs485_startRead();
 }
 
-#define _rs485_readAvail() ((uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE))
-#define _rs485_writeAvail() ((uint8_t)(((uint8_t)(s_readPtr - s_writePtr - 1)) % RS485_BUF_SIZE))
-
-uint8_t rs485_readAvail()
-{
+uint8_t rs485_readAvail() {
     if (rs485_state == RS485_LINE_RX) {
         return _rs485_readAvail();
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
-uint8_t rs485_writeAvail()
-{
+uint8_t rs485_writeAvail() {
     if (rs485_state != RS485_LINE_RX) {
         return _rs485_writeAvail();
-    }
-    else {
+    } else {
         // Can switch to TX and have full buffer
         return RS485_BUF_SIZE - 1;
     }
@@ -86,8 +82,10 @@ uint8_t rs485_writeAvail()
     uart_tx_fifo_empty_set_mask(true); \
     ADJUST_PTR(s_readPtr);
 
-void rs485_interrupt()
-{
+/**
+ * Process a RS485 interrupt (FIFO empty)
+ */
+void rs485_interrupt() {
     // Empty TX buffer? Check for more data
     if (uart_tx_fifo_empty() && uart_tx_fifo_empty_get_mask()) {
         do {
@@ -95,30 +93,16 @@ void rs485_interrupt()
             if (_rs485_readAvail() > 0) {
                 // Feed more data, read at read pointer and then increase
                 writeByte();
-            }
-            else if (rs485_master) {
-                // Disable interrupt but remain in write mode
-                uart_tx_fifo_empty_set_mask(false);
-                break;
-            }
-            else if (rs485_over) {
-                rs485_over = 0;
-                // Send OVER byte
-                uart_set_9b(1);
-                uart_write(rs485_close ? RS485_CCHAR_CLOSE : RS485_CCHAR_OVER);
-                uart_tx_fifo_empty_set_mask(true);
-            } 
-            else {
+            } else {
                 // NO MORE data to transmit
                 // TX2IF cannot be cleared, shut IE
                 uart_tx_fifo_empty_set_mask(false);
                 // goto first phase of tx end
-                s_lastTx = 1;
+                s_lastTx = true;
                 break;
             }
         } while (uart_tx_fifo_empty());
-    }
-    else if (!uart_rx_fifo_empty() && uart_rx_fifo_empty_get_mask()) {
+    } else if (!uart_rx_fifo_empty() && uart_rx_fifo_empty_get_mask()) {
         // Data received
         do {
             CLRWDT();
@@ -137,7 +121,7 @@ void rs485_interrupt()
             
             // if s_ferr don't disengage read, only set the flag, in order to not lose next bytes
             // Only read data (0) if enabled
-            if (!md.ferr && (md.rc9 || !rs485_skipData)) {
+            if (!md.ferr && (!rs485_skipData)) {
                 rs485_lastRc9 = md.rc9;
                 *(s_writePtr++) = data;
                 ADJUST_PTR(s_writePtr);
@@ -147,10 +131,9 @@ void rs485_interrupt()
 }
 
 /**
- * Poll as much as possible (internal timered)
+ * Poll as much as possible
  */
-_Bool rs485_poll()
-{
+_Bool rs485_poll() {
     CLRWDT();
     if (s_oerr) {
         fatal("U.OER");
@@ -163,7 +146,7 @@ _Bool rs485_poll()
             if (s_lastTx) {
                 s_lastTick = timers_get();
                 rs485_state = RS485_LINE_TX_DISENGAGE;
-                s_lastTx = 0;
+                s_lastTx = false;
             }
             break;
         case RS485_LINE_WAIT_FOR_ENGAGE:
@@ -171,7 +154,7 @@ _Bool rs485_poll()
                 // Engage
                 rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
                 // Enable RS485 driver
-                uart_trasmit();
+                uart_transmit();
                 s_lastTick = timers_get();
             }
             break;
@@ -179,7 +162,7 @@ _Bool rs485_poll()
             if (elapsed >= START_TRANSMIT_TIMEOUT) {
                 // Transmit
                 rs485_state = RS485_LINE_TX;
-                s_lastTx = 0;
+                s_lastTx = false;
                 if (_rs485_readAvail() > 0) {
                     // Feed first byte
                     writeByte();
@@ -200,9 +183,8 @@ _Bool rs485_poll()
     return rs485_state != RS485_LINE_RX;
 }
 
-void rs485_write(_Bool address, const uint8_t* data, uint8_t size)
-{ 
-    rs485_over = rs485_close = rs485_master = 0;
+void rs485_write(const uint8_t* data, uint8_t size) { 
+    rs485_master = 0;
 
     // Reset reader, if in progress
     if (rs485_state == RS485_LINE_RX) {
@@ -234,9 +216,6 @@ void rs485_write(_Bool address, const uint8_t* data, uint8_t size)
         CLRWDT();
     }
 
-    // 9-bit address
-    uart_set_9b(address);
-
     // Schedule trasmitting, if not yet ready
     switch (rs485_state) {
         case RS485_LINE_TX_DISENGAGE:
@@ -248,17 +227,10 @@ void rs485_write(_Bool address, const uint8_t* data, uint8_t size)
             // Was in transmit state: reenable TX feed interrupt
             uart_tx_fifo_empty_set_mask(true);
             break;
-            
-        //case RS485_LINE_TX:
-        //case RS485_LINE_WAIT_FOR_START_TRANSMIT:
-        //case RS485_LINE_WAIT_FOR_ENGAGE:
-            // Already tx, ok
-        //    break;
     }
 }
 
-static void rs485_startRead()
-{
+static void rs485_startRead() {
     CLRWDT();
     if (rs485_state != RS485_LINE_RX) {
         // Break all
@@ -294,8 +266,7 @@ void rs485_waitDisengageTime() {
     }
 }
 
-__bit rs485_read(uint8_t* data, uint8_t size)
-{
+__bit rs485_read(uint8_t* data, uint8_t size) {
     if (rs485_state != RS485_LINE_RX) { 
         rs485_startRead();
         return false;

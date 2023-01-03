@@ -2,14 +2,13 @@
 #define	UART_H
 
 /**
- * Module that virtualize UART support for bus wired communication from RS485 module.
- * Requires 9-bit support
- * Declared to decouple UART implementation, that can be native Microchip MCU or Raspbian/Raspberry based.
+ * Module that virtualize 8-bit UART support for bus wired communication from RS485 module.
+ * Not using parity since PIC 16/18 doesn't have any hardware support, and having it in software
+ * will probably kill performances.
+ * Declared to decouple UART implementation, that can be native Microchip MCU or Linux based (via USB dongle).
  */
 
 typedef struct {
-    // Receive state of the 9th bit
-    unsigned rc9 :1;
     // Frame error occurred?
     unsigned ferr :1;
     // Overflow error occurred?
@@ -20,18 +19,16 @@ typedef struct {
 
 // Use inline definition to avoid stack depths
 
-// MAX485 levels
+// MAX485 line drive
 #define EN_TRANSMIT 1
 #define EN_RECEIVE 0
 
-#define uart_trasmit() RS485_PORT_EN = EN_TRANSMIT
+#define uart_transmit() RS485_PORT_EN = EN_TRANSMIT
 #define uart_receive() RS485_PORT_EN = EN_RECEIVE
 
 #define uart_init() \
     RS485_RCSTA.SPEN = 1; \
-    RS485_RCSTA.RX9 = 1; \
     RS485_TXSTA.SYNC = 0; \
-    RS485_TXSTA.TX9 = 1; \
     RS485_INIT_BAUD(); \
     /* Enable ports */ \
     RS485_TRIS_RX = 1; \
@@ -39,14 +36,11 @@ typedef struct {
     /* Enable control ports */ \
     RS485_TRIS_EN = 0; \
 
-#define uart_set_9b(b) RS485_TXSTA.TX9D = b
 #define uart_write(b) RS485_TXREG = b
 #define uart_read(data, md) \
     /* Check for errors BEFORE reading RCREG */ \
     (md)->oerr = RS485_RCSTA.OERR; \
     (md)->ferr = RS485_RCSTA.FERR; \
-    /* read data to reset IF and FERR */ \
-    (md)->rc9 = RS485_RCSTA.RX9D; \
     *(data) = RS485_RCREG;
 
 #define uart_tx_fifo_empty() RS485_PIR_TXIF
@@ -65,9 +59,8 @@ typedef struct {
 #else
 
 void uart_init();
-void uart_trasmit();
+void uart_transmit();
 void uart_receive();
-void uart_set_9b(_Bool b);
 void uart_write(uint8_t b);
 void uart_read(uint8_t* data, UART_RX_MD* md);
 

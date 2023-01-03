@@ -222,7 +222,7 @@ void uart_init() {
 #define EN_TRANSMIT 1
 #define EN_RECEIVE 0
 
-void uart_trasmit() {
+void uart_transmit() {
     gpio_write(gpioMap, 2, EN_TRANSMIT);
 }
 
