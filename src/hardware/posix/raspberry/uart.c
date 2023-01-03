@@ -160,8 +160,6 @@ static Mmap* gpioMap;
 static _Bool s_rc9;
 static _Bool s_txEn;
 static _Bool s_rxEn;
-static _Bool s_txFifoMask;
-static _Bool s_rxFifoMask;
 
 // Sometimes the PL011 gets stuck in busy mode.
 static const TICK_TYPE MAX_WAIT_TICKS = TICKS_PER_SECOND / 4;
@@ -203,8 +201,6 @@ void uart_init() {
     s_rc9 = 0;
     s_txEn = 0;
     s_rxEn = 0;
-    s_txFifoMask = 0;
-    s_rxFifoMask = 0;
 
     const uint32_t pi_peri_phys = 0x20000000;
     uartMap = mmap_create((pi_peri_phys + 0x00201000), 0x90);
@@ -249,10 +245,8 @@ void uart_read(uint8_t* data, UART_RX_MD* md) {
     uint32_t rx = mmap_rd(uartMap, UART_REG_DR);
     *data = rx & 0xff;
     // And then read ERRORS associated to that uint8_t
-    md->oerr = (rx & UART_REG_DR_OE) != 0;
-    md->ferr = (rx & UART_REG_DR_FE) != 0;
-    _Bool perr = (rx & UART_REG_DR_PE) != 0;
-    md->rc9 = s_rc9 ? !perr : perr;
+    md->overrunErr = (rx & UART_REG_DR_OE) != 0;
+    md->frameErr = (rx & UART_REG_DR_FE) != 0;
 
 #ifdef DEBUGMODE
     printf(" R");
@@ -272,22 +266,6 @@ _Bool uart_tx_fifo_empty() {
 
 _Bool uart_rx_fifo_empty() {
     return s_rxEn && (mmap_rd(uartMap, UART_REG_FR) & UART_REG_FR_RXFE);
-}
-
-_Bool uart_tx_fifo_empty_get_mask() {
-    return s_txFifoMask;    
-}
-
-_Bool uart_rx_fifo_empty_get_mask() {
-    return s_rxFifoMask;    
-}
-
-void uart_tx_fifo_empty_set_mask(_Bool b) {
-    s_txFifoMask = b;
-}
-
-void uart_rx_fifo_empty_set_mask(_Bool b) {
-    s_rxFifoMask = b;
 }
 
 void uart_enable_tx() {
