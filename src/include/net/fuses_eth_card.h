@@ -29,8 +29,6 @@ typedef uint32_t TICK_TYPE;
 #define PRIO_TYPE low_priority
 #define EEPROM_MODIFIER const
 
-#define MASTER_MAX_CHILDREN 16
-
 
 // ******* 
 // DISPLAY
@@ -98,18 +96,21 @@ typedef uint32_t TICK_TYPE;
     #define RS485_TRIS_RX TRISGbits.RG2
     #define RS485_TRIS_EN TRISGbits.RG0
     #define RS485_PORT_EN PORTGbits.RG0
-    #define RS485_BAUD 19200
-        // For 9600:
-    //#define RS485_INIT_BAUD() \
-    //    TXSTA2bits.BRGH = 1;\
-    //    BAUDCON2bits.BRG16 = 0;\
-    //    SPBRGH2 = 0;\
-    //    SPBRG2 = 162
+#if RS485_BAUD == 9600
+    #define RS485_INIT_BAUD() \
+       TXSTA2bits.BRGH = 1;\
+       BAUDCON2bits.BRG16 = 0;\
+       SPBRGH2 = 0;\
+       SPBRG2 = 162
+#elif RS485_BAUD == 19200
     #define RS485_INIT_BAUD() \
          TXSTA2bits.BRGH = 1;\
          BAUDCON2bits.BRG16 = 0;\
          SPBRGH2 = 0;\
          SPBRG2 = 80
+#else
+    #error Baud rate not supported by macro
+#endif
     #define RS485_INIT_INT() \
         IPR3bits.TX2IP = 0; \
         IPR3bits.RC2IP = 0
@@ -126,18 +127,21 @@ typedef uint32_t TICK_TYPE;
     #define RS485_TRIS_RX TRISCbits.RC7
     #define RS485_TRIS_EN TRISCbits.RC4
     #define RS485_PORT_EN PORTCbits.RC4
-    #define RS485_BAUD 19200
-        // For 9600:
-    //#define RS485_INIT_BAUD() \
-    //    TXSTA1bits.BRGH = 1;\
-    //    BAUDCON1bits.BRG16 = 0;\
-    //    SPBRGH1 = 0;\
-    //    SPBRG1 = 162
+#if RS485_BAUD == 9600
+    #define RS485_INIT_BAUD() \
+       TXSTA1bits.BRGH = 1;\
+       BAUDCON1bits.BRG16 = 0;\
+       SPBRGH1 = 0;\
+       SPBRG1 = 162
+#elif RS485_BAUD == 19200
      #define RS485_INIT_BAUD() \
          TXSTA1bits.BRGH = 1;\
          BAUDCON1bits.BRG16 = 0;\
          SPBRGH1 = 0;\
          SPBRG1 = 80
+#else
+    #error Baud rate not supported by macro
+#endif
     #define RS485_INIT_INT() \
         IPR1bits.TX1IP = 0; \
         IPR1bits.RC1IP = 0

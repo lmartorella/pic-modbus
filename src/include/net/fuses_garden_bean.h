@@ -45,16 +45,21 @@
 #define RS485_TRIS_RX TRISCbits.TRISC7
 #define RS485_TRIS_EN TRISDbits.TRISD1
 #define RS485_PORT_EN PORTDbits.RD1
-#define RS485_BAUD 19200
-    // For 9600:
-//#define RS485_INIT_BAUD() \
-//    TXSTAbits.BRGH = 1;\
-//    SPBRG = 25
+#if RS485_BAUD == 9600
 #define RS485_INIT_BAUD() \
-     TXSTAbits.BRGH = 1;\
-     BAUDCTLbits.BRG16 = 0;\
-     SPBRGH = 0;\
-     SPBRG = 12
+    TXSTAbits.BRGH = 1;\
+    BAUDCTLbits.BRG16 = 0;\
+    SPBRGH = 0;\
+    SPBRG = 25
+#elif RS485_BAUD == 19200
+#define RS485_INIT_BAUD() \
+    TXSTAbits.BRGH = 1;\
+    BAUDCTLbits.BRG16 = 0;\
+    SPBRGH = 0;\
+    SPBRG = 12
+#else
+    #error Baud rate not supported by macro
+#endif
 
 // *****
 // Tick timer source. Uses TMR0 (8-bit prescales to 1:256), that resolve from 0.25ms to 16.7secs

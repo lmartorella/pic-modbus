@@ -48,18 +48,25 @@ typedef uint16_t TICK_TYPE;
 #define RS485_TRIS_RX TRISBbits.TRISB2
 #define RS485_TRIS_EN TRISAbits.TRISA6
 #define RS485_PORT_EN PORTAbits.RA6
-#define RS485_BAUD 19200
-    // For 9600:
-//#define RS485_INIT_BAUD() \
-//    TXSTAbits.BRGH = 1;\
-//    SPBRG = 25
+#if RS485_BAUD == 9600
 #define RS485_INIT_BAUD() \
      TXSTAbits.BRGH = 1;\
+     SPBRG = 25;\
      BAUDCONbits.SCKP = 0;\
      BAUDCONbits.BRG16 = 0;\
-     SPBRG = 12;\
      APFCON0bits.RXDTSEL = 1;\
-     APFCON1bits.TXCKSEL = 1;\
+     APFCON1bits.TXCKSEL = 1;
+#elif RS485_BAUD == 19200
+#define RS485_INIT_BAUD() \
+     TXSTAbits.BRGH = 1;\
+     SPBRG = 12;\
+     BAUDCONbits.SCKP = 0;\
+     BAUDCONbits.BRG16 = 0;\
+     APFCON0bits.RXDTSEL = 1;\
+     APFCON1bits.TXCKSEL = 1;
+#else
+    #error Baud rate not supported by macro
+#endif
 
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5

@@ -2,8 +2,6 @@
 
 RS485_STATE rs485_state;
 
-#define ADJUST_PTR(x) while (x >= (s_buffer + RS485_BUF_SIZE)) x-= RS485_BUF_SIZE
-
 // Circular buffer
 static uint8_t s_buffer[RS485_BUF_SIZE];
 // Pointer of the writing head
@@ -13,14 +11,8 @@ static uint8_t* s_readPtr;
 #define _rs485_readAvail() ((uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE))
 #define _rs485_writeAvail() ((uint8_t)(((uint8_t)(s_readPtr - s_writePtr - 1)) % RS485_BUF_SIZE))
 
-/**
- * Set when the incoming data can be safely skipped and won't trigger read buffer overrun
- * if not processed
- */
-__bit rs485_skipData;
-
-static __bit s_lastTx;
-static __bit s_oerr;
+// Avoid modulo math on 8-bit MCUs
+#define MODULO_PTR(x) while (x >= (s_buffer + RS485_BUF_SIZE)) x-= RS485_BUF_SIZE
 
 static TICK_TYPE s_lastTick;
 
@@ -49,8 +41,6 @@ void rs485_init() {
     uart_receive();
        
     rs485_skipData = false;
-    s_oerr  = false;
-    s_lastTx = false;
     s_writePtr = s_readPtr = s_buffer;
     s_lastTick = timers_get();
     
@@ -80,95 +70,68 @@ uint8_t rs485_writeAvail() {
 #define writeByte() \
     uart_write(*(s_readPtr++)); \
     uart_tx_fifo_empty_set_mask(true); \
-    ADJUST_PTR(s_readPtr);
+    MODULO_PTR(s_readPtr);
 
 /**
- * Process a RS485 interrupt (FIFO empty)
- */
-void rs485_interrupt() {
-    // Empty TX buffer? Check for more data
-    if (uart_tx_fifo_empty() && uart_tx_fifo_empty_get_mask()) {
-        do {
-            CLRWDT();
-            if (_rs485_readAvail() > 0) {
-                // Feed more data, read at read pointer and then increase
-                writeByte();
-            } else {
-                // NO MORE data to transmit
-                // TX2IF cannot be cleared, shut IE
-                uart_tx_fifo_empty_set_mask(false);
-                // goto first phase of tx end
-                s_lastTx = true;
-                break;
-            }
-        } while (uart_tx_fifo_empty());
-    } else if (!uart_rx_fifo_empty() && uart_rx_fifo_empty_get_mask()) {
-        // Data received
-        do {
-            CLRWDT();
-            
-            uint8_t data;
-            UART_RX_MD md;
-
-            uart_read(&data, &md);
-            
-            if (md.oerr) {
-                // Disable IE otherwise the interrupt will loop
-                s_oerr = 1;
-                uart_rx_fifo_empty_set_mask(false);
-                return;
-            }
-            
-            // if s_ferr don't disengage read, only set the flag, in order to not lose next bytes
-            // Only read data (0) if enabled
-            if (!md.ferr && (!rs485_skipData)) {
-                rs485_lastRc9 = md.rc9;
-                *(s_writePtr++) = data;
-                ADJUST_PTR(s_writePtr);
-            }
-        } while (!uart_rx_fifo_empty());
-    }
-}
-
-/**
- * Poll as much as possible
+ * Returns `true` if the bus is active (so fast poll is required).
  */
 _Bool rs485_poll() {
     CLRWDT();
-    if (s_oerr) {
-        fatal("U.OER");
-        return false;
-    }
-    
+
     TICK_TYPE elapsed = timers_get() - s_lastTick;
-    switch (rs485_state){
-        case RS485_LINE_TX:
-            if (s_lastTx) {
-                s_lastTick = timers_get();
-                rs485_state = RS485_LINE_TX_DISENGAGE;
-                s_lastTx = false;
-            }
-            break;
-        case RS485_LINE_WAIT_FOR_ENGAGE:
-            if (elapsed >= ENGAGE_CHANNEL_TIMEOUT) {
-                // Engage
-                rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
-                // Enable RS485 driver
-                uart_transmit();
-                s_lastTick = timers_get();
-            }
-            break;
+    switch (rs485_state) {
+        case RS485_LINE_TX: {
+            // Empty TX buffer? Check for more data
+            while (uart_tx_fifo_empty()) {
+                CLRWDT();
+                if (_rs485_readAvail() > 0) {
+                    // Feed more data, read at read pointer and then increase
+                    writeByte();
+                } else {
+                    // NO MORE data to transmit
+                    // goto first phase of tx end
+                    s_lastTick = timers_get();
+                    rs485_state = RS485_LINE_TX_DISENGAGE;
+                    return true;
+                }
+            };
+            return true;
+        } 
+        case RS485_LINE_TX: 
+        case RS485_LINE_RX_SKIP: {
+            // Data received
+            while (!uart_rx_fifo_empty()) {
+                CLRWDT();
+                
+                uint8_t data;
+                UART_RX_MD md;
+
+                uart_read(&data, &md);
+                
+                if (md.overrunErr) {
+                    fatal("U.OER");
+                    return false;
+                }
+                if (md.frameErr) {
+                    s_frameErrors++;
+                    rs485_state = RS485_LINE_RX_SKIP;
+                }
+                
+                // Only read data if not in skip mode
+                if (rs485_state != RS485_LINE_RX_SKIP) {
+                    *(s_writePtr++) = data;
+                    MODULO_PTR(s_writePtr);
+                }
+            };
+            return true;
+        }
         case RS485_LINE_WAIT_FOR_START_TRANSMIT:
             if (elapsed >= START_TRANSMIT_TIMEOUT) {
                 // Transmit
                 rs485_state = RS485_LINE_TX;
-                s_lastTx = false;
                 if (_rs485_readAvail() > 0) {
                     // Feed first byte
                     writeByte();
-                } else {
-                    // Enable interrupts now to eventually change state
-                    uart_tx_fifo_empty_set_mask(true);
                 }
             }
             break;
@@ -180,28 +143,30 @@ _Bool rs485_poll() {
             }
             break;
     }
-    return rs485_state != RS485_LINE_RX;
+    return rs485_state != RS485_LINE_RX && rs485_state != RS485_LINE_RX_SKIP;
 }
 
 void rs485_write(const uint8_t* data, uint8_t size) { 
     rs485_master = 0;
 
     // Reset reader, if in progress
-    if (rs485_state == RS485_LINE_RX) {
+    if (rs485_state == RS485_LINE_RX || rs485_state == RS485_LINE_RX_SKIP) {
         // Truncate reading
         uart_disable_rx();
-        uart_rx_fifo_empty_set_mask(0);
         s_readPtr = s_writePtr = s_buffer;
 
-        // Enable UART transmit. This will trigger the TXIF, but don't enable it now.
+        // Enable UART transmit.
         uart_enable_tx();
 
-        rs485_state = RS485_LINE_WAIT_FOR_ENGAGE;
+        // Engage
+        rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
+        // Enable RS485 driver
+        uart_transmit();
         s_lastTick = timers_get();
+    } else if (rs485_state == RS485_LINE_TX_DISENGAGE) {
+        // Re-convert it to tx
+        rs485_state = RS485_LINE_TX;
     }
-
-    // Disable interrupts
-    uart_tx_fifo_empty_set_mask(false);
 
     if (size > _rs485_writeAvail()) {
         // Overflow error
@@ -211,37 +176,23 @@ void rs485_write(const uint8_t* data, uint8_t size) {
     // Copy to buffer
     while (size > 0) {
         *(s_writePtr++) = *(data++);
-        ADJUST_PTR(s_writePtr);
+        MODULO_PTR(s_writePtr);
         size--;
         CLRWDT();
-    }
-
-    // Schedule trasmitting, if not yet ready
-    switch (rs485_state) {
-        case RS485_LINE_TX_DISENGAGE:
-            // Re-convert it to tx
-            rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
-            s_lastTick = timers_get();
-            break;
-        case RS485_LINE_TX:
-            // Was in transmit state: reenable TX feed interrupt
-            uart_tx_fifo_empty_set_mask(true);
-            break;
     }
 }
 
 static void rs485_startRead() {
     CLRWDT();
-    if (rs485_state != RS485_LINE_RX) {
+    if (rs485_state == RS485_LINE_TX || rs485_state == RS485_LINE_WAIT_FOR_START_TRANSMIT) {
         // Break all
         rs485_state = RS485_LINE_TX_DISENGAGE;
         s_lastTick = timers_get();
         return;
     }
     
-    // Disable writing (and reset OERR)
+    // Disable writing
     uart_disable_tx();
-    uart_tx_fifo_empty_set_mask(false);
 
     // Disable RS485 driver
     uart_receive();
@@ -252,18 +203,6 @@ static void rs485_startRead() {
 
     // Enable UART receiver
     uart_enable_rx();
-    uart_rx_fifo_empty_set_mask(1);
-}
-
-void rs485_waitDisengageTime() {
-    if (rs485_state == RS485_LINE_RX) { 
-        // Disable rx receiver
-        uart_disable_rx();
-        uart_rx_fifo_empty_set_mask(0);
-        
-        rs485_state = RS485_LINE_TX_DISENGAGE;
-        s_lastTick = timers_get();
-    }
 }
 
 __bit rs485_read(uint8_t* data, uint8_t size) {
@@ -281,7 +220,7 @@ __bit rs485_read(uint8_t* data, uint8_t size) {
             ret = true;
             while (size > 0) {
                 *(data++) = *(s_readPtr++);
-                ADJUST_PTR(s_readPtr);
+                MODULO_PTR(s_readPtr);
                 size--;
                 CLRWDT();
             }

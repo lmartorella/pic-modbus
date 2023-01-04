@@ -10,9 +10,9 @@
 
 typedef struct {
     // Frame error occurred?
-    unsigned ferr :1;
+    unsigned frameErr :1;
     // Overflow error occurred?
-    unsigned oerr :1;
+    unsigned overrunErr :1;
 } UART_RX_MD;
 
 #ifdef __XC8
@@ -39,17 +39,12 @@ typedef struct {
 #define uart_write(b) RS485_TXREG = b
 #define uart_read(data, md) \
     /* Check for errors BEFORE reading RCREG */ \
-    (md)->oerr = RS485_RCSTA.OERR; \
-    (md)->ferr = RS485_RCSTA.FERR; \
+    (md)->overrunErr = RS485_RCSTA.OERR; \
+    (md)->frameErr = RS485_RCSTA.FERR; \
     *(data) = RS485_RCREG;
 
 #define uart_tx_fifo_empty() RS485_PIR_TXIF
-#define uart_tx_fifo_empty_get_mask() RS485_PIE_TXIE
-#define uart_tx_fifo_empty_set_mask(b) RS485_PIE_TXIE = b
-
 #define uart_rx_fifo_empty() !RS485_PIR_RCIF
-#define uart_rx_fifo_empty_get_mask() RS485_PIE_RCIE
-#define uart_rx_fifo_empty_set_mask(b) RS485_PIE_RCIE = b
 
 #define uart_enable_tx()  RS485_TXSTA.TXEN = 1
 #define uart_disable_tx()  RS485_TXSTA.TXEN = 0
@@ -65,12 +60,7 @@ void uart_write(uint8_t b);
 void uart_read(uint8_t* data, UART_RX_MD* md);
 
 _Bool uart_tx_fifo_empty();
-_Bool uart_tx_fifo_empty_get_mask();
-void uart_tx_fifo_empty_set_mask(_Bool b);
-
 _Bool uart_rx_fifo_empty();
-_Bool uart_rx_fifo_empty_get_mask();
-void uart_rx_fifo_empty_set_mask(_Bool b);
 
 void uart_enable_tx();
 void uart_disable_tx();

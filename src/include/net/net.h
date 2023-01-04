@@ -26,6 +26,8 @@ typedef unsigned char __bit;
 #include <stdlib.h>
 #include <string.h>
 
+#define RS485_BAUD 19200
+
 /**
  * Loads the MCU headers and additional fuses
  */
