@@ -15,44 +15,6 @@ typedef struct {
     unsigned overrunErr :1;
 } UART_RX_MD;
 
-#ifdef __XC8
-
-// Use inline definition to avoid stack depths
-
-// MAX485 line drive
-#define EN_TRANSMIT 1
-#define EN_RECEIVE 0
-
-#define uart_transmit() RS485_PORT_EN = EN_TRANSMIT
-#define uart_receive() RS485_PORT_EN = EN_RECEIVE
-
-#define uart_init() \
-    RS485_RCSTA.SPEN = 1; \
-    RS485_TXSTA.SYNC = 0; \
-    RS485_INIT_BAUD(); \
-    /* Enable ports */ \
-    RS485_TRIS_RX = 1; \
-    RS485_TRIS_TX = 0; \
-    /* Enable control ports */ \
-    RS485_TRIS_EN = 0; \
-
-#define uart_write(b) RS485_TXREG = b
-#define uart_read(data, md) \
-    /* Check for errors BEFORE reading RCREG */ \
-    (md)->overrunErr = RS485_RCSTA.OERR; \
-    (md)->frameErr = RS485_RCSTA.FERR; \
-    *(data) = RS485_RCREG;
-
-#define uart_tx_fifo_empty() RS485_PIR_TXIF
-#define uart_rx_fifo_empty() !RS485_PIR_RCIF
-
-#define uart_enable_tx()  RS485_TXSTA.TXEN = 1
-#define uart_disable_tx()  RS485_TXSTA.TXEN = 0
-#define uart_enable_rx()   RS485_RCSTA.CREN = 1
-#define uart_disable_rx()  RS485_RCSTA.CREN = 0
-
-#else
-
 void uart_init();
 void uart_transmit();
 void uart_receive();
@@ -66,8 +28,6 @@ void uart_enable_tx();
 void uart_disable_tx();
 void uart_enable_rx();
 void uart_disable_rx(); 
-
-#endif
                                       
 #endif	/* UART_H */
 

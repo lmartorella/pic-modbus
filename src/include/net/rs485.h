@@ -7,24 +7,6 @@
  */
 
 /**
- * State of the RS485 line
- */
-typedef enum {
-    // Receiving, all OK
-    RS485_LINE_RX,
-    // End of transmitting, in disengage line period
-    RS485_LINE_TX_DISENGAGE,
-    // Transmitting, data
-    RS485_LINE_TX,
-    // After TX engaged, wait before transmitting
-    RS485_LINE_WAIT_FOR_START_TRANSMIT,
-    // Read and discard characters until frame end
-    RS485_LINE_RX_SKIP
-} RS485_STATE;
-
-extern RS485_STATE rs485_state;
-
-/**
  * Initialize asynchronous mode, but only half-duplex is used
  */
 void rs485_init(void);
