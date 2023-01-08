@@ -59,6 +59,9 @@
 
 #include "net/net.h"
 
+// Represents one second in Ticks
+#define TICK_SECOND (TICK_TYPE)(TICKS_PER_SECOND)
+
 // Include proper device header file
 //#if defined(__18CXX) && !defined(HI_TECH_C)	
 //	// PIC18 processor with Microchip C18 compiler

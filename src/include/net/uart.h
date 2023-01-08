@@ -1,6 +1,10 @@
 #ifndef UART_H
 #define	UART_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Module that virtualize 8-bit UART support for bus wired communication from RS485 module.
  * Not using parity since PIC 16/18 doesn't have any hardware support, and having it in software
@@ -28,6 +32,10 @@ void uart_enable_tx();
 void uart_disable_tx();
 void uart_enable_rx();
 void uart_disable_rx(); 
-                                      
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif	/* UART_H */
 

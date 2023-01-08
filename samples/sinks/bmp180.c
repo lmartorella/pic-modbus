@@ -83,7 +83,7 @@ __bit bmp180_poll() {
     if (s_state == STATE_IDLE) {
         return 1;
     }
-    if ((timers_get() - s_lastTime) > TICK_SECOND) {
+    if ((timers_get() - s_lastTime) > TICKS_PER_SECOND) {
         fatal("B.LOCK");
     }
 

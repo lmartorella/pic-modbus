@@ -21,6 +21,10 @@ void uart_init() {
     RS485_TRIS_TX = 0;
     /* Enable control ports */
     RS485_TRIS_EN = 0;
+
+    uart_receive();
+    uart_disable_tx();
+    uart_disable_rx();
 }
 
 void uart_write(uint8_t b) {

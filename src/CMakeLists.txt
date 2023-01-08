@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(net VERSION 0.1.0)
+project(net LANGUAGES C CXX)
+include(CTest)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 14)
 
 add_definitions(-D_CONF_POSIX)
 
@@ -17,8 +21,10 @@ install(TARGETS net
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/net)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+# The tests
+add_executable(rs485Tests tests/rs485Tests.cpp rs485.c)
+target_include_directories(rs485Tests PRIVATE tests include)
+target_link_libraries(rs485Tests PRIVATE Catch2WithMain)
 
-include(CPack)
-include(GNUInstallDirs)
+enable_testing()
+add_test(NAME rs485Tests COMMAND $<TARGET_FILE:rs485Tests>)
