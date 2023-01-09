@@ -14,6 +14,7 @@ enum { TRANSMIT, RECEIVE } mode;
 std::queue<uint8_t> txQueue;
 std::queue<uint8_t> rxQueue;
 TICK_TYPE s_timer = 0;
+int txQueueSize = 1000; // no max
 
 static void simulateSend(const std::vector<uint8_t>& data) {
     for (auto it = data.begin(); it != data.end(); ++it) {
@@ -21,12 +22,9 @@ static void simulateSend(const std::vector<uint8_t>& data) {
     }
 }
 
-static std::vector<uint8_t> simulateReceive(int size) {
-    if (size > txQueue.size()) {
-        throw std::runtime_error("Not enough data to read");
-    }
-    std::vector<uint8_t> data(size);
-    for (int i = 0; i < size; i++) {
+static std::vector<uint8_t> receiveAllData() {
+    std::vector<uint8_t> data(txQueue.size());
+    for (int i = 0; i < data.size(); i++) {
         data[i] = txQueue.front();
         txQueue.pop();
     }
@@ -55,10 +53,16 @@ extern "C" {
     }
 
     void uart_enable_rx() {
+        if (txEnabled) {
+            throw std::runtime_error("Not supposed to happen on RS485");
+        }
         rxEnabled = true;
     }
 
     void uart_enable_tx() {
+        if (rxEnabled) {
+            throw std::runtime_error("Not supposed to happen on RS485");
+        }
         txEnabled = true;
     }
 
@@ -93,11 +97,14 @@ extern "C" {
         if (!txEnabled) {
             throw std::runtime_error("TX not enabled");
         }
+        if (txQueue.size() >= txQueueSize) {
+            throw std::runtime_error("Buffer overrun during TX");
+        }
         txQueue.push(byte);
     }
 
     _Bool uart_tx_fifo_empty() {
-        return txQueue.empty();
+        return txQueue.size() < txQueueSize;
     }
 
     _Bool uart_rx_fifo_empty() {
@@ -113,7 +120,9 @@ extern "C" {
     }
 }
 
-TEST_CASE() {
+TEST_CASE("Normal operations") {
+    txQueueSize = 1;
+
     rs485_init();
     REQUIRE(rxEnabled == true);
     REQUIRE(txEnabled == false);
@@ -154,17 +163,17 @@ TEST_CASE() {
     REQUIRE(rs485_poll() == false);
     REQUIRE(rs485_state == RS485_LINE_TX);
 
-    REQUIRE(simulateReceive(1) == std::vector<uint8_t>({ 0x1 }));
+    REQUIRE(receiveAllData() == std::vector<uint8_t>({ 0x1 }));
 
     // Write data until buffer is full
     REQUIRE(rs485_poll() == false);
 
-    REQUIRE(simulateReceive(1) == std::vector<uint8_t>({ 0x2 }));
+    REQUIRE(receiveAllData() == std::vector<uint8_t>({ 0x2 }));
 
     // Write data until buffer is full
     REQUIRE(rs485_poll() == false);
 
-    REQUIRE(simulateReceive(1) == std::vector<uint8_t>({ 0x3 }));
+    REQUIRE(receiveAllData() == std::vector<uint8_t>({ 0x3 }));
 
     REQUIRE(rs485_poll() == true);
     REQUIRE(rs485_poll() == true);
@@ -180,4 +189,79 @@ TEST_CASE() {
     REQUIRE(rxEnabled == true);
 
     REQUIRE(rs485_state == RS485_LINE_RX);
+}
+
+TEST_CASE("Max RX buffer") {
+    txQueueSize = 32;
+
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    for (int i = 0; i < RS485_BUF_SIZE - 1; i++) {
+        simulateSend({ (uint8_t)i });
+    }
+
+    // Read data in a single poll call
+    REQUIRE(rs485_poll() == false);
+
+    std::vector<uint8_t> buffer(RS485_BUF_SIZE - 1);
+    REQUIRE(rs485_read(&buffer[0], RS485_BUF_SIZE - 1) == true);
+
+    for (int i = 0; i < RS485_BUF_SIZE - 1; i++) {
+        REQUIRE(buffer[i] == i);
+    }
+
+    // Test rollover
+    for (int i = 0; i < 2; i++) {
+        simulateSend({ (uint8_t)(i + 100)});
+    }
+
+    REQUIRE(rs485_poll() == false);
+
+    std::vector<uint8_t> buffer2(2);
+    REQUIRE(rs485_read(&buffer[0], 2) == true);
+
+    for (int i = 0; i < 2; i++) {
+        REQUIRE(buffer[i] == i + 100);
+    }
+}
+
+TEST_CASE("Max TX buffer") {
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    std::vector<uint8_t> buffer(RS485_BUF_SIZE - 1);
+    for (int i = 0; i < RS485_BUF_SIZE - 1; i++) {
+        buffer[i] = (uint8_t)i;
+    }
+
+    rs485_write(&buffer[0], RS485_BUF_SIZE - 1);
+    // Write data in a single poll call
+    REQUIRE(rs485_poll() == true);
+    advanceTime(START_TRANSMIT_TIMEOUT + 1);
+    // At the end of TX starts disengage timer
+    REQUIRE(rs485_poll() == true);
+    auto rx = receiveAllData();
+    REQUIRE(rx == buffer);
+
+    advanceTime(DISENGAGE_CHANNEL_TIMEOUT + 1);
+    REQUIRE(rs485_poll() == false);
+
+    // Test rollover
+    std::vector<uint8_t> buffer2(2);
+    for (int i = 0; i < 2; i++) {
+        buffer2[i] = (uint8_t)(i + 200);
+    }
+
+    rs485_write(&buffer2[0], 2);
+    // Write data in a single poll call
+    REQUIRE(rs485_poll() == true);
+    advanceTime(START_TRANSMIT_TIMEOUT + 1);
+    // At the end of TX starts disengage timer
+    REQUIRE(rs485_poll() == true);
+    rx = receiveAllData();
+    REQUIRE(rx == buffer2);
+
+    advanceTime(DISENGAGE_CHANNEL_TIMEOUT + 1);
+    REQUIRE(rs485_poll() == false);
 }
