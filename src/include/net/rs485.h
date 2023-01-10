@@ -80,6 +80,10 @@ typedef enum {
 } RS485_LINE_STATE;
 extern RS485_LINE_STATE rs485_state;
 
+// Once this is set, it skip reading in the buffer until reset.
+// It should be manually reset
+extern _Bool rs485_frameError;
+
 #ifdef __cplusplus
 }
 #endif

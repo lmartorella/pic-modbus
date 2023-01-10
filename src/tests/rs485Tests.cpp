@@ -16,10 +16,11 @@ std::queue<uint8_t> rxQueue;
 TICK_TYPE s_timer = 0;
 int txQueueSize = 1000; // no max
 bool simulateHwRxOverrun = false;
+bool simulateHwRxFrameError = false;
 
 static void initMock(int _txQueueSize) {
     txQueueSize = _txQueueSize;
-    simulateHwRxOverrun = false;
+    simulateHwRxOverrun = simulateHwRxFrameError = false;
 }
 
 static void simulateSend(const std::vector<uint8_t>& data) {
@@ -92,7 +93,7 @@ extern "C" {
         }
         *byte = rxQueue.front();
         rxQueue.pop();
-        md->frameErr = false;
+        md->frameErr = simulateHwRxFrameError;
         md->overrunErr = simulateHwRxOverrun;
     }
 
@@ -372,4 +373,35 @@ TEST_CASE("Test RX hardware overrun") {
     simulateHwRxOverrun = true;
 
     CHECK_THROWS_WITH(rs485_poll(), "Fatal U.OER");;
+}
+
+TEST_CASE("Test RX hardware frame error") {
+    initMock(1);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(!rs485_frameError);
+
+    simulateSend({ (uint8_t)0x1 });
+    simulateHwRxFrameError = true;
+
+    std::vector<uint8_t> buffer(1);
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(rs485_frameError);
+    // Can't read
+    REQUIRE(rs485_read(&buffer[0], 1) == false);
+    REQUIRE(rs485_poll() == false);
+    // Can't read
+    REQUIRE(rs485_read(&buffer[0], 1) == false);
+    REQUIRE(rs485_frameError);
+
+    rs485_frameError = false;
+
+    simulateSend({ (uint8_t)0x2 });
+    simulateHwRxFrameError = false;
+
+    REQUIRE(rs485_poll() == false);
+    // First data lost
+    REQUIRE(rs485_read(&buffer[0], 1) == true);
+    REQUIRE(buffer[0] == 0x2);
+    REQUIRE(!rs485_frameError);
 }

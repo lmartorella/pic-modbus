@@ -12,9 +12,8 @@ static uint8_t s_buffer[RS485_BUF_SIZE];
 static uint8_t s_writePtr;
 // Pointer of the reading head (if = write ptr, no bytes avail)
 static uint8_t s_readPtr;
-
-static uint8_t s_frameErrors;
-static _Bool s_skip;
+// Once this is set, it skip reading in the buffer until reset.
+_Bool rs485_frameError;
 
 static uint8_t _rs485_readAvail() {
     return (uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE);
@@ -33,7 +32,7 @@ static void rs485_startRead() {
     // Disable RS485 driver
     uart_receive();
     rs485_state = RS485_LINE_RX;
-    s_skip = false;
+    rs485_frameError = false;
 
     // Reset circular buffer
     s_readPtr = s_writePtr = 0;
@@ -43,8 +42,6 @@ static void rs485_startRead() {
 }
 
 void rs485_init() {
-    s_frameErrors = 0;
-
     uart_init();
 
     s_writePtr = s_readPtr = 0;
@@ -123,12 +120,11 @@ _Bool rs485_poll() {
                     return false;
                 }
                 if (md.frameErr) {
-                    s_frameErrors++;
-                    s_skip = true;
+                    rs485_frameError = true;
                 }
                 
                 // Only read data if not in skip mode
-                if (!s_skip) {
+                if (!rs485_frameError) {
                     s_buffer[s_writePtr] = data;
                     s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
 
