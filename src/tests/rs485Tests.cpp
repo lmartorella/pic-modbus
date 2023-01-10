@@ -224,6 +224,13 @@ TEST_CASE("Max RX buffer") {
     for (int i = 0; i < 2; i++) {
         REQUIRE(buffer[i] == i + 100);
     }
+
+    // Test overrun error
+    for (int i = 0; i < RS485_BUF_SIZE; i++) {
+        simulateSend({ (uint8_t)i });
+    }
+
+    CHECK_THROWS_WITH(rs485_poll(), "Fatal U.rov");
 }
 
 TEST_CASE("Max TX buffer") {
@@ -264,4 +271,8 @@ TEST_CASE("Max TX buffer") {
 
     advanceTime(DISENGAGE_CHANNEL_TIMEOUT + 1);
     REQUIRE(rs485_poll() == false);
+
+    // Check overrun
+    std::vector<uint8_t> buffer3(RS485_BUF_SIZE);
+    CHECK_THROWS_WITH(rs485_write(&buffer3[0], RS485_BUF_SIZE), "Fatal U.wov");;
 }

@@ -138,6 +138,11 @@ _Bool rs485_poll() {
                 if (rs485_state != RS485_LINE_RX_SKIP) {
                     s_buffer[s_writePtr] = data;
                     s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
+
+                    if (s_writePtr == s_readPtr) {
+                        // Overflow error
+                        fatal("U.rov");
+                    }
                 }
             };
             // Wait for a character to be read: slow timer
@@ -171,7 +176,7 @@ void rs485_write(const uint8_t* data, uint8_t size) {
 
     if (size > _rs485_writeAvail()) {
         // Overflow error
-        fatal("U.ov");
+        fatal("U.wov");
     }
     
     // Copy to buffer
