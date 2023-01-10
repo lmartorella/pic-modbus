@@ -76,9 +76,7 @@ typedef enum {
     // Transmitting, data
     RS485_LINE_TX,
     // After TX engaged, wait before transmitting
-    RS485_LINE_WAIT_FOR_START_TRANSMIT,
-    // Read and discard characters until frame end
-    RS485_LINE_RX_SKIP
+    RS485_LINE_WAIT_FOR_START_TRANSMIT
 } RS485_LINE_STATE;
 extern RS485_LINE_STATE rs485_state;
 

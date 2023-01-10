@@ -14,6 +14,7 @@ static uint8_t s_writePtr;
 static uint8_t s_readPtr;
 
 static uint8_t s_frameErrors;
+static _Bool s_skip;
 
 static uint8_t _rs485_readAvail() {
     return (uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE);
@@ -26,19 +27,13 @@ static uint8_t _rs485_writeAvail() {
 static TICK_TYPE s_lastTick;
 
 static void rs485_startRead() {
-    if (rs485_state == RS485_LINE_TX || rs485_state == RS485_LINE_WAIT_FOR_START_TRANSMIT) {
-        // Break all
-        rs485_state = RS485_LINE_TX_DISENGAGE;
-        s_lastTick = timers_get();
-        return;
-    }
-    
     // Disable writing
     uart_disable_tx();
 
     // Disable RS485 driver
     uart_receive();
     rs485_state = RS485_LINE_RX;
+    s_skip = false;
 
     // Reset circular buffer
     s_readPtr = s_writePtr = 0;
@@ -55,7 +50,6 @@ void rs485_init() {
     s_writePtr = s_readPtr = 0;
     s_lastTick = timers_get();
     
-    rs485_state = RS485_LINE_RX;
     rs485_startRead();
 }
 
@@ -94,7 +88,6 @@ _Bool rs485_poll() {
         rs485_state = RS485_LINE_TX;
     } else if (rs485_state == RS485_LINE_TX_DISENGAGE && elapsed >= DISENGAGE_CHANNEL_TIMEOUT) {
         // Detach TX line
-        rs485_state = RS485_LINE_RX;
         rs485_startRead();
     }
 
@@ -116,8 +109,7 @@ _Bool rs485_poll() {
             // Wait for a character to be written: slow timer
             return false;
         } 
-        case RS485_LINE_RX: 
-        case RS485_LINE_RX_SKIP: {
+        case RS485_LINE_RX: {
             // Data received
             while (!uart_rx_fifo_empty()) {                
                 uint8_t data;
@@ -126,16 +118,17 @@ _Bool rs485_poll() {
                 uart_read(&data, &md);
                 
                 if (md.overrunErr) {
+                    // Not enough fast polling, reboot
                     fatal("U.OER");
                     return false;
                 }
                 if (md.frameErr) {
                     s_frameErrors++;
-                    rs485_state = RS485_LINE_RX_SKIP;
+                    s_skip = true;
                 }
                 
                 // Only read data if not in skip mode
-                if (rs485_state != RS485_LINE_RX_SKIP) {
+                if (!s_skip) {
                     s_buffer[s_writePtr] = data;
                     s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
 
@@ -156,7 +149,7 @@ _Bool rs485_poll() {
 
 void rs485_write(const uint8_t* data, uint8_t size) {
     // Abort reader, if in progress
-    if (rs485_state == RS485_LINE_RX || rs485_state == RS485_LINE_RX_SKIP) {
+    if (rs485_state == RS485_LINE_RX) {
         // Truncate reading
         uart_disable_rx();
         s_readPtr = s_writePtr = 0;
@@ -189,7 +182,11 @@ void rs485_write(const uint8_t* data, uint8_t size) {
 
 _Bool rs485_read(uint8_t* data, uint8_t size) {
     if (rs485_state != RS485_LINE_RX) { 
-        rs485_startRead();
+        if (rs485_state == RS485_LINE_TX || rs485_state == RS485_LINE_WAIT_FOR_START_TRANSMIT) {
+            // Break all
+            rs485_state = RS485_LINE_TX_DISENGAGE;
+            s_lastTick = timers_get();
+        }
         return false;
     } else {
         _Bool ret = false;

@@ -279,6 +279,49 @@ TEST_CASE("Max TX buffer") {
     CHECK_THROWS_WITH(rs485_write(&buffer3[0], RS485_BUF_SIZE), "Fatal U.wov");;
 }
 
+TEST_CASE("Coalesce write chunks if possible") {
+    txQueueSize = 2;
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    std::vector<uint8_t> buffer(1);
+    buffer[0] = 0x20;
+
+    rs485_write(&buffer[0], 1);
+    REQUIRE(rs485_poll() == true);
+    advanceTime(START_TRANSMIT_TIMEOUT + 1);
+    // Only one byte written, so the disengage timer starts
+    REQUIRE(rs485_poll() == true);
+    REQUIRE(rs485_state == RS485_LINE_TX_DISENGAGE);
+    auto rx = receiveAllData();
+    REQUIRE(rx.size() == 1);
+    REQUIRE(rx[0] == 0x20);
+
+    REQUIRE(txEnabled == true);
+    REQUIRE(rxEnabled == false);
+
+    // Now write again: the line will not be disengaged
+    buffer[0] = 0x21;
+    rs485_write(&buffer[0], 1);
+    REQUIRE(rs485_state == RS485_LINE_TX);
+    // Only one byte written, so the disengage timer starts
+    REQUIRE(rs485_poll() == true);
+    REQUIRE(rs485_state == RS485_LINE_TX_DISENGAGE);
+    rx = receiveAllData();
+    REQUIRE(rx.size() == 1);
+    REQUIRE(rx[0] == 0x21);
+
+    advanceTime(DISENGAGE_CHANNEL_TIMEOUT - 1);
+    REQUIRE(rs485_poll() == true);
+    advanceTime(2);
+
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(txEnabled == false);
+    REQUIRE(rxEnabled == true);
+
+    REQUIRE(rs485_state == RS485_LINE_RX);
+}
+
 TEST_CASE("Test read in the middle of transmission (abort)") {
     txQueueSize = 1;
     rs485_init();
