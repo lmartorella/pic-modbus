@@ -15,6 +15,12 @@ std::queue<uint8_t> txQueue;
 std::queue<uint8_t> rxQueue;
 TICK_TYPE s_timer = 0;
 int txQueueSize = 1000; // no max
+bool simulateHwRxOverrun = false;
+
+static void initMock(int _txQueueSize) {
+    txQueueSize = _txQueueSize;
+    simulateHwRxOverrun = false;
+}
 
 static void simulateSend(const std::vector<uint8_t>& data) {
     for (auto it = data.begin(); it != data.end(); ++it) {
@@ -87,7 +93,7 @@ extern "C" {
         *byte = rxQueue.front();
         rxQueue.pop();
         md->frameErr = false;
-        md->overrunErr = false;
+        md->overrunErr = simulateHwRxOverrun;
     }
 
     void uart_write(uint8_t byte) {
@@ -121,7 +127,7 @@ extern "C" {
 }
 
 TEST_CASE("Normal operations") {
-    txQueueSize = 1;
+    initMock(1);
 
     rs485_init();
     REQUIRE(rxEnabled == true);
@@ -192,7 +198,7 @@ TEST_CASE("Normal operations") {
 }
 
 TEST_CASE("Max RX buffer") {
-    txQueueSize = 32;
+    initMock(32);
 
     rs485_init();
     REQUIRE(rs485_poll() == false);
@@ -234,7 +240,7 @@ TEST_CASE("Max RX buffer") {
 }
 
 TEST_CASE("Max TX buffer") {
-    txQueueSize = 32;
+    initMock(32);
 
     rs485_init();
     REQUIRE(rs485_poll() == false);
@@ -280,7 +286,7 @@ TEST_CASE("Max TX buffer") {
 }
 
 TEST_CASE("Coalesce write chunks if possible") {
-    txQueueSize = 2;
+    initMock(2);
     rs485_init();
     REQUIRE(rs485_poll() == false);
 
@@ -323,7 +329,7 @@ TEST_CASE("Coalesce write chunks if possible") {
 }
 
 TEST_CASE("Test read in the middle of transmission (abort)") {
-    txQueueSize = 1;
+    initMock(1);
     rs485_init();
     REQUIRE(rs485_poll() == false);
 
@@ -355,4 +361,15 @@ TEST_CASE("Test read in the middle of transmission (abort)") {
     REQUIRE(rxEnabled == true);
 
     REQUIRE(rs485_state == RS485_LINE_RX);
+}
+
+TEST_CASE("Test RX hardware overrun") {
+    initMock(1);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    simulateSend({ (uint8_t)0 });
+    simulateHwRxOverrun = true;
+
+    CHECK_THROWS_WITH(rs485_poll(), "Fatal U.OER");;
 }
