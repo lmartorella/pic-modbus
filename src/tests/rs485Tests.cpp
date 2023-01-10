@@ -234,6 +234,8 @@ TEST_CASE("Max RX buffer") {
 }
 
 TEST_CASE("Max TX buffer") {
+    txQueueSize = 32;
+
     rs485_init();
     REQUIRE(rs485_poll() == false);
 
@@ -275,4 +277,39 @@ TEST_CASE("Max TX buffer") {
     // Check overrun
     std::vector<uint8_t> buffer3(RS485_BUF_SIZE);
     CHECK_THROWS_WITH(rs485_write(&buffer3[0], RS485_BUF_SIZE), "Fatal U.wov");;
+}
+
+TEST_CASE("Test read in the middle of transmission (abort)") {
+    txQueueSize = 1;
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    std::vector<uint8_t> buffer(3);
+    for (int i = 0; i < 3; i++) {
+        buffer[i] = (uint8_t)(i + 0x10);
+    }
+
+    rs485_write(&buffer[0], 3);
+    REQUIRE(rs485_poll() == true);
+    advanceTime(START_TRANSMIT_TIMEOUT + 1);
+    // Only one byte written
+    REQUIRE(rs485_poll() == false);
+    auto rx = receiveAllData();
+    REQUIRE(rx.size() == 1);
+    REQUIRE(rx[0] == 0x10);
+
+    // Now start read: write will be aborted
+    REQUIRE(rs485_read(&buffer[0], 1) == false);
+
+    REQUIRE(rs485_state == RS485_LINE_TX_DISENGAGE);
+    REQUIRE(txEnabled == true);
+    REQUIRE(rxEnabled == false);
+
+    advanceTime(DISENGAGE_CHANNEL_TIMEOUT + 1);
+
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(txEnabled == false);
+    REQUIRE(rxEnabled == true);
+
+    REQUIRE(rs485_state == RS485_LINE_RX);
 }
