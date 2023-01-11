@@ -74,7 +74,7 @@ _Bool net_sec_poll(void);
  */
 #include "appio.h"
 #include "persistence.h"
-#include "modbus.h"
+#include "protocol.h"
 #include "bus_client.h"
 #include "bus_server.h"
 #include "sinks.h"
