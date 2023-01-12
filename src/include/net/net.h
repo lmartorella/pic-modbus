@@ -26,8 +26,6 @@ typedef _Bool __bit;
 #include <stdlib.h>
 #include <string.h>
 
-#define RS485_BAUD 19200
-
 /**
  * Loads the MCU headers and additional fuses
  */
@@ -44,7 +42,7 @@ typedef _Bool __bit;
 #define _IS_PIC16F1827_CARD
 
 #elif defined(_CONF_POSIX)
-#include "fuses_posix.h"
+#include "configuration.h"
 
 #else
 #error Missing configuration

@@ -15,7 +15,7 @@ static PersistentData s_persistentData = {
 
     // Used by bus secondary
     {
-        UNASSIGNED_STATION_ADDRESS, 
+        UNASSIGNED_SUB_ADDRESS, 
         0xff
     },
     

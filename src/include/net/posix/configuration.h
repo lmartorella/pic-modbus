@@ -1,5 +1,7 @@
-#ifndef _FUSES_POSIX_H
-#define _FUSES_POSIX_H
+#ifndef _STD_CONF_H
+#define _STD_CONF_H
+
+#define RS485_BAUD 19200
 
 #undef DEBUGMODE
 
@@ -16,9 +18,16 @@ typedef uint32_t TICK_TYPE;
 #define EXC_STRING_T const char*
 #define EXC_STRING_NULL ((void*)0)
 
-void fatal(const char* str);
-
 #define CLRWDT()
 
-#endif /* FUSES_RASPBIAN_H */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+void fatal(const char* str);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

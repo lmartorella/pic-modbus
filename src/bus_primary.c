@@ -8,11 +8,11 @@
 // 8*8 = 63 max children (last is broadcast)
 #define BUFFER_MASK_SIZE ((MASTER_MAX_CHILDREN + 7) / 8)
 
-const uint8_t bus_prim_childrenMaskSize = BUFFER_MASK_SIZE;
+const uint8_t bus_srv_childrenMaskSize = BUFFER_MASK_SIZE;
 
-uint8_t bus_prim_knownChildren[BUFFER_MASK_SIZE];
-uint8_t bus_prim_dirtyChildren[BUFFER_MASK_SIZE];
-__bit bus_prim_hasDirtyChildren;
+uint8_t bus_srv_knownChildren[BUFFER_MASK_SIZE];
+uint8_t bus_srv_dirtyChildren[BUFFER_MASK_SIZE];
+__bit bus_srv_hasDirtyChildren;
 
 // Ack message contains ACK
 #define ACK_MSG_SIZE 4
@@ -39,7 +39,7 @@ static enum {
     BUS_PRIV_STATE_SOCKET_CONNECTED
 } s_busState;
 
-BUS_PRIMARY_STATS bus_prim_busStats;
+BUS_SRV_STATS bus_srv_busStats;
 
 static __bit s_waitTxFlush;
 static __bit s_waitTxQuickEnd;
@@ -48,13 +48,13 @@ static void socketCreate();
 static void socketPoll();
 
 static __bit isChildKnown(uint8_t i) {
-    return (bus_prim_knownChildren[i / 8] & (1 << (i % 8))) != 0;
+    return (bus_srv_knownChildren[i / 8] & (1 << (i % 8))) != 0;
 }
 
 static uint8_t countChildren() {
     uint8_t count = 0;
-    for (uint8_t i = 0; i < sizeof(bus_prim_knownChildren); i++) {
-        uint8_t d = bus_prim_knownChildren[i];
+    for (uint8_t i = 0; i < sizeof(bus_srv_knownChildren); i++) {
+        uint8_t d = bus_srv_knownChildren[i];
         while(d) {
             count += (d & 1);
             d >>= 1;
@@ -66,7 +66,7 @@ static uint8_t countChildren() {
 static void setDirtyChild(uint8_t i)
 {
     flog("setDirty: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
-    bus_prim_dirtyChildren[i / 8] |= (1 << (i % 8));
+    bus_srv_dirtyChildren[i / 8] |= (1 << (i % 8));
 }
 
 static void updateDisp() {
@@ -77,24 +77,24 @@ static void updateDisp() {
 
 static void setChildKnown(uint8_t i) {
     setDirtyChild(i);
-    bus_prim_knownChildren[i / 8] |= (1 << (i % 8));
+    bus_srv_knownChildren[i / 8] |= (1 << (i % 8));
     flog("setKnown: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());    
     updateDisp();
 }
 
 static void setChildDead(uint8_t i) {
     setDirtyChild(i);
-    bus_prim_knownChildren[i / 8] &= ~(1 << (i % 8));
+    bus_srv_knownChildren[i / 8] &= ~(1 << (i % 8));
     flog("setDead: @%u, knownTot: %u", (unsigned)i, (unsigned)countChildren());
     updateDisp();
 }
 
-void bus_prim_init(uint16_t serverUdpPort) {
+void bus_srv_init(uint16_t serverUdpPort) {
     ip_init(serverUdpPort);
 
     // No beans are known, nor dirty
-    memset(bus_prim_knownChildren, 0, BUFFER_MASK_SIZE);
-    bus_prim_resetDirtyChildren();
+    memset(bus_srv_knownChildren, 0, BUFFER_MASK_SIZE);
+    bus_srv_resetDirtyChildren();
     
     // Starts from zero
     s_scanIndex = BROADCAST_ADDRESS;
@@ -105,15 +105,15 @@ void bus_prim_init(uint16_t serverUdpPort) {
     // Do full scan
     s_lastScanTime = timers_get();
 
-    memset(&bus_prim_busStats, 0, sizeof(BUS_PRIMARY_STATS));
+    memset(&bus_srv_busStats, 0, sizeof(BUS_SRV_STATS));
 }
 
-void bus_prim_resetDirtyChildren() {
-    if (bus_prim_hasDirtyChildren) {
+void bus_srv_resetDirtyChildren() {
+    if (bus_srv_hasDirtyChildren) {
         flog("resetDirty");
     }
-    bus_prim_hasDirtyChildren = 0;
-    memset(bus_prim_dirtyChildren, 0, BUFFER_MASK_SIZE);
+    bus_srv_hasDirtyChildren = 0;
+    memset(bus_srv_dirtyChildren, 0, BUFFER_MASK_SIZE);
 }
 
 // Ask for the next known child
@@ -192,26 +192,26 @@ static void checkAck()
             }
             else if (isChildKnown(s_scanIndex)) {
                 // A known node reset! Notify it.
-                bus_prim_hasDirtyChildren = 1;
+                bus_srv_hasDirtyChildren = 1;
                 setDirtyChild(s_scanIndex);
             }
             else {
                 // Not known node hello: register it
-                bus_prim_hasDirtyChildren = 1;
+                bus_srv_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
             break;
         case BUS_ACK_TYPE_HEARTBEAT:
             if (!isChildKnown(s_scanIndex) && s_scanIndex != BROADCAST_ADDRESS) {
                 // A node with address registered, but I didn't knew it. Register it.
-                bus_prim_hasDirtyChildren = 1;
+                bus_srv_hasDirtyChildren = 1;
                 setChildKnown(s_scanIndex);
             }
             break;
         case BUS_ACK_TYPE_READ_STATUS:
             // Set as dirty node (status to fetch)
             if (isChildKnown(s_scanIndex)) {
-                bus_prim_hasDirtyChildren = 1;
+                bus_srv_hasDirtyChildren = 1;
                 setDirtyChild(s_scanIndex);
             }
             break;
@@ -221,7 +221,7 @@ static void checkAck()
     s_busState = BUS_PRIV_STATE_IDLE;
 }
 
-_Bool bus_prim_poll() {   
+_Bool bus_srv_poll() {   
     if (s_waitTxFlush) {
         // Finished TX?
         if (rs485_state != RS485_LINE_RX) {
@@ -280,7 +280,7 @@ _Bool bus_prim_poll() {
             if (timers_get() - s_lastTime >= BUS_SOCKET_TIMEOUT) {
                 // Timeout. Dead bean?
                 // Drop the TCP connection and reset the channel
-                bus_prim_disconnectSocket(SOCKET_ERR_TIMEOUT);
+                bus_srv_disconnectSocket(SOCKET_ERR_TIMEOUT);
                 prot_prim_control_abort();
             } else {
                 socketPoll();
@@ -291,13 +291,13 @@ _Bool bus_prim_poll() {
 }
 
 // The command starts when the bus is idle
-void bus_prim_connectSocket(int8_t nodeIdx)
+void bus_srv_connectSocket(int8_t nodeIdx)
 {
     s_socketConnected = nodeIdx;
     // Next IDLE will start the connection
 }
 
-void bus_prim_disconnectSocket(int8_t val)
+void bus_srv_disconnectSocket(int8_t val)
 {
     if (s_socketConnected >= 0) {
         // Send break char
@@ -306,12 +306,12 @@ void bus_prim_disconnectSocket(int8_t val)
         
         s_busState = BUS_PRIV_STATE_IDLE;
         
-        bus_prim_busStats.socketTimeouts++;
+        bus_srv_busStats.socketTimeouts++;
     }
     s_socketConnected = val;
 }
 
-BUS_PRIMARY_STATE bus_prim_getState() 
+BUS_PRIMARY_STATE bus_srv_getState() 
 {
     if (s_socketConnected >= 0)
         return BUS_STATE_SOCKET_CONNECTED;

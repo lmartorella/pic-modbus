@@ -53,5 +53,8 @@ extern uint8_t bus_srv_dirtyChildren[];
 extern uint8_t bus_srv_knownChildren[];
 void bus_srv_resetDirtyChildren(void);
 
+void bus_srv_connectSocket(int8_t nodeIdx);
+void bus_srv_disconnectSocket(int8_t val);
+
 #endif	/* BUS_H */
 

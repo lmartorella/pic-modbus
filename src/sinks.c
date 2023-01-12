@@ -59,8 +59,8 @@ __bit sys_read_sec() {
 __bit sys_write_prim() {
     SYS_WRITE_IMPL_HEADER(prim);
     prot_prim_control_write(&BusMasterStats, sizeof(TWOCC));
-    prot_prim_control_write(&bus_prim_busStats, sizeof(BUS_PRIMARY_STATS));
-    memset(&bus_prim_busStats, 0, sizeof(BUS_PRIMARY_STATS));
+    //prot_prim_control_write(&bus_srv_busStats, sizeof(BUS_SRV_STATS));
+    //memset(&bus_srv_busStats, 0, sizeof(BUS_SRV_STATS));
 
     prot_prim_control_write(&EndOfMetadataText, sizeof(TWOCC));
     // Finish

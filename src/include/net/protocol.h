@@ -53,17 +53,12 @@ extern __bit prot_registered;
 /**
  * Implementation dependent calls
  */
-// Directly with define in order to minimize stack usage
-#define prot_sec_control_readW(w) rs485_read((uint8_t*)w, 2) 
-#define prot_sec_control_read(data, size) rs485_read((uint8_t*)data, (uint8_t)size)
-#define prot_sec_control_writeW(w) rs485_write(false, (uint8_t*)&w, 2)
-#define prot_sec_control_write(data, size) rs485_write(false, (uint8_t*)data, (uint8_t)size)
-#define prot_sec_control_over() set_rs485_over()
-#define prot_sec_control_idle(buf) rs485_write(true, buf, 1)
-#define prot_sec_control_readAvail() rs485_readAvail()
-#define prot_sec_control_writeAvail() rs485_writeAvail()
-#define prot_sec_control_isConnected() bus_sec_isConnected()
-#define prot_sec_control_close() bus_sec_abort()
+void prot_sec_control_readW(uint16_t* value);
+void prot_sec_control_read(void* buf, uint8_t size);
+void prot_sec_control_writeW(uint16_t value);
+void prot_sec_control_write(const void* buf, uint8_t size);
+uint8_t prot_sec_control_readAvail();
+uint8_t prot_sec_control_writeAvail();
 
 __bit prot_prim_control_readW(uint16_t* w);
 __bit prot_prim_control_read(void* data, uint16_t size);
@@ -76,7 +71,6 @@ uint16_t prot_prim_control_writeAvail(void);
 #define prot_prim_control_isConnected() ip_isConnected()
 #define prot_prim_control_close() ip_flush()
 void prot_prim_control_abort(void);
-
 
 #if defined(HAS_RS485_BUS_PRIMARY)
 #define prot_control_writeAvail prot_prim_control_writeAvail

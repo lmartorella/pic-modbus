@@ -37,9 +37,9 @@ void prot_init() {
 static void CLOS_prim_command() {
     CLOS_IMPL(prim);
 }
-static void CLOS_sec_command() {
-    CLOS_IMPL(sec);
-}
+// static void CLOS_sec_command() {
+//     CLOS_IMPL(sec);
+// }
 
 #define SINK_IMPL(IMPL) \
     prot_ ## IMPL ## _control_writeW(SINK_IDS_COUNT); \
@@ -51,9 +51,9 @@ static void CLOS_sec_command() {
 static void SINK_prim_command() {
     SINK_IMPL(prim);
 }
-static void SINK_sec_command() {
-    SINK_IMPL(sec);
-}
+// static void SINK_sec_command() {
+//     SINK_IMPL(sec);
+// }
 
 #define GUID_IMPL(IMPL) \
     if (!prot_ ## IMPL ## _control_read(&pers_data.deviceId, sizeof(GUID))) { \
@@ -66,9 +66,9 @@ static void SINK_sec_command() {
 static void GUID_prim_command() {
     GUID_IMPL(prim);
 }
-static void GUID_sec_command() {
-    GUID_IMPL(sec);
-}
+// static void GUID_sec_command() {
+//     GUID_IMPL(sec);
+// }
 
 #define READ_IMPL(IMPL) \
     uint16_t sinkId; \
@@ -81,9 +81,9 @@ static void GUID_sec_command() {
 static void READ_prim_command() {
     READ_IMPL(prim);
 }
-static void READ_sec_command() {
-    READ_IMPL(sec);
-}
+// static void READ_sec_command() {
+//     READ_IMPL(sec);
+// }
 
 #define WRIT_IMPL(IMPL) \
     uint16_t sinkId; \
@@ -96,9 +96,9 @@ static void READ_sec_command() {
 static void WRIT_prim_command() {
     WRIT_IMPL(prim);
 }
-static void WRIT_sec_command() {
-    WRIT_IMPL(sec);
-}
+// static void WRIT_sec_command() {
+//     WRIT_IMPL(sec);
+// }
 
 static void SELE_prim_command() {
     // Select subnode. 
@@ -110,22 +110,22 @@ static void SELE_prim_command() {
     // Select subnode.
     if (w > 0) {
         // Otherwise connect the socket
-        bus_prim_connectSocket((int8_t)(w - 1));
+        bus_srv_connectSocket((int8_t)(w - 1));
     }
     prot_registered = true;
 }
 
-static void SELE_sec_command() {
-    // Select subnode. 
-    uint16_t w;
-    if (!prot_sec_control_readW(&w)) {
-        fatal("SE.u");
-    }
+// static void SELE_sec_command() {
+//     // Select subnode. 
+//     uint16_t w;
+//     if (!prot_sec_control_readW(&w)) {
+//         fatal("SE.u");
+//     }
     
-    // Select subnode.
-    // Simply ignore when no subnodes
-    prot_registered = true;
-}
+//     // Select subnode.
+//     // Simply ignore when no subnodes
+//     prot_registered = true;
+// }
 
 // 0 bytes to receive
 static void CHIL_prim_command()
@@ -135,30 +135,29 @@ static void CHIL_prim_command()
     prot_prim_control_write(&pers_data.deviceId, sizeof(GUID));
     
     // Propagate the request to all children to fetch their GUIDs
-    uint16_t count = bus_prim_getChildrenMaskSize();
-    prot_prim_control_writeW(count);
-    prot_prim_control_write(bus_prim_getChildrenMask(), count);
+    prot_prim_control_writeW(bus_srv_childrenMaskSize);
+    prot_prim_control_write(bus_srv_knownChildren, bus_srv_childrenMaskSize);
 
-    bus_prim_resetDirtyChildren();
+    bus_srv_resetDirtyChildren();
     
     // end of transmission, over to Master
     prot_prim_control_over();
 }
 
 // 0 bytes to receive
-static void CHIL_sec_command()
-{
-    // Fetch my GUID
-    // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
-    prot_sec_control_write(&pers_data.deviceId, sizeof(GUID));
+// static void CHIL_sec_command()
+// {
+//     // Fetch my GUID
+//     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
+//     prot_sec_control_write(&pers_data.deviceId, sizeof(GUID));
     
-    // No children
-    uint16_t count = 0;
-    prot_sec_control_writeW(count);
+//     // No children
+//     uint16_t count = 0;
+//     prot_sec_control_writeW(count);
     
-    // end of transmission, over to Master
-    prot_sec_control_over();
-}
+//     // end of transmission, over to Master
+//     prot_sec_control_over();
+// }
 
 // Code-memory optimized for small PIC XC8
 static _Bool memcmp2(char c1, char c2, char d1, char d2) {
@@ -258,9 +257,9 @@ static _Bool memcmp2(char c1, char c2, char d1, char d2) {
 static _Bool pollProtocol_prim() {
     POLL_IMPL(prim);
 }
-static _Bool pollProtocol_sec() {
-    POLL_IMPL(sec);
-}
+// static _Bool pollProtocol_sec() {
+//     POLL_IMPL(sec);
+// }
 
 
 /**
@@ -280,17 +279,17 @@ _Bool prot_prim_poll() {
     ip_poll();
     
     if (!prot_prim_control_isConnected()) {
-        bus_prim_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
+        bus_srv_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
         return false;
     }
 
     // Socket connected?
-    switch (bus_prim_getState()) {
-        case BUS_STATE_SOCKET_CONNECTED:
+    switch (bus_srv_getState()) {
+        case BUS_SRV_STATE_SOCKET_CONNECTED:
             // TCP is still polled by bus
             return true;
-        case BUS_STATE_SOCKET_TIMEOUT:
-        case BUS_STATE_SOCKET_FRAME_ERR:
+        case BUS_SRV_STATE_SOCKET_TIMEOUT:
+        case BUS_SRV_STATE_SOCKET_FRAME_ERR:
             // drop the TCP connection        
             prot_prim_control_abort();
             break;
@@ -298,22 +297,22 @@ _Bool prot_prim_poll() {
     return pollProtocol_prim();
 }
 
-/**
- * Manage POLLs (read buffers)
- */
-_Bool prot_sec_poll() {
-    prot_slowTimer = 0;
-    CLRWDT();
+// /**
+//  * Manage POLLs (read buffers)
+//  */
+// _Bool prot_sec_poll() {
+//     prot_slowTimer = 0;
+//     CLRWDT();
 
-    TICK_TYPE now = timers_get();
-    if (now - s_slowTimer >= TICKS_PER_SECOND)
-    {
-        s_slowTimer = now;
-        prot_slowTimer = 1;
-    }
+//     TICK_TYPE now = timers_get();
+//     if (now - s_slowTimer >= TICKS_PER_SECOND)
+//     {
+//         s_slowTimer = now;
+//         prot_slowTimer = 1;
+//     }
     
-    if (!prot_sec_control_isConnected()) {
-        return false;
-    }
-    return pollProtocol_sec();
-}
+//     if (!prot_sec_control_isConnected()) {
+//         return false;
+//     }
+//     return pollProtocol_sec();
+// }
