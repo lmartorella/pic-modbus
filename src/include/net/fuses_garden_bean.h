@@ -84,7 +84,7 @@
 #define LED_TRISBIT TRISAbits.TRISA3
 
 // Reset the device with fatal error
-#define EXC_STRING_T uint8_t
+typedef uint8_t EXC_STRING_T; 
 #define EXC_STRING_NULL 0
 
 extern __persistent EXC_STRING_T g_exceptionPtr;

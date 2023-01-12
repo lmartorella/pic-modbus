@@ -161,7 +161,7 @@ typedef uint32_t TICK_TYPE;
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK/4ull)
 #define TICK_PRESCALER 256ull
 
-#define EXC_STRING_T const char*
+typedef const char* EXC_STRING_T; 
 #define EXC_STRING_NULL (void*)0
 
 // Reset the device with fatal error

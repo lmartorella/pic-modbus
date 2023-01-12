@@ -1,6 +1,17 @@
 #ifndef _STD_CONF_H
 #define _STD_CONF_H
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <errno.h>
+#include <unistd.h>
+
+typedef _Bool __bit;
+
+#define __PACK
+#define __POSIX
+#define _GNU_SOURCE
+
 #define RS485_BAUD 19200
 
 #undef DEBUGMODE
@@ -15,7 +26,7 @@ typedef uint32_t TICK_TYPE;
 #define TICKS_PER_SECOND (1000000u)
 #define TICKS_PER_MILLISECOND (1000u)
 
-#define EXC_STRING_T const char*
+typedef const char* EXC_STRING_T;
 #define EXC_STRING_NULL ((void*)0)
 
 #define CLRWDT()

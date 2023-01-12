@@ -3,6 +3,10 @@
 
 #include "guid.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * The system persistence record
  */
@@ -43,5 +47,9 @@ void pers_save(void);
  * Returns true if active and require polling
  * */
 _Bool pers_poll(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

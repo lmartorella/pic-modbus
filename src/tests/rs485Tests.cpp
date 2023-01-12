@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <queue>
 
-typedef _Bool __bit;
 #include "net/uart.h"
 #include "net/rs485.h"
 

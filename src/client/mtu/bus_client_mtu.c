@@ -1,4 +1,9 @@
-#include "net/net.h"
+#include "net/appio.h"
+#include "net/bus_client.h"
+#include "net/leds.h"
+#include "net/persistence.h"
+#include "net/protocol.h"
+#include "net/rs485.h"
 
 /**
  * Specific module for client Modbus RTU nodes (RS485), optimized
@@ -49,12 +54,11 @@ void bus_cl_init() {
 #endif
     ) {
         // Reset address
-        pers_data.sec.address = UNASSIGNED_STATION_ADDRESS;       
+        s_stationAddress = pers_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
         pers_save();
-        s_availForAddressAssign = true;
     }
 
-    if (s_stationAddress == UNASSIGNED_STATION_ADDRESS) {
+    if (s_stationAddress == UNASSIGNED_SUB_ADDRESS) {
         // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
@@ -82,89 +86,6 @@ __bit bus_cl_poll() {
         // Nothing to do
         return s_state == STATE_IDLE;
     }
-    switch (s_state) {
-        case 
-            // Header decode
-            if (rs485_readAvail() > 0) {            
 
-                // RC9 will be 1
-                rs485_read(&buf, 1);
-                // Waiting for header?
-                if (s_state < STATE_HEADER_3) {
-                    // Keep an eye to address if in assign state
-                    if (s_state == STATE_HEADER_ADDRESS && s_availForAddressAssign) {
-                        // Store the byte, in case of s_skipNextAddressCheck
-                        s_tempAddressForAssignment = buf;
-                        // Go ahead
-                        s_state++;
-                    }
-                    else if (buf == s_header[s_state]) {
-                        // Header matches. Go next.
-                        s_state++;
-                    }
-                    else {
-                        // Not my address, or protocol error. Restart from 0x55 but don't try to skip glitches
-                        reinit_after_disengage();
-                    }
-                }
-                else {
-                    _Bool isManaged = false;
-                    // Header correct. Now read the command and respond
-                    switch (buf) { 
-                        case BUS_MSG_TYPE_ADDRESS_ASSIGN:
-                            if (s_availForAddressAssign) {
-                                // Master now knows me
-                                s_acknowledged = 1;
-                                // Store the new address in memory
-                                storeAddress();
-                                sendAck(BUS_ACK_TYPE_HEARTBEAT);
-                                isManaged = true;
-                            }
-                            break;
-
-                        case BUS_MSG_TYPE_HEARTBEAT:
-                            // Only respond to heartbeat if has address
-                            if (s_stationAddress != UNASSIGNED_STATION_ADDRESS) {
-                                sendAck(s_acknowledged ? 
-                                    (g_resetReason == RESET_NONE ? BUS_ACK_TYPE_HEARTBEAT : BUS_ACK_TYPE_READ_STATUS) 
-                                        : BUS_ACK_TYPE_HELLO);
-                                isManaged = true;
-                            }
-                            break;
-
-                        case BUS_MSG_TYPE_READY_FOR_HELLO:
-                            // Only respond to hello if ready to program
-                            if (s_availForAddressAssign) {
-                                sendAck(BUS_ACK_TYPE_HELLO);
-                                isManaged = true;
-                            }
-                            break;
-
-                        case BUS_MSG_TYPE_CONNECT:
-                            if (s_stationAddress != UNASSIGNED_STATION_ADDRESS) {
-                                // Master now knows me
-                                s_acknowledged = 1;
-                                // Start reading data with rc9 not set
-                                rs485_skipData = rs485_lastRc9 = false;
-                                // Socket, direct connect
-                                s_state = STATE_SOCKET_OPEN;
-                                isManaged = true;
-                            }
-                            break;
-                        default:
-                            // Unknown command. Reset
-                            // Restart from 0x55
-                            reinit_after_disengage();
-                            break;
-                    }
-                
-                    if (!isManaged) {
-                        // If not managed, reinit bus for the next message
-                        reinit_after_disengage();
-                    }
-                }
-            }
-    }
-
-    return s_state != STATE_HEADER_0;
+    return false;
 }

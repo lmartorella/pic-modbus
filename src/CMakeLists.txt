@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_definitions(-D_CONF_POSIX)
 
-file(GLOB COMMON_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.c)
+file(GLOB COMMON_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.c client/mtu/*.c)
 # Not ready yet
 list(REMOVE_ITEM COMMON_SRC "bus_primary.c")
 file(GLOB POSIX_SRC "./hardware/posix/*.c")
@@ -27,6 +27,10 @@ install(TARGETS net
 add_executable(rs485Tests tests/rs485Tests.cpp rs485.c)
 target_include_directories(rs485Tests PRIVATE tests include)
 target_link_libraries(rs485Tests PRIVATE Catch2WithMain)
+
+add_executable(busClientMtuTests tests/busClientMtuTests.cpp client/mtu/bus_client_mtu.c)
+target_include_directories(busClientMtuTests PRIVATE tests include)
+target_link_libraries(busClientMtuTests PRIVATE Catch2WithMain)
 
 enable_testing()
 add_test(NAME rs485Tests COMMAND $<TARGET_FILE:rs485Tests>)

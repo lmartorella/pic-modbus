@@ -72,7 +72,7 @@ typedef uint16_t TICK_TYPE;
 //TXCKSEL:1  TX/CK function is on RB5
 
 // persistent char* are not supported by xc8 1.37
-#define EXC_STRING_T uint16_t
+typedef uint16_t EXC_STRING_T; 
 #define EXC_STRING_NULL (0)
 
 extern __persistent EXC_STRING_T g_exceptionPtr;

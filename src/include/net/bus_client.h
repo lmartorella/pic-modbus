@@ -1,6 +1,12 @@
 #ifndef _MODBUS_CLIENT_H
 #define	_MODBUS_CLIENT_H
 
+#include "configuration.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Common interface for Modbus server (secondary) nodes.
  * It can be implemented, for instance, by RTU nodes (RS485 client), TCP clients or 
@@ -36,5 +42,9 @@ typedef enum {
     BUS_CL_STATE_WAIT_TX
 } BUS_CL_STATE;
 BUS_CL_STATE bus_cl_getState(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* BUS_SEC_H */

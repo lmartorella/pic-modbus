@@ -1,6 +1,12 @@
 #ifndef _APPIO_INCLUDE_
 #define _APPIO_INCLUDE_
 
+#include "configuration.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * General module for system-related functions
  */
@@ -98,6 +104,10 @@ void flog(const char* format, ...);
 #else
 // Not implemented in MCUs
 #define flog(...) 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

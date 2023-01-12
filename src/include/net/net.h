@@ -8,10 +8,6 @@
 
 #elif defined _CONF_POSIX
 
-typedef _Bool __bit;
-
-#define __PACK
-#define __POSIX
 #define _GNU_SOURCE
 
 #include <errno.h>
