@@ -12,9 +12,9 @@
 void net_prim_init(uint16_t serverUdpPort) {
     NET_INIT_IMPL(bus_srv_init(serverUdpPort));
 }
-// void net_sec_init() {
-//     NET_INIT_IMPL(bus_sec_init());
-// }
+void net_cl_init() {
+    NET_INIT_IMPL(bus_cl_init());
+}
 
 #define NET_POLL_IMPL(BUS_POLL, PROT_POLL) \
     CLRWDT(); \
@@ -24,8 +24,8 @@ void net_prim_init(uint16_t serverUdpPort) {
     return pers_poll() || active; \
 
 _Bool net_prim_poll() {
-    NET_POLL_IMPL(bus_srv_poll, prot_prim_poll);
+    NET_POLL_IMPL(bus_srv_poll, prot_srv_poll);
 }
-// _Bool net_sec_poll() {
-//     NET_POLL_IMPL(bus_sec_poll, prot_sec_poll);
-// }
+_Bool net_cl_poll() {
+    NET_POLL_IMPL(bus_cl_poll, prot_cl_poll);
+}

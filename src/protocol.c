@@ -34,8 +34,8 @@ void prot_init() {
     prot_ ## IMPL ## _control_close(); \
 
 /* CLOSE the socket */ \
-static void CLOS_prim_command() {
-    CLOS_IMPL(prim);
+static void CLOS_srv_command() {
+    CLOS_IMPL(srv);
 }
 // static void CLOS_sec_command() {
 //     CLOS_IMPL(sec);
@@ -48,8 +48,8 @@ static void CLOS_prim_command() {
     prot_ ## IMPL ## _control_over(); \
 
 /* 0 bytes to receive*/
-static void SINK_prim_command() {
-    SINK_IMPL(prim);
+static void SINK_srv_command() {
+    SINK_IMPL(srv);
 }
 // static void SINK_sec_command() {
 //     SINK_IMPL(sec);
@@ -63,8 +63,8 @@ static void SINK_prim_command() {
     pers_save(); \
 
 /* 16 bytes to receive */
-static void GUID_prim_command() {
-    GUID_IMPL(prim);
+static void GUID_srv_command() {
+    GUID_IMPL(srv);
 }
 // static void GUID_sec_command() {
 //     GUID_IMPL(sec);
@@ -78,8 +78,8 @@ static void GUID_prim_command() {
     s_inWriteSink = (int8_t)sinkId; \
 
 /* 2 bytes to receive */
-static void READ_prim_command() {
-    READ_IMPL(prim);
+static void READ_srv_command() {
+    READ_IMPL(srv);
 }
 // static void READ_sec_command() {
 //     READ_IMPL(sec);
@@ -93,17 +93,17 @@ static void READ_prim_command() {
     s_inReadSink = (int8_t)sinkId; \
 
 /* 2 bytes to receive */
-static void WRIT_prim_command() {
-    WRIT_IMPL(prim);
+static void WRIT_srv_command() {
+    WRIT_IMPL(srv);
 }
 // static void WRIT_sec_command() {
 //     WRIT_IMPL(sec);
 // }
 
-static void SELE_prim_command() {
+static void SELE_srv_command() {
     // Select subnode. 
     uint16_t w;
-    if (!prot_prim_control_readW(&w)) {
+    if (!prot_srv_control_readW(&w)) {
         fatal("SE.u");
     }
     
@@ -128,20 +128,20 @@ static void SELE_prim_command() {
 // }
 
 // 0 bytes to receive
-static void CHIL_prim_command()
+static void CHIL_srv_command()
 {
     // Fetch my GUID
     // Send ONLY mine guid. Other GUIDS should be fetched using SELE first.
-    prot_prim_control_write(&pers_data.deviceId, sizeof(GUID));
+    prot_srv_control_write(&pers_data.deviceId, sizeof(GUID));
     
     // Propagate the request to all children to fetch their GUIDs
-    prot_prim_control_writeW(bus_srv_childrenMaskSize);
-    prot_prim_control_write(bus_srv_knownChildren, bus_srv_childrenMaskSize);
+    prot_srv_control_writeW(bus_srv_childrenMaskSize);
+    prot_srv_control_write(bus_srv_knownChildren, bus_srv_childrenMaskSize);
 
     bus_srv_resetDirtyChildren();
     
     // end of transmission, over to Master
-    prot_prim_control_over();
+    prot_srv_control_over();
 }
 
 // 0 bytes to receive
@@ -254,8 +254,8 @@ static _Bool memcmp2(char c1, char c2, char d1, char d2) {
         } \
     } \
 
-static _Bool pollProtocol_prim() {
-    POLL_IMPL(prim);
+static _Bool pollProtocol_srv() {
+    POLL_IMPL(srv);
 }
 // static _Bool pollProtocol_sec() {
 //     POLL_IMPL(sec);
@@ -265,7 +265,7 @@ static _Bool pollProtocol_prim() {
 /**
  * Manage POLLs (read buffers)
  */
-_Bool prot_prim_poll() {
+_Bool prot_srv_poll() {
     prot_slowTimer = 0;
     CLRWDT();
 
@@ -278,7 +278,7 @@ _Bool prot_prim_poll() {
     }
     ip_poll();
     
-    if (!prot_prim_control_isConnected()) {
+    if (!prot_srv_control_isConnected()) {
         bus_srv_disconnectSocket(SOCKET_ERR_CLOSED_BY_PARENT);
         return false;
     }
@@ -291,10 +291,10 @@ _Bool prot_prim_poll() {
         case BUS_SRV_STATE_SOCKET_TIMEOUT:
         case BUS_SRV_STATE_SOCKET_FRAME_ERR:
             // drop the TCP connection        
-            prot_prim_control_abort();
+            prot_srv_control_abort();
             break;
     }
-    return pollProtocol_prim();
+    return pollProtocol_srv();
 }
 
 // /**

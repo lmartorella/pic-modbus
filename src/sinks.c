@@ -31,11 +31,11 @@ enum SYSSINK_CMD {
     /* No more data */ \
     return false; \
 
-__bit sys_read_prim() {
-    SYS_READ_IMPL(prim);
+__bit sys_read_srv() {
+    SYS_READ_IMPL(srv);
 }
-__bit sys_read_sec() {
-    SYS_READ_IMPL(sec);
+__bit sys_read_cl() {
+    SYS_READ_IMPL(cl);
 }
 
 #define SYS_WRITE_IMPL_HEADER(IMPL) \
@@ -56,20 +56,20 @@ __bit sys_read_sec() {
         prot_ ## IMPL ## _control_write(exc, l); \
     } \
 
-__bit sys_write_prim() {
-    SYS_WRITE_IMPL_HEADER(prim);
-    prot_prim_control_write(&BusMasterStats, sizeof(TWOCC));
-    //prot_prim_control_write(&bus_srv_busStats, sizeof(BUS_SRV_STATS));
+__bit sys_write_srv() {
+    SYS_WRITE_IMPL_HEADER(srv);
+    prot_srv_control_write(&BusMasterStats, sizeof(TWOCC));
+    //prot_srv_control_write(&bus_srv_busStats, sizeof(BUS_SRV_STATS));
     //memset(&bus_srv_busStats, 0, sizeof(BUS_SRV_STATS));
 
-    prot_prim_control_write(&EndOfMetadataText, sizeof(TWOCC));
+    prot_srv_control_write(&EndOfMetadataText, sizeof(TWOCC));
     // Finish
     return false;
 }
 
-__bit sys_write_sec() {
-    SYS_WRITE_IMPL_HEADER(sec);
-    prot_sec_control_write(&EndOfMetadataText, sizeof(TWOCC)); \
+__bit sys_write_cl() {
+    SYS_WRITE_IMPL_HEADER(cl);
+    prot_cl_control_write(&EndOfMetadataText, sizeof(TWOCC)); \
     // Finish
     return false;
 }
