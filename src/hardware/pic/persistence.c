@@ -23,7 +23,7 @@ static EEPROM_MODIFIER PersistentData s_persistentData __ADDRESS = {
 
     // Used by bus secondary
     .sec = {
-        .address = UNASSIGNED_SUB_ADDRESS, 
+        .address = UNASSIGNED_STATION_ADDRESS, 
         .filler = 0xff
     },
     

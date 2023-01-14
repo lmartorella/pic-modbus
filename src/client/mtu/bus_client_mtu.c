@@ -1,8 +1,4 @@
-#include "net/appio.h"
 #include "net/bus_client.h"
-#include "net/leds.h"
-#include "net/persistence.h"
-#include "net/protocol.h"
 #include "net/rs485.h"
 
 /**
@@ -32,9 +28,9 @@ static enum {
 } s_state;
 
 /**
- * The current station address. It is 0 if the station still doesn't have an address (auto-configuration).
+ * The current station address. It is UNASSIGNED_STATION_ADDRESS (255) if the station still doesn't have an address (auto-configuration).
  */
-static uint8_t s_stationAddress;
+uint8_t bus_cl_stationAddress;
 
 /**
  * Was the node be acknowledged by the server? (auto-configuration)
@@ -43,34 +39,9 @@ static __bit s_acknowledged;
 
 void bus_cl_init() {
     // Prepare address
-    s_stationAddress = pers_data.sec.address;
     s_acknowledged = false;
-
-    // Address should be reset?
-    if (g_resetReason == RESET_MCLR
-#ifdef _IS_ETH_CARD
-            // Bug of HW spec of PIC18?
-            || g_resetReason == RESET_POWER
-#endif
-    ) {
-        // Reset address
-        s_stationAddress = pers_data.sec.address = UNASSIGNED_SUB_ADDRESS;       
-        pers_save();
-    }
-
-    if (s_stationAddress == UNASSIGNED_SUB_ADDRESS) {
-        // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
-        led_on();
-    }
-
     // RS485 already in receive mode
     s_state = STATE_SKIP_DATA;
-}
-
-static void storeAddress(uint8_t address) {
-    pers_data.sec.address = s_stationAddress;
-    pers_save();
-    led_off();
 }
 
 // Called often

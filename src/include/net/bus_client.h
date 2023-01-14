@@ -21,6 +21,11 @@ extern "C" {
 void bus_cl_init();
 
 /**
+ * The current station address.
+ */
+extern uint8_t bus_cl_stationAddress;
+
+/**
  * Poll for bus client activities.
  * Returns true if the node is currently active and requires short polling.
  * Returns false if the node is not currently active and it can be polled with larger period,
