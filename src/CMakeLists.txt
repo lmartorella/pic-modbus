@@ -34,3 +34,4 @@ target_link_libraries(busClientMtuTests PRIVATE Catch2WithMain)
 
 enable_testing()
 add_test(NAME rs485Tests COMMAND $<TARGET_FILE:rs485Tests>)
+add_test(NAME busClientMtuTests COMMAND $<TARGET_FILE:busClientMtuTests>)

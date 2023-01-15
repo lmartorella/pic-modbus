@@ -404,3 +404,37 @@ TEST_CASE("Test RX hardware frame error") {
     REQUIRE(buffer[0] == 0x2);
     REQUIRE(!rs485_frameError);
 }
+
+TEST_CASE("Test external start skip") {
+    initMock(1);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(!rs485_frameError);
+
+    simulateSend({ (uint8_t)0x1, (uint8_t)0x2 });
+
+    std::vector<uint8_t> buffer(1);
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(!rs485_frameError);
+    REQUIRE(rs485_read(&buffer[0], 1) == true);
+    REQUIRE(rs485_readAvail() == 1);
+    REQUIRE(rs485_poll() == false);
+
+    rs485_frameError = true;
+    REQUIRE(rs485_poll() == false);
+
+    REQUIRE(rs485_frameError);
+    REQUIRE(rs485_readAvail() == 0);
+    REQUIRE(rs485_poll() == false);
+
+    rs485_frameError = false;
+
+    simulateSend({ (uint8_t)0x2 });
+    simulateHwRxFrameError = false;
+
+    REQUIRE(rs485_poll() == false);
+    // First data lost
+    REQUIRE(rs485_read(&buffer[0], 1) == true);
+    REQUIRE(buffer[0] == 0x2);
+    REQUIRE(!rs485_frameError);
+}

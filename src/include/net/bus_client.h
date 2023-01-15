@@ -33,20 +33,30 @@ extern uint8_t bus_cl_stationAddress;
  */
 __bit bus_cl_poll();
 
-/**
- * Get the client state machine current state
- */
+// Specific state for RTU client
 typedef enum {
-    BUS_CL_STATE_HEADER_0 = 0,         // header0, 55
-    BUS_CL_STATE_HEADER_1 = 1,         // header1, aa
-    BUS_CL_STATE_HEADER_2 = 2,         // header2, address
-    BUS_CL_STATE_HEADER_ADDRESS = 2,   // header2
-    BUS_CL_STATE_HEADER_3 = 3,         // msgtype
-            
-    BUS_CL_STATE_SOCKET_OPEN = 10,
-    BUS_CL_STATE_WAIT_TX
-} BUS_CL_STATE;
-BUS_CL_STATE bus_cl_getState(void);
+    // The client bus is idle, waiting for a complete frame header
+    BUS_CL_RTU_IDLE,
+    // Read mode: skipping input data and waiting for the next idle state.
+    BUS_CL_RTU_WAIT_FOR_IDLE,
+    // Read the address and size of the data to read/write
+    BUS_CL_RTU_WAIT_REGISTER_DATA,
+    // Wait the checksum to validate the message
+    BUS_CL_RTU_CHECK_REQUEST_CRC,
+    // Wait the end of the packet and then start response
+    BUS_CL_RTU_WAIT_FOR_RESPONSE,
+    // Transmit response
+    BUS_CL_RTU_RESPONSE,
+    // The sink read function is piped to the "Write Register" function request
+    BUS_CL_RTU_READ_STREAM,
+    // The sink write function is piped to the "Read Register" function response
+    BUS_CL_RTU_WRITE_STREAM,
+    // When the response is completed and the response CRC should be written
+    BUS_CL_RTU_WRITE_RESPONSE_CRC,
+    // Wait for the RS485 module to end the transmission
+    BUS_CL_RTU_WAIT_FOR_FLUSH
+} BUS_CL_RTU_STATE;
+extern BUS_CL_RTU_STATE bus_cl_rtu_state;
 
 #ifdef __cplusplus
 }

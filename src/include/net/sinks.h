@@ -5,6 +5,12 @@
  * Sink definition and API module
  */
 
+#include "configuration.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * The system sink type ID
  */
@@ -45,6 +51,15 @@ extern const SinkFunction sink_readHandlers[];
  */
 extern const SinkFunction sink_writeHandlers[];
 
+/**
+ * The sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
+ */
+extern const uint8_t sink_readSizes[];
+/**
+ * The sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.
+ */
+extern const uint8_t sink_writeSizes[];
+
 #if defined(HAS_RS485_BUS_PRIMARY)
 #define sys_read sys_read_prim
 #define sys_write sys_write_prim
@@ -53,5 +68,8 @@ extern const SinkFunction sink_writeHandlers[];
 #define sys_write sys_write_sec
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

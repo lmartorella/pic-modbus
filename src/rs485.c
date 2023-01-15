@@ -12,8 +12,8 @@ static uint8_t s_buffer[RS485_BUF_SIZE];
 static uint8_t s_writePtr;
 // Pointer of the reading head (if = write ptr, no bytes avail)
 static uint8_t s_readPtr;
-// Once this is set, it skip reading in the buffer until reset.
-_Bool rs485_frameError;
+// Once this is set, it skip reading in the buffer until mark condition is detected.
+static _Bool rs485_frameError;
 
 static uint8_t _rs485_readAvail() {
     return (uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE);
@@ -143,7 +143,7 @@ _Bool rs485_poll() {
     return true;
 }
 
-void rs485_write(const uint8_t* data, uint8_t size) {
+void rs485_write(const void* data, uint8_t size) {
     // Abort reader, if in progress
     if (rs485_state == RS485_LINE_RX) {
         // Truncate reading
@@ -170,13 +170,14 @@ void rs485_write(const uint8_t* data, uint8_t size) {
     
     // Copy to buffer
     while (size > 0) {
-        s_buffer[s_writePtr] = *(data++);
+        s_buffer[s_writePtr] = *((const uint8_t*)data);
+        data = (const uint8_t*)data + 1;
         s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
         size--;
     }
 }
 
-_Bool rs485_read(uint8_t* data, uint8_t size) {
+_Bool rs485_read(void* data, uint8_t size) {
     if (rs485_state != RS485_LINE_RX) { 
         if (rs485_state == RS485_LINE_TX || rs485_state == RS485_LINE_WAIT_FOR_START_TRANSMIT) {
             // Break all
@@ -190,7 +191,8 @@ _Bool rs485_read(uint8_t* data, uint8_t size) {
         if (_rs485_readAvail() >= size) {
             ret = true;
             while (size > 0) {
-                *(data++) = s_buffer[s_readPtr];
+                *((uint8_t*)data) = s_buffer[s_readPtr];
+                data = (uint8_t*)data + 1;
                 s_readPtr = (s_readPtr + 1) % RS485_BUF_SIZE;
                 size--;
             }

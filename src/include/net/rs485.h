@@ -29,13 +29,14 @@ _Bool rs485_poll(void);
 
 /**
  * Enqueue bytes to send. Buffer is copied so it is safe to be reused.
+ * If size > rs485_writeAvail() if raise fatal error for buffer overrun.
  */ 
-void rs485_write(const uint8_t* data, uint8_t size);
+void rs485_write(const void* data, uint8_t size);
 
 /**
- * Read data, if available.
+ * Read data, if size <= rs485_readAvail(), otherwise it returns false.
  */
-_Bool rs485_read(uint8_t* data, uint8_t size);
+_Bool rs485_read(void* data, uint8_t size);
 
 /**
  * Get count of available bytes in the read buffer
@@ -80,9 +81,8 @@ typedef enum {
 } RS485_LINE_STATE;
 extern RS485_LINE_STATE rs485_state;
 
-// Once this is set, it skip reading in the buffer until reset.
-// It should be manually reset
-extern _Bool rs485_frameError;
+// Set to true when the line is not active from more than 3.5 characters (ModBus mark condition)
+extern _Bool rs485_isMarkCondition;
 
 #ifdef __cplusplus
 }

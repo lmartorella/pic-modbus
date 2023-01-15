@@ -1,6 +1,14 @@
 #include "net/net.h"
 
+/**
+ * Was the node be acknowledged by the server? (auto-configuration)
+ */
+static __bit s_acknowledged;
+
 void net_prim_init(uint16_t serverUdpPort) {
+    // Prepare address
+    s_acknowledged = false;
+
     timers_init();
     io_init();
     led_init();
