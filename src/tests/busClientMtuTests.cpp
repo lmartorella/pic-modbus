@@ -34,6 +34,12 @@ extern "C" {
         }
         return true;
     }
+
+    void rs485_discard() {
+        while (!rxQueue.empty()) {
+            rxQueue.pop();
+        }
+    }
 }
 
 static void initRs485() {
@@ -82,5 +88,6 @@ TEST_CASE("No addressing, skip packet") {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
 
     simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }

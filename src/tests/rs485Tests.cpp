@@ -42,6 +42,9 @@ static void advanceTime(TICK_TYPE delta) {
 }
 
 extern "C" {
+    // Internal
+    extern _Bool rs485_frameError;
+
     void uart_init() {
         uart_disable_rx();
         uart_disable_tx();
@@ -405,7 +408,7 @@ TEST_CASE("Test RX hardware frame error") {
     REQUIRE(!rs485_frameError);
 }
 
-TEST_CASE("Test external start skip") {
+TEST_CASE("Test skip data") {
     initMock(1);
     rs485_init();
     REQUIRE(rs485_poll() == false);
@@ -420,14 +423,12 @@ TEST_CASE("Test external start skip") {
     REQUIRE(rs485_readAvail() == 1);
     REQUIRE(rs485_poll() == false);
 
-    rs485_frameError = true;
+    rs485_discard();
     REQUIRE(rs485_poll() == false);
 
-    REQUIRE(rs485_frameError);
+    REQUIRE(!rs485_frameError);
     REQUIRE(rs485_readAvail() == 0);
     REQUIRE(rs485_poll() == false);
-
-    rs485_frameError = false;
 
     simulateSend({ (uint8_t)0x2 });
     simulateHwRxFrameError = false;

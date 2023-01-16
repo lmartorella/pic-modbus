@@ -86,7 +86,6 @@ __bit bus_cl_poll() {
         } else {
             // No this station, wait for idle
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
-            return false;
         }
     }
 
@@ -134,11 +133,15 @@ __bit bus_cl_poll() {
             // Invalid CRC, skip data.
             // TODO: However the sink data was already written if piped!
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
-            return false;
         } else {
             // Ok, go on with the response
             s_exceptionCode = NO_ERROR;
         }
+    }
+
+    if (bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE) {
+        rs485_discard();
+        return false;
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {

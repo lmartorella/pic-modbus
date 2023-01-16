@@ -13,7 +13,8 @@ static uint8_t s_writePtr;
 // Pointer of the reading head (if = write ptr, no bytes avail)
 static uint8_t s_readPtr;
 // Once this is set, it skip reading in the buffer until mark condition is detected.
-static _Bool rs485_frameError;
+// @internal
+_Bool rs485_frameError;
 
 static uint8_t _rs485_readAvail() {
     return (uint8_t)(((uint8_t)(s_writePtr - s_readPtr)) % RS485_BUF_SIZE);
@@ -199,4 +200,8 @@ _Bool rs485_read(void* data, uint8_t size) {
         }
         return ret;
     }
+}
+
+void rs485_discard() {
+    s_readPtr = s_writePtr;
 }

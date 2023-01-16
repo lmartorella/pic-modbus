@@ -39,6 +39,11 @@ void rs485_write(const void* data, uint8_t size);
 _Bool rs485_read(void* data, uint8_t size);
 
 /**
+ * Skip read buffer
+ */
+void rs485_discard();
+
+/**
  * Get count of available bytes in the read buffer
  */
 uint8_t rs485_readAvail();
