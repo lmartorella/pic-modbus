@@ -68,11 +68,15 @@ uint8_t rs485_writeAvail(void);
 // Time to wait before transmitting after channel switched from RX to TX.
 #define START_TRANSMIT_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 2)
 // time to wait before releasing the channel from transmit to receive
-// but let's wait an additional full byte since USART is free when still transmitting the last byte.
+// but let's wait an additional full byte since UART is free when still transmitting the last byte.
 #define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * (1.5 + 1))
+
+// Mark condition that separates messages in Modbus
+#define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 3.5)
 
 /**
  * State of the RS485 line
+ * @internal
  */
 typedef enum {
     // Receiving, all OK

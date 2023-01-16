@@ -146,6 +146,7 @@ TEST_CASE("Normal operations") {
     // Read data in a single poll call
     REQUIRE(rs485_poll() == false);
     REQUIRE(rs485_read(&buffer[0], 4) == false);
+    REQUIRE(!rs485_isMarkCondition);
 
     simulateSend({ 0x2, 0x3 });
 
@@ -153,6 +154,7 @@ TEST_CASE("Normal operations") {
     REQUIRE(rs485_poll() == false);
 
     REQUIRE(rs485_read(&buffer[0], 3) == true);
+    REQUIRE(!rs485_isMarkCondition);
 
     REQUIRE(buffer == std::vector<uint8_t>({ 0x1, 0x2, 0x3 }));
 
@@ -198,6 +200,7 @@ TEST_CASE("Normal operations") {
     REQUIRE(rxEnabled == true);
 
     REQUIRE(rs485_state == RS485_LINE_RX);
+    REQUIRE(rs485_isMarkCondition);
 }
 
 TEST_CASE("Max RX buffer") {
@@ -362,7 +365,7 @@ TEST_CASE("Test read in the middle of transmission (abort)") {
     REQUIRE(rs485_poll() == false);
     REQUIRE(txEnabled == false);
     REQUIRE(rxEnabled == true);
-
+    REQUIRE(rs485_isMarkCondition);
     REQUIRE(rs485_state == RS485_LINE_RX);
 }
 
@@ -438,4 +441,38 @@ TEST_CASE("Test skip data") {
     REQUIRE(rs485_read(&buffer[0], 1) == true);
     REQUIRE(buffer[0] == 0x2);
     REQUIRE(!rs485_frameError);
+}
+
+TEST_CASE("Test mark condition") {
+    initMock(1);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(rs485_isMarkCondition);
+
+    // Packed data
+    for (int i = 0; i < 50; i++) {
+        advanceTime(TICKS_PER_CHAR);
+        simulateSend({ (uint8_t)i });
+        REQUIRE(rs485_poll() == false);
+        REQUIRE(!rs485_isMarkCondition);
+        std::vector<uint8_t> buffer(1);
+        REQUIRE(rs485_read(&buffer[0], 1) == true);
+        REQUIRE(buffer[0] == i);
+    }
+
+    // More slack data
+    for (int i = 0; i < 50; i++) {
+        advanceTime(TICKS_PER_CHAR * 2);
+        simulateSend({ (uint8_t)i });
+        REQUIRE(rs485_poll() == false);
+        REQUIRE(!rs485_isMarkCondition);
+        std::vector<uint8_t> buffer(1);
+        REQUIRE(rs485_read(&buffer[0], 1) == true);
+        REQUIRE(buffer[0] == i);
+    }
+
+    // Timeout
+    advanceTime(TICKS_PER_CHAR * 4);
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(rs485_isMarkCondition);
 }
