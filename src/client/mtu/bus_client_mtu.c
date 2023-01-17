@@ -51,6 +51,7 @@ BUS_CL_RTU_STATE bus_cl_rtu_state;
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
+    s_crc = 0xffff;
 }
 
 // Called often
@@ -73,10 +74,10 @@ __bit bus_cl_poll() {
             return false;
         }
         if (packet.address == bus_cl_stationAddress) {
-            if (packet.function == READ_HOLDING_REGISTERS || packet.function == WRITE_HOLDING_REGISTERS) {
+            s_function = packet.function;
+            if (s_function == READ_HOLDING_REGISTERS || s_function == WRITE_HOLDING_REGISTERS) {
                 // The message is for reading registers. Address data will follow
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_REGISTER_DATA;
-                s_function = packet.function;
             } else {
                 // Invalid function, return error
                 s_exceptionCode = ERR_INVALID_FUNCTION;
@@ -145,7 +146,7 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
-        if (s_exceptionCode != NO_ERROR) {
+        if (s_exceptionCode == NO_ERROR) {
             // Transmit packet data in one go
             ModbusRtuPacketHeader header;
             header.address = bus_cl_stationAddress;

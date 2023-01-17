@@ -20,7 +20,10 @@ extern "C" {
     bool rs485_isMarkCondition;
 
     void rs485_write(const void* buffer, uint8_t size) {
-        throw std::runtime_error("TODO");
+        const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer);
+        for (auto i = 0; i < size; ++i) {
+            txQueue.push(data[i]);
+        }
     }
 
     bool rs485_read(void* buffer, uint8_t size) {
@@ -45,6 +48,7 @@ extern "C" {
 static void initRs485() {
     rs485_isMarkCondition = true;
     rs485_state = RS485_LINE_RX;
+    rs485_discard();
 }
 
 /**
@@ -57,11 +61,17 @@ static void simulateData(const std::vector<uint16_t>& data) {
         }
         rs485_isMarkCondition = false;
     } else {
-        if (rxQueue.size() > 0) {
-            throw std::runtime_error("Can't set mark state when pending data is in the buffer");
-        }
         rs485_isMarkCondition = true;
     }
+}
+
+static std::vector<uint8_t> simulateRead() {
+    std::vector<uint8_t> ret;
+    while (txQueue.size() > 0) {
+        ret.push_back(txQueue.front());
+        txQueue.pop();
+    }
+    return ret;
 }
 
 TEST_CASE("No addressing, skip packet") {
@@ -90,4 +100,60 @@ TEST_CASE("No addressing, skip packet") {
     simulateData({ });
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+TEST_CASE("Addressed but truncated packet") {
+    initRs485();
+    bus_cl_init();
+    bus_cl_stationAddress = 2;
+
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+
+    // Addressed and correct function
+    simulateData({ 0x2, 0x10 });
+    REQUIRE(bus_cl_poll() == false);
+    // After 2 bytes read, the client will start skipping data
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
+
+    simulateData({ 0x3 });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
+
+    // Mark condition, reset state
+    simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+TEST_CASE("Wrong function") {
+    initRs485();
+    bus_cl_init();
+    bus_cl_stationAddress = 2;
+
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+
+    // Addressed and incorrect function
+    simulateData({ 0x2, 0x11 });
+    REQUIRE(bus_cl_poll() == false);
+    // After 2 bytes read, the client will start skipping data
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+
+    simulateData({ 0x3 });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+
+    // Mark condition, now the station will respond
+    simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+
+    REQUIRE(simulateRead() == std::vector<uint8_t>({ 0x2, 0x91, 0x1, 0xff, 0xff }));
+
+    rs485_state = RS485_LINE_RX;
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
 }
