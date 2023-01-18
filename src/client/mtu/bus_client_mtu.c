@@ -98,13 +98,13 @@ __bit bus_cl_poll() {
         }
         
         // register address if the sink id * 256
-        if (packet.registerAddressL != 0 || packet.registerAddressH > SINK_IDS_COUNT) {
+        if (packet.registerAddressL != 0 || packet.registerAddressH >= SINK_IDS_COUNT) {
             // Invalid address, return error
             s_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
-        s_currentSink = packet.registerAddressL;
+        s_currentSink = packet.registerAddressH;
         uint8_t s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? sink_readSizes[s_currentSink] : sink_writeSizes[s_currentSink]) / 2;
         if (packet.countH != 0 || packet.countL != s_regCount) {
             // Invalid size, return error

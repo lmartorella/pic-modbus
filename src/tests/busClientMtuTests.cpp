@@ -125,6 +125,8 @@ TEST_CASE("Addressed but truncated packet") {
     simulateData({ });
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+
+    REQUIRE(simulateRead() == std::vector<uint8_t>({ }));
 }
 
 TEST_CASE("Wrong function") {
@@ -156,4 +158,131 @@ TEST_CASE("Wrong function") {
     rs485_state = RS485_LINE_RX;
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
+}
+
+static void testWrongAddress(uint8_t addressH, uint8_t addressL) {
+    initRs485();
+    bus_cl_init();
+    bus_cl_stationAddress = 2;
+
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+
+    // Addressed and correct function
+    simulateData({ 0x2, 0x10 });
+    REQUIRE(bus_cl_poll() == false);
+    // After 2 bytes read, the client will wait for address
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
+
+    simulateData({ addressH, addressL, 0, 1 });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+
+    // Mark condition, now the station will respond
+    simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+
+    // Function error
+    REQUIRE(simulateRead() == std::vector<uint8_t>({ 0x2, 0x90, 0x2, 0xff, 0xff }));
+
+    rs485_state = RS485_LINE_RX;
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
+}
+
+TEST_CASE("Wrong address: low value") {
+    testWrongAddress(0, 1);
+}
+TEST_CASE("Wrong address, low value -1") {
+    testWrongAddress(0, 0xff);
+}
+TEST_CASE("Wrong address, high value > sink") {
+    testWrongAddress(3, 0x0);
+}
+TEST_CASE("Wrong address, high value -1") {
+    testWrongAddress(0xff, 0x0);
+}
+
+static void testSizeSetup(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t function) {
+    initRs485();
+    bus_cl_init();
+    bus_cl_stationAddress = 2;
+
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+
+    // Addressed and correct function
+    simulateData({ 0x2, function });
+    REQUIRE(bus_cl_poll() == false);
+    // After 2 bytes read, the client will wait for address
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
+
+    simulateData({ sinkId, 0x0, sizeH, sizeL });
+    REQUIRE(bus_cl_poll() == false);
+}
+
+static void testWrongSize(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
+    testSizeSetup(sinkId, sizeH, sizeL, 0x10);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+
+    // Mark condition, now the station will respond
+    simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+
+    // Function size error
+    REQUIRE(simulateRead() == std::vector<uint8_t>({ 0x2, 0x90, 0x3, 0xff, 0xff }));
+
+    rs485_state = RS485_LINE_RX;
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+TEST_CASE("Wrong size: high value") {
+    testWrongSize(0, 1, 0);
+}
+TEST_CASE("Wrong size: high value, 2") {
+    testWrongSize(0, 2, 0);
+}
+TEST_CASE("Wrong size: low value, 0") {
+    testWrongSize(1, 0, 0);
+}
+TEST_CASE("Wrong size: low value, 1") {
+    testWrongSize(1, 0, 1);
+}
+TEST_CASE("Wrong size: low value, 0xff") {
+    testWrongSize(1, 0, 0xff);
+}
+
+static void testCorrectSize(uint8_t sinkId, uint8_t function, uint8_t sizeL) {
+    testSizeSetup(sinkId, 0, sizeL, function);
+    REQUIRE(bus_cl_rtu_state == (function == 0x3 ? BUS_CL_RTU_CHECK_REQUEST_CRC : BUS_CL_RTU_WRITE_STREAM));
+
+    simulateData({ });
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+TEST_CASE("Correct size, sink 0, read") {
+    testCorrectSize(0, 0x3, 1);
+}
+TEST_CASE("Correct size, sink 0, write") {
+    testCorrectSize(0, 0x10, 0);
+}
+TEST_CASE("Correct size, sink 1, read") {
+    testCorrectSize(1, 0x3, 0);
+}
+TEST_CASE("Correct size, sink 1, write") {
+    testCorrectSize(1, 0x10, 2);
+}
+TEST_CASE("Correct size, sink 3, read") {
+    testCorrectSize(2, 0x3, 4);
+}
+TEST_CASE("Correct size, sink 3, write") {
+    testCorrectSize(2, 0x10, 4);
 }
