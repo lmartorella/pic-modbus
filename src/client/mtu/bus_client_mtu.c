@@ -105,7 +105,7 @@ __bit bus_cl_poll() {
             return false;
         }
         s_currentSink = packet.registerAddressH;
-        uint8_t s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? sink_readSizes[s_currentSink] : sink_writeSizes[s_currentSink]) / 2;
+        s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? sink_readSizes[s_currentSink] : sink_writeSizes[s_currentSink]) / 2;
         if (packet.countH != 0 || packet.countL != s_regCount) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
@@ -117,7 +117,7 @@ __bit bus_cl_poll() {
             // Ok, sink data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
-            bus_cl_rtu_state = BUS_CL_RTU_WRITE_STREAM;
+            bus_cl_rtu_state = BUS_CL_RTU_READ_STREAM;
             // Waits for the sink to call bus_cl_closeStream()
             return false;
         }
@@ -167,9 +167,7 @@ __bit bus_cl_poll() {
                 // Waits for the sink to call bus_cl_closeStream()
                 return false;
             } else {
-                rs485_write(&s_crc, sizeof(uint16_t));
-                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_FLUSH;
-                return false;
+                bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
         } else {
             // Transmit error data in one go
@@ -197,4 +195,12 @@ __bit bus_cl_poll() {
     }
 
     return false;
+}
+
+void bus_cl_closeStream() {
+    if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM) {
+        bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
+    } else if (bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM) {
+        bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
+    }
 }

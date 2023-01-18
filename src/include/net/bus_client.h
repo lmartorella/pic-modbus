@@ -33,6 +33,11 @@ extern uint8_t bus_cl_stationAddress;
  */
 __bit bus_cl_poll();
 
+/**
+ * Called by sink when in stream mode to close data read/write and complete the transmission
+ */
+void bus_cl_closeStream();
+
 // Specific state for RTU client
 typedef enum {
     // The client bus is idle, waiting for a complete frame header
