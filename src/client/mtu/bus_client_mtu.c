@@ -25,6 +25,12 @@ typedef struct {
     uint8_t countL;           // big endian
 } ModbusRtuHoldingRegisterRequest;
 
+// Optimize number of read operations, for Write Register read also count;
+typedef struct {
+    ModbusRtuHoldingRegisterRequest req;
+    uint8_t countBytes;
+} ModbusRtuHoldingRegisterWriteRequest;
+
 typedef enum {
     NO_ERROR = 0,
     ERR_INVALID_FUNCTION = 1,
@@ -92,22 +98,24 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA) {
-        ModbusRtuHoldingRegisterRequest packet;
-        if (!rs485_read(&packet, sizeof(ModbusRtuHoldingRegisterRequest))) {
+        ModbusRtuHoldingRegisterWriteRequest packet;
+        // In case of write, read the size too
+        uint8_t size = s_function == READ_HOLDING_REGISTERS ? sizeof(ModbusRtuHoldingRegisterRequest) : sizeof(ModbusRtuHoldingRegisterRequest) + 1;
+        if (!rs485_read(&packet, size)) {
             // Nothing to do, wait for more data
             return false;
         }
         
         // register address if the sink id * 256
-        if (packet.registerAddressL != 0 || packet.registerAddressH >= SINK_IDS_COUNT) {
+        if (packet.req.registerAddressL != 0 || packet.req.registerAddressH >= SINK_IDS_COUNT) {
             // Invalid address, return error
             s_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
-        s_currentSink = packet.registerAddressH;
+        s_currentSink = packet.req.registerAddressH;
         s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? sink_readSizes[s_currentSink] : sink_writeSizes[s_currentSink]) / 2;
-        if (packet.countH != 0 || packet.countL != s_regCount) {
+        if (packet.req.countH != 0 || packet.req.countL != s_regCount) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -118,20 +126,28 @@ __bit bus_cl_poll() {
             // Ok, sink data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
-            bus_cl_rtu_state = BUS_CL_RTU_READ_STREAM;
-            // Waits for the sink to call bus_cl_closeStream()
-            return false;
+            if (packet.countBytes != sink_writeSizes[s_currentSink]) {
+                // Invalid size, return error
+                s_exceptionCode = ERR_INVALID_SIZE;
+                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+                return false;
+            } else {
+                bus_cl_rtu_state = BUS_CL_RTU_READ_STREAM;
+                // Waits for the sink to call bus_cl_closeStream()
+                return false;
+            }
         }
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC) {
         uint16_t readCrc;
+        // CRC is LSB first
+        uint16_t expectedCrc = le16toh(crc16);
+
         if (!rs485_read(&readCrc, sizeof(uint16_t))) {
             // Nothing to do, wait for more data
             return false;
         }
-        // CRC is LSB first
-        uint16_t expectedCrc = le16toh(crc16);
 
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
         if (expectedCrc != readCrc) {

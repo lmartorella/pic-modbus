@@ -13,7 +13,7 @@ std::queue<uint8_t> txQueue;
 std::queue<uint8_t> rxQueue;
 
 // In crc16.cpp
-extern uint16_t caclCrc16(const uint8_t* buffer, int wLength);
+extern uint16_t calcCrc16(const uint8_t* buffer, int wLength);
 
 extern "C" {
     const uint16_t SINK_IDS_COUNT = 3;
@@ -47,6 +47,7 @@ extern "C" {
         uint8_t* di = reinterpret_cast<uint8_t*>(buffer);
         for (int i = 0; i < size; i++, di++) {
             *di = rxQueue.front();
+            crc_update(*di);
             rxQueue.pop();
         }
         return true;
@@ -66,6 +67,9 @@ static void initRs485() {
     crc_reset();
 }
 
+// For CRC calculation
+static std::vector<uint8_t> packetData;
+
 /**
  * Each packet is distant enough from other packets to 
  */
@@ -73,11 +77,13 @@ static void simulateData(const std::vector<uint8_t>& data) {
     if (data.size() > 0) {
         for (auto it = data.begin(); it != data.end(); ++it) {
             rxQueue.push(*it);
+            packetData.push_back(*it);
         }
         rs485_isMarkCondition = false;
     } else {
         rs485_isMarkCondition = true;
         crc_reset();
+        packetData.clear();
     }
 }
 
@@ -86,7 +92,7 @@ static void simulateMark() {
 }
 
 static std::vector<uint8_t> crcOf(const std::vector<uint8_t>& data) {
-    uint16_t crc = caclCrc16(&data[0], data.size());
+    uint16_t crc = calcCrc16(&data[0], data.size());
     // CRC is LSB first
     return std::vector<uint8_t>({ (uint8_t)(crc & 0xff), (uint8_t)(crc >> 8) });
 }
@@ -204,7 +210,7 @@ static void testWrongAddress(uint8_t addressH, uint8_t addressL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 
     // Addressed and correct function
-    simulateData({ 0x2, 0x10 });
+    simulateData({ 0x2, 0x3 });
     REQUIRE(bus_cl_poll() == false);
     // After 2 bytes read, the client will wait for address
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
@@ -219,7 +225,7 @@ static void testWrongAddress(uint8_t addressH, uint8_t addressL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Function error
-    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x90, 0x2 }));
+    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, 0x2 }));
 
     rs485_state = RS485_LINE_RX;
     REQUIRE(bus_cl_poll() == false);
@@ -258,8 +264,28 @@ static void testSizeSetup(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t 
     REQUIRE(bus_cl_poll() == false);
 }
 
-static void testWrongSize(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
+static void testWrongSizeRead(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
+    testSizeSetup(sinkId, sizeH, sizeL, 0x03);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+
+    // Mark condition, now the station will respond
+    simulateMark();
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+
+    // Function size error
+    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, 0x3 }));
+
+    rs485_state = RS485_LINE_RX;
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+static void testWrongSizeWrite(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t sizeBytes) {
     testSizeSetup(sinkId, sizeH, sizeL, 0x10);
+    simulateData({ sizeBytes });
+    REQUIRE(bus_cl_poll() == false);
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
 
@@ -276,27 +302,83 @@ static void testWrongSize(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-TEST_CASE("Wrong size: high value") {
-    testWrongSize(0, 1, 0);
+TEST_CASE("Wrong size read: high value") {
+    testWrongSizeRead(0, 1, 0);
 }
-TEST_CASE("Wrong size: high value, 2") {
-    testWrongSize(0, 2, 0);
+TEST_CASE("Wrong size read: high value, 2") {
+    testWrongSizeRead(0, 2, 0);
 }
-TEST_CASE("Wrong size: low value, 0") {
-    testWrongSize(1, 0, 0);
+TEST_CASE("Wrong size read: low value, 0") {
+    testWrongSizeRead(0, 0, 0);
 }
-TEST_CASE("Wrong size: low value, 1") {
-    testWrongSize(1, 0, 1);
+TEST_CASE("Wrong size read: low value, 2 (sink wants 1)") {
+    testWrongSizeRead(0, 0, 2);
 }
-TEST_CASE("Wrong size: low value, 0xff") {
-    testWrongSize(1, 0, 0xff);
+TEST_CASE("Wrong size read: low value, 1 on sink 1") {
+    testWrongSizeRead(1, 0, 1);
+}
+TEST_CASE("Wrong size read: low value, 0xff") {
+    testWrongSizeRead(0, 0, 0xff);
+}
+
+TEST_CASE("Wrong size write: high value") {
+    testWrongSizeWrite(0, 1, 0, 1);
+}
+TEST_CASE("Wrong size write: high value, 2") {
+    testWrongSizeWrite(0, 2, 0, 2);
+}
+TEST_CASE("Wrong size write: low value, 0") {
+    testWrongSizeWrite(1, 0, 0, 0);
+}
+TEST_CASE("Wrong size write: low value, 1") {
+    testWrongSizeWrite(1, 0, 1, 2);
+}
+TEST_CASE("Wrong size write: low value, 0xff") {
+    testWrongSizeWrite(1, 0, 0xff, 0xff);
+}
+TEST_CASE("Wrong size write: low value wight but not in bytes") {
+    testWrongSizeWrite(1, 0, 2, 5);
+}
+
+TEST_CASE("Wrong CRC in read") {
+    testSizeSetup(0, 0, 1, 0x3);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    simulateData({ 0xde, 0xad });
+    REQUIRE(bus_cl_poll() == false);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
+    // Mark condition, now the station will NOT respond due to CRC error
+    simulateMark();
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+}
+
+TEST_CASE("Wrong CRC in write") {
+    testSizeSetup(1, 0, 2, 0x10);
+    simulateData({ 4 });
+    REQUIRE(bus_cl_poll() == false);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
+    bus_cl_closeStream();
+    REQUIRE(bus_cl_poll() == false);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    simulateData({ 0xde, 0xad });
+    REQUIRE(bus_cl_poll() == false);
+
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
+    // Mark condition, now the station will NOT respond due to CRC error
+    simulateMark();
+    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
 static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     testSizeSetup(sinkId, 0, sizeL, 0x3);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
 
-    simulateData({ 0xff, 0xff }); // Fake CRC
+    simulateData(crcOf(packetData));
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
 
@@ -321,7 +403,12 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
 
 static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
     testSizeSetup(sinkId, 0, sizeL, 0x10);
+    // Still missing the content size
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
 
+    // Write sizeL * 2 bytes
+    simulateData({ (uint8_t)(sizeL * 2) });
+    REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
@@ -331,7 +418,7 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
 
-    simulateData({ 0xff, 0xff }); // Fake CRC
+    simulateData(crcOf(packetData));
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
 
