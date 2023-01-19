@@ -125,16 +125,16 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC) {
-        uint16_t crc;
-        if (!rs485_read(&crc, sizeof(uint16_t))) {
+        uint16_t readCrc;
+        if (!rs485_read(&readCrc, sizeof(uint16_t))) {
             // Nothing to do, wait for more data
             return false;
         }
         // CRC is LSB first
-        crc16 = le16toh(crc16);
+        uint16_t expectedCrc = le16toh(crc16);
 
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-        if (crc != crc16) {
+        if (expectedCrc != readCrc) {
             // Invalid CRC, skip data.
             // TODO: However the sink data was already written if piped!
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
@@ -186,8 +186,8 @@ __bit bus_cl_poll() {
 
     if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_RESPONSE_CRC) {
         // CRC is LSB first
-        crc16 = htole16(crc16);
-        rs485_write(&crc16, sizeof(uint16_t));
+        uint16_t crc = htole16(crc16);
+        rs485_write(&crc, sizeof(uint16_t));
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_FLUSH;
         return false;
     }
