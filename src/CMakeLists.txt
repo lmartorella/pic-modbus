@@ -24,11 +24,11 @@ install(TARGETS net
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/net)
 
 # The tests
-add_executable(rs485Tests tests/rs485Tests.cpp rs485.c)
+add_executable(rs485Tests tests/rs485Tests.cpp rs485.c crc.c)
 target_include_directories(rs485Tests PRIVATE tests include)
 target_link_libraries(rs485Tests PRIVATE Catch2WithMain)
 
-add_executable(busClientMtuTests tests/busClientMtuTests.cpp client/mtu/bus_client_mtu.c)
+add_executable(busClientMtuTests tests/busClientMtuTests.cpp tests/crc16.cpp client/mtu/bus_client_mtu.c crc.c)
 target_include_directories(busClientMtuTests PRIVATE tests include)
 target_link_libraries(busClientMtuTests PRIVATE Catch2WithMain)
 

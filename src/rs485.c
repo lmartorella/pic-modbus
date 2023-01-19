@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "net/crc.h"
 #include "net/rs485.h"
 #include "net/timers.h"
 #include "net/uart.h"
@@ -38,6 +39,7 @@ static void rs485_startRead() {
     rs485_state = RS485_LINE_RX;
     rs485_frameError = false;
     rs485_isMarkCondition = true;
+    crc_reset();
 
     // Reset circular buffer
     s_readPtr = s_writePtr = 0;
@@ -74,7 +76,7 @@ uint8_t rs485_writeAvail() {
 
 // Feed more data, read at read pointer and then increase
 // and re-enable interrupts now
-static void writeByte() {
+static void feedByte() {
     uart_write(s_buffer[s_readPtr]);
     s_readPtr = (s_readPtr + 1) % RS485_BUF_SIZE;
 }
@@ -93,6 +95,7 @@ _Bool rs485_poll() {
         rs485_startRead();
     } else if (rs485_state == RS485_LINE_RX && elapsed >= MARK_CONDITION_TIMEOUT) {
         rs485_isMarkCondition = true;
+        crc_reset();
     }
 
     switch (rs485_state) {
@@ -101,7 +104,7 @@ _Bool rs485_poll() {
             while (uart_tx_fifo_empty()) {
                 if (_rs485_readAvail() > 0) {
                     // Feed more data, read at read pointer and then increase
-                    writeByte();
+                    feedByte();
                 } else {
                     // NO MORE data to transmit
                     // goto first phase of tx end
@@ -118,10 +121,10 @@ _Bool rs485_poll() {
             _Bool haveData = false;
             while (!uart_rx_fifo_empty()) {
                 haveData = true;
-                uint8_t data;
+                uint8_t ch;
                 UART_RX_MD md;
 
-                uart_read(&data, &md);
+                uart_read(&ch, &md);
 
                 if (md.overrunErr) {
                     // Not enough fast polling, reboot
@@ -133,7 +136,9 @@ _Bool rs485_poll() {
                 
                 // Only read data if not in skip mode
                 if (!rs485_frameError) {
-                    s_buffer[s_writePtr] = data;
+                    s_buffer[s_writePtr] = ch;
+                    crc_update(ch);
+
                     s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
 
                     if (s_writePtr == s_readPtr) {
@@ -162,6 +167,7 @@ void rs485_write(const void* data, uint8_t size) {
         // Truncate reading
         uart_disable_rx();
         s_readPtr = s_writePtr = 0;
+        crc_reset();
 
         // Enable UART transmit.
         uart_enable_tx();
@@ -183,7 +189,9 @@ void rs485_write(const void* data, uint8_t size) {
     
     // Copy to buffer
     while (size > 0) {
-        s_buffer[s_writePtr] = *((const uint8_t*)data);
+        uint8_t ch = *((const uint8_t*)data);
+        s_buffer[s_writePtr] = ch;
+        crc_update(ch);
         data = (const uint8_t*)data + 1;
         s_writePtr = (s_writePtr + 1) % RS485_BUF_SIZE;
         size--;
@@ -196,6 +204,7 @@ _Bool rs485_read(void* data, uint8_t size) {
             // Break all
             rs485_state = RS485_LINE_TX_DISENGAGE;
             s_lastTick = timers_get();
+            crc_reset();
         }
         return false;
     } else {
@@ -204,7 +213,9 @@ _Bool rs485_read(void* data, uint8_t size) {
         if (_rs485_readAvail() >= size) {
             ret = true;
             while (size > 0) {
-                *((uint8_t*)data) = s_buffer[s_readPtr];
+                uint8_t ch = s_buffer[s_readPtr];
+                *((uint8_t*)data) = ch;
+                crc_update(ch);
                 data = (uint8_t*)data + 1;
                 s_readPtr = (s_readPtr + 1) % RS485_BUF_SIZE;
                 size--;

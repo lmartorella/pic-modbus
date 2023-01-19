@@ -1,5 +1,7 @@
 #include "assert.h"
+#include "endian.h"
 #include "net/bus_client.h"
+#include "net/crc.h"
 #include "net/sinks.h"
 #include "net/rs485.h"
 
@@ -37,8 +39,6 @@ uint8_t bus_cl_stationAddress;
 
 // If != NO_ERR, write an error
 static uint8_t s_exceptionCode;
-// The current calculated CRC
-static uint16_t s_crc;
 // Store the reg count (low byte) of the last command
 static uint8_t s_regCount;
 // The current function in use
@@ -48,10 +48,11 @@ static uint8_t s_currentSink;
 
 BUS_CL_RTU_STATE bus_cl_rtu_state;
 
+#define INITIAL_CRC_VALUE (0xffff)
+
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
-    s_crc = 0xffff;
 }
 
 // Called often
@@ -129,8 +130,11 @@ __bit bus_cl_poll() {
             // Nothing to do, wait for more data
             return false;
         }
+        // CRC is LSB first
+        crc16 = le16toh(crc16);
+
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-        if (crc != s_crc) {
+        if (crc != crc16) {
             // Invalid CRC, skip data.
             // TODO: However the sink data was already written if piped!
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
@@ -176,14 +180,14 @@ __bit bus_cl_poll() {
             header.function = s_function | 0x80;
             rs485_write(&header, sizeof(ModbusRtuPacketHeader));
             rs485_write(&s_exceptionCode, sizeof(uint8_t));
-            rs485_write(&s_crc, sizeof(uint16_t));
-            bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_FLUSH;
-            return false;
+            bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
         }
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_RESPONSE_CRC) {
-        rs485_write(&s_crc, sizeof(uint16_t));
+        // CRC is LSB first
+        crc16 = htole16(crc16);
+        rs485_write(&crc16, sizeof(uint16_t));
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_FLUSH;
         return false;
     }
