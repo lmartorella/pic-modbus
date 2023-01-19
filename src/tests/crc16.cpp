@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-uint16_t calcCrc16(const uint8_t* buffer, int size) {
+uint16_t calcCrc16(uint16_t crc, const uint8_t* buffer, int size) {
     static const uint16_t crc16_tab[] = {
         0X0000, 0XC0C1, 0XC181, 0X0140, 0XC301, 0X03C0, 0X0280, 0XC241,
         0XC601, 0X06C0, 0X0780, 0XC741, 0X0500, 0XC5C1, 0XC481, 0X0440,
@@ -35,8 +35,6 @@ uint16_t calcCrc16(const uint8_t* buffer, int size) {
         0X4400, 0X84C1, 0X8581, 0X4540, 0X8701, 0X47C0, 0X4680, 0X8641,
         0X8201, 0X42C0, 0X4380, 0X8341, 0X4100, 0X81C1, 0X8081, 0X4040
     };
-
-    uint16_t crc = 0xFFFF;
 
     while (size--) {
         crc = crc16_tab[(crc ^ (*buffer++)) & 0xFF] ^ (crc >> 8);

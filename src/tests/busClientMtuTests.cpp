@@ -13,7 +13,7 @@ std::queue<uint8_t> txQueue;
 std::queue<uint8_t> rxQueue;
 
 // In crc16.cpp
-extern uint16_t calcCrc16(const uint8_t* buffer, int wLength);
+extern uint16_t calcCrc16(uint16_t prevCrc, const uint8_t* buffer, int wLength);
 
 extern "C" {
     const uint16_t SINK_IDS_COUNT = 3;
@@ -92,7 +92,13 @@ static void simulateMark() {
 }
 
 static std::vector<uint8_t> crcOf(const std::vector<uint8_t>& data) {
-    uint16_t crc = calcCrc16(&data[0], data.size());
+    uint16_t crc = calcCrc16(0xffff, &data[0], data.size());
+    // CRC is LSB first
+    return std::vector<uint8_t>({ (uint8_t)(crc & 0xff), (uint8_t)(crc >> 8) });
+}
+static std::vector<uint8_t> crcOf(const std::vector<uint8_t>& data1, const std::vector<uint8_t>& data2) {
+    uint16_t crc = calcCrc16(0xffff, &data1[0], data1.size());
+    crc = calcCrc16(crc, &data2[0], data2.size());
     // CRC is LSB first
     return std::vector<uint8_t>({ (uint8_t)(crc & 0xff), (uint8_t)(crc >> 8) });
 }
@@ -385,15 +391,25 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     simulateMark();
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM);
+
     // Read response
     std::vector<uint8_t> expectedResponse({ 0x2, 0x3, sinkId, 0x0, 0x0, sizeL, (uint8_t)(sizeL * 2) });
     REQUIRE(simulateRead() == expectedResponse);
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM);
 
+    // Pull stream data to keep CRC correct
+    std::vector<uint8_t> expectedData;
+    for (int i = 0; i < sizeL * 2; i++) {
+        uint8_t ch = i;
+        expectedData.push_back(ch);
+        rs485_write(&ch, 1);
+    }
+
     bus_cl_closeStream();
+    REQUIRE(simulateRead() == expectedData);
     REQUIRE(bus_cl_poll() == false);
-    REQUIRE(simulateRead() == crcOf(expectedResponse));
+    REQUIRE(simulateRead() == crcOf(expectedResponse, expectedData));
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     rs485_state = RS485_LINE_RX;
@@ -413,6 +429,20 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
 
+    // Avoid call simulateData with zero size, it is a mark condition
+    if (sizeL > 0) {
+        // Push stream data to keep CRC correct
+        std::vector<uint8_t> expectedData;
+        for (int i = 0; i < sizeL * 2; i++) {
+            expectedData.push_back((uint8_t)i);
+        }
+        simulateData(expectedData);
+
+        std::vector<uint8_t> readData(sizeL * 2);
+        REQUIRE(rs485_read(&readData[0], sizeL * 2) == true);
+        REQUIRE(readData == expectedData);
+    }
+    
     bus_cl_closeStream();
 
     REQUIRE(bus_cl_poll() == false);
