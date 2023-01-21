@@ -45,7 +45,7 @@ uint8_t bus_cl_stationAddress;
 // If != NO_ERR, write an error
 static uint8_t s_exceptionCode;
 // Store the reg count (low byte) of the last command
-static uint8_t s_regCount;
+static uint8_t s_sizeRemaining;
 // The current function in use
 static uint8_t s_function;
 // The current sink ID addressed
@@ -113,8 +113,8 @@ __bit bus_cl_poll() {
             return false;
         }
         s_currentSink = packet.req.registerAddressH;
-        s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize) / 2;
-        if (packet.req.countH != 0 || packet.req.countL != s_regCount) {
+        s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize;
+        if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -125,16 +125,38 @@ __bit bus_cl_poll() {
             // Ok, sink data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
-            if (packet.countBytes != bus_cl_functions[s_currentSink].writeSize) {
+            if (packet.countBytes != s_sizeRemaining) {
                 // Invalid size, return error
                 s_exceptionCode = ERR_INVALID_SIZE;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                 return false;
             } else {
                 bus_cl_rtu_state = BUS_CL_RTU_READ_STREAM;
-                // Waits for the sink to call bus_cl_closeStream()
+            }
+        }
+    }
+
+    if (bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM) {
+        uint8_t avail = rs485_readAvail();
+        uint8_t buf[STREAM_BUFFER_SIZE];
+        if (s_sizeRemaining <= STREAM_BUFFER_SIZE) {
+            // A single call can be done to read the rest of the stream
+            if (avail < s_sizeRemaining) {
                 return false;
             }
+            rs485_read(buf, s_sizeRemaining);
+            bus_cl_functions[s_currentSink].onWrite(buf);
+            // Next state
+            bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
+        } else if (avail >= STREAM_BUFFER_SIZE || avail >= s_sizeRemaining) {
+            // Need to read a whole stream buffer size
+            if (avail < STREAM_BUFFER_SIZE) {
+                return false;
+            }
+            rs485_read(buf, STREAM_BUFFER_SIZE);
+            bus_cl_functions[s_currentSink].onWrite(buf);
+            s_sizeRemaining -= STREAM_BUFFER_SIZE;
+            return false;
         }
     }
 
@@ -176,15 +198,13 @@ __bit bus_cl_poll() {
             sizes.registerAddressH = s_currentSink;
             sizes.registerAddressL = 0;
             sizes.countH = 0;
-            sizes.countL = s_regCount;
+            sizes.countL = s_sizeRemaining / 2;
             rs485_write(&sizes, sizeof(ModbusRtuHoldingRegisterRequest));
             // Now, if write, open stream
             if (s_function == READ_HOLDING_REGISTERS) {
-                uint8_t size = s_regCount * 2;
+                uint8_t size = s_sizeRemaining;
                 rs485_write(&size, 1);
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_STREAM;
-                // Waits for the sink to call bus_cl_closeStream()
-                return false;
             } else {
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
@@ -196,6 +216,30 @@ __bit bus_cl_poll() {
             rs485_write(&header, sizeof(ModbusRtuPacketHeader));
             rs485_write(&s_exceptionCode, sizeof(uint8_t));
             bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
+        }
+    }
+
+    if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM) {
+        uint8_t avail = rs485_writeAvail();
+        uint8_t buf[STREAM_BUFFER_SIZE];
+        if (s_sizeRemaining <= STREAM_BUFFER_SIZE) {
+            // A single call can be done to write the rest of the stream
+            if (avail < s_sizeRemaining) {
+                return false;
+            }
+            bus_cl_functions[s_currentSink].onRead(buf);
+            rs485_write(buf, s_sizeRemaining);
+            // Next state
+            bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
+        } else if (avail >= STREAM_BUFFER_SIZE || avail >= s_sizeRemaining) {
+            // Need to write a whole stream buffer size
+            if (avail < STREAM_BUFFER_SIZE) {
+                return false;
+            }
+            bus_cl_functions[s_currentSink].onRead(buf);
+            rs485_write(buf, STREAM_BUFFER_SIZE);
+            s_sizeRemaining -= STREAM_BUFFER_SIZE;
+            return false;
         }
     }
 

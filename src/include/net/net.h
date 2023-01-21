@@ -67,6 +67,7 @@ _Bool net_sec_poll(void);
  * API
  */
 #include "appio.h"
+#include "auto_conf_functions.h"
 #include "bus_client.h"
 #include "bus_server.h"
 #include "ip_client.h"

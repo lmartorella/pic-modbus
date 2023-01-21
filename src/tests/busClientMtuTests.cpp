@@ -15,12 +15,37 @@ std::queue<uint8_t> rxQueue;
 extern uint16_t calcCrc16(uint16_t prevCrc, const uint8_t* buffer, int wLength);
 
 extern "C" {
-    const uint16_t SINK_IDS_COUNT = 3;
-    const uint8_t sink_readSizes[SINK_IDS_COUNT] = { 2, 0, 8 };
-    const uint8_t sink_writeSizes[SINK_IDS_COUNT] = { 0, 4, 8 };
+    const uint8_t bus_cl_function_count = 3;
+    const FunctionDefinition bus_cl_functions[bus_cl_function_count] = {
+        {
+            .id = { .str = "FC1"},
+            .onRead = nullptr,
+            .readSize = 2,
+            .onWrite = nullptr,
+            .writeSize = 0,
+        },
+        {
+            .id = { .str = "FC2" },
+            .onRead = nullptr,
+            .readSize = 0,
+            .onWrite = nullptr,
+            .writeSize = 4,
+        },
+        {
+            .id = { .str = "FC3" },
+            .onRead = nullptr,
+            .readSize = 8,
+            .onWrite = nullptr,
+            .writeSize = 8,
+        },
+    };
 
     RS485_LINE_STATE rs485_state;
     bool rs485_isMarkCondition;
+
+    uint8_t rs485_writeAvail() {
+        return 255; // Infinite
+    }
 
     void rs485_write(const void* buffer, uint8_t size) {
         if (rs485_state != RS485_LINE_TX) {
@@ -33,6 +58,10 @@ extern "C" {
             txQueue.push(data[i]);
             crc_update(data[i]);
         }
+    }
+
+    uint8_t rs485_readAvail() {
+        return (uint8_t)rxQueue.size();
     }
 
     bool rs485_read(void* buffer, uint8_t size) {
@@ -64,6 +93,14 @@ static void initRs485() {
     rs485_state = RS485_LINE_RX;
     rs485_discard();
     crc_reset();
+}
+
+void checkFunctionDataReceived(int funcId, const std::vector<uint8_t>& data) {
+
+}
+
+void prepareFunctionDataToSend(int funcId, const std::vector<uint8_t>& data) {
+    
 }
 
 // For CRC calculation
@@ -360,13 +397,14 @@ TEST_CASE("Wrong CRC in read") {
 }
 
 TEST_CASE("Wrong CRC in write") {
-    testSizeSetup(1, 0, 2, 0x10);
+    testSizeSetup(1, 0, 2, 0x10); // write sink 1
     simulateData({ 4 });
     REQUIRE(bus_cl_poll() == false);
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
-    bus_cl_closeStream();
+    simulateData({ 0xf1, 0xf2, 0xf3, 0xf4 });
     REQUIRE(bus_cl_poll() == false);
+    checkFunctionDataReceived(1, { 0xf1, 0xf2, 0xf3, 0xf4 });
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
     simulateData({ 0xde, 0xad });
@@ -388,6 +426,13 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
 
     simulateMark();
+
+    std::vector<uint8_t> dataToSend;
+    for (int i = 0; i < sizeL * 2; i++) {
+        dataToSend.push_back((uint8_t)(i + 0x40));
+    }
+    prepareFunctionDataToSend(sinkId, dataToSend);
+
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM);
 
@@ -397,18 +442,9 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM);
 
-    // Pull stream data to keep CRC correct
-    std::vector<uint8_t> expectedData;
-    for (int i = 0; i < sizeL * 2; i++) {
-        uint8_t ch = i;
-        expectedData.push_back(ch);
-        rs485_write(&ch, 1);
-    }
-
-    bus_cl_closeStream();
-    REQUIRE(simulateRead() == expectedData);
+    REQUIRE(simulateRead() == dataToSend);
     REQUIRE(bus_cl_poll() == false);
-    REQUIRE(simulateRead() == crcOf(expectedResponse, expectedData));
+    REQUIRE(simulateRead() == crcOf(expectedResponse, dataToSend));
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     rs485_state = RS485_LINE_RX;
@@ -431,20 +467,16 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
     // Avoid call simulateData with zero size, it is a mark condition
     if (sizeL > 0) {
         // Push stream data to keep CRC correct
-        std::vector<uint8_t> expectedData;
+        std::vector<uint8_t> dataToSend;
         for (int i = 0; i < sizeL * 2; i++) {
-            expectedData.push_back((uint8_t)i);
+            dataToSend.push_back((uint8_t)i);
         }
-        simulateData(expectedData);
+        simulateData(dataToSend);
+        REQUIRE(bus_cl_poll() == false);
 
-        std::vector<uint8_t> readData(sizeL * 2);
-        REQUIRE(rs485_read(&readData[0], sizeL * 2) == true);
-        REQUIRE(readData == expectedData);
+        checkFunctionDataReceived(sinkId, dataToSend);
     }
     
-    bus_cl_closeStream();
-
-    REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
 
     simulateData(crcOf(packetData));

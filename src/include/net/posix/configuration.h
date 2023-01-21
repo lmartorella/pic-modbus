@@ -19,7 +19,8 @@ typedef _Bool __bit;
 // Define IP and protocol
 #define HAS_IP
 
-#define RS485_BUF_SIZE 64
+#define RS485_BUF_SIZE (64)
+#define STREAM_BUFFER_SIZE (16)
 
 typedef uint32_t TICK_TYPE;
 // Using gettime

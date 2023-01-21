@@ -49,12 +49,6 @@ typedef struct {
     FOURCC id;
 
     /**
-     * The function handler that consumes the function data sent by the server
-     * during a write call. The buffer size is `writeSize`.
-     */
-    void (*onWrite)(const void* buffer);
-
-    /**
      * The function handler that produces the function response data to send to the server
      * during a read call. The buffer size is `readSize`.
      */
@@ -64,6 +58,12 @@ typedef struct {
      * The required sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
      */
     uint8_t readSize;
+
+    /**
+     * The function handler that consumes the function data sent by the server
+     * during a write call. The buffer size is `writeSize`.
+     */
+    void (*onWrite)(const void* buffer);
 
     /**
      * The required sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.

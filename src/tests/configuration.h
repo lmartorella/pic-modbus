@@ -9,6 +9,7 @@ typedef uint32_t TICK_TYPE;
 #define TICKS_PER_SECOND (1000000)
 #define RS485_BAUD (19200)
 #define RS485_BUF_SIZE (32)
+#define STREAM_BUFFER_SIZE (16)
 
 typedef const char* EXC_STRING_T;
 
