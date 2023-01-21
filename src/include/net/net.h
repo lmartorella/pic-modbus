@@ -67,15 +67,13 @@ _Bool net_sec_poll(void);
  * API
  */
 #include "appio.h"
-#include "persistence.h"
-#include "protocol.h"
 #include "bus_client.h"
 #include "bus_server.h"
-#include "sinks.h"
 #include "ip_client.h"
+#include "leds.h"
+#include "persistence.h"
 #include "rs485.h"
 #include "timers.h"
 #include "uart.h"
-#include "leds.h"
 
 #endif	/* _NET_H */

@@ -2,7 +2,6 @@
 #include "endian.h"
 #include "net/bus_client.h"
 #include "net/crc.h"
-#include "net/sinks.h"
 #include "net/rs485.h"
 
 /**
@@ -107,14 +106,14 @@ __bit bus_cl_poll() {
         }
         
         // register address if the sink id * 256
-        if (packet.req.registerAddressL != 0 || packet.req.registerAddressH >= SINK_IDS_COUNT) {
+        if (packet.req.registerAddressL != 0 || packet.req.registerAddressH >= bus_cl_function_count) {
             // Invalid address, return error
             s_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
         s_currentSink = packet.req.registerAddressH;
-        s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? sink_readSizes[s_currentSink] : sink_writeSizes[s_currentSink]) / 2;
+        s_regCount = ((s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize) / 2;
         if (packet.req.countH != 0 || packet.req.countL != s_regCount) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
@@ -126,7 +125,7 @@ __bit bus_cl_poll() {
             // Ok, sink data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
-            if (packet.countBytes != sink_writeSizes[s_currentSink]) {
+            if (packet.countBytes != bus_cl_functions[s_currentSink].writeSize) {
                 // Invalid size, return error
                 s_exceptionCode = ERR_INVALID_SIZE;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;

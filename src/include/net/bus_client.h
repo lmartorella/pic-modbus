@@ -2,6 +2,7 @@
 #define	_MODBUS_CLIENT_H
 
 #include "configuration.h"
+#include "net/guid.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +26,11 @@ void bus_cl_init();
  */
 extern uint8_t bus_cl_stationAddress;
 
+// RS485 Modbus defines station address in the range 1 to 247. 0 is used for broadcast messages without acknowledge.
+// So use 254 as special "unassigned" address. When the AUTO_REGISTER function is called, the only device in auto mode in the bus
+// should reply and change his address.
+#define UNASSIGNED_STATION_ADDRESS (254)
+
 /**
  * Poll for bus client activities.
  * Returns true if the node is currently active and requires short polling.
@@ -34,11 +40,54 @@ extern uint8_t bus_cl_stationAddress;
 __bit bus_cl_poll();
 
 /**
- * Called by sink when in stream mode to close data read/write and complete the transmission
+ * Function handler descriptor. The register address is the descriptor index * 256.
  */
-void bus_cl_closeStream();
+typedef struct {
+    /**
+     * The unique ID of the function, the type
+     */
+    FOURCC id;
 
-// Specific state for RTU client
+    /**
+     * The function handler that consumes the function data sent by the server
+     * during a write call. The buffer size is `writeSize`.
+     */
+    void (*onWrite)(const void* buffer);
+
+    /**
+     * The function handler that produces the function response data to send to the server
+     * during a read call. The buffer size is `readSize`.
+     */
+    void (*onRead)(void* buffer);
+
+    /**
+     * The required sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
+     */
+    uint8_t readSize;
+
+    /**
+     * The required sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.
+     */
+    uint8_t writeSize;
+} FunctionDefinition;
+
+/**
+ * The function count in the `bus_cl_functions`. Must be filled by the application.
+ */
+extern const uint8_t bus_cl_function_count;
+
+/**
+ * The function definitions, of size `bus_cl_function_count`. Must be filled by the application.
+ * The first function will have the address 0x0, the second one the address 0x100, regardless the read/write size.
+ */
+extern const FunctionDefinition bus_cl_functions[];
+
+/***
+ ***
+ * Specific state for RTU client
+ ***
+ **/
+
 typedef enum {
     // The client bus is idle, waiting for a complete frame header
     BUS_CL_RTU_IDLE,

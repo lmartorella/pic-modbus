@@ -14,7 +14,7 @@ void net_prim_init(uint16_t serverUdpPort) {
     led_init();
     pers_load();
     bus_srv_init(serverUdpPort);
-    prot_init();
+    autoconf_init();
     rs485_init();
 }
 
@@ -53,7 +53,7 @@ void net_cl_init() {
     bus_cl_init();
     net_cl_init_address();
 
-    prot_init();
+    autoconf_init();
     rs485_init();
 }
 

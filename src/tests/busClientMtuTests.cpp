@@ -5,7 +5,6 @@
 #include "net/bus_client.h"
 #include "net/crc.h"
 #include "net/rs485.h"
-#include "net/sinks.h"
 
 using namespace std::string_literals;
 
