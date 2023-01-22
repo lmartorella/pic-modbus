@@ -114,7 +114,7 @@ __bit bus_cl_poll() {
         }
         s_currentSink = packet.req.registerAddressH;
         s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize;
-        if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2) {
+        if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2 || s_sizeRemaining == 0) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -230,7 +230,7 @@ __bit bus_cl_poll() {
             bus_cl_functions[s_currentSink].onRead(buf);
             rs485_write(buf, s_sizeRemaining);
             // Next state
-            bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
+            bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
         } else if (avail >= STREAM_BUFFER_SIZE || avail >= s_sizeRemaining) {
             // Need to write a whole stream buffer size
             if (avail < STREAM_BUFFER_SIZE) {
