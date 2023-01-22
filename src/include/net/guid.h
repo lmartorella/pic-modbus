@@ -37,6 +37,7 @@ typedef union {
         char c4;
     } chars;
     uint8_t bytes[4];
+    uint32_t dword;
 } FOURCC;
 
 #endif

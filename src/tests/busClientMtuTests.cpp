@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 #include <stdbool.h>
+#include <string.h>
 #include <queue>
 
 #include "net/bus_client.h"
@@ -20,47 +21,116 @@ static std::vector<uint8_t> operator+ (const std::vector<uint8_t>& vec1, const s
 // In crc16.cpp
 extern uint16_t calcCrc16(uint16_t prevCrc, const uint8_t* buffer, int wLength);
 
-/**
- * The function handler that produces the function response data to send to the server
- * during a read call. The buffer size is `readSize`.
- */
-void onFunctionRead(int functionId, void* buffer, int size);
-
-/**
- * The function handler that consumes the function data sent by the server
- * during a write call. The buffer size is `writeSize`.
- */
-void onFunctionWrite(int functionId, const void* buffer, int size);
-
 template<typename T>
 void functionError(T param) {
     throw std::runtime_error("It should not be called");
 }
 
+class FunctionMock { 
+    const int writeSize;
+    const int readSize;
+    const std::string name;
+    const int id;
+    
+    bool readyForRead;
+    bool isWritten;
+public:
+    std::vector<uint8_t> bufferToSend;
+    std::vector<uint8_t> bufferReceived;
+
+    FunctionMock(int id, std::string name, int readSize, int writeSize)
+        :id(id), name(name), readSize(readSize), writeSize(writeSize)
+    { 
+        reset();
+    }
+
+    void reset() {
+        bufferToSend.clear();
+        bufferReceived.clear();
+        readyForRead = false;
+        isWritten = false;
+    }
+
+    FunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
+        FunctionDefinition ret = {
+            .id = { .dword = 0 },
+            .onRead = onRead,
+            .readSize = (uint8_t)readSize,
+            .onWrite = onWrite,
+            .writeSize = (uint8_t)writeSize,
+        };
+        strncpy(ret.id.str, name.c_str(), 4);
+        return ret;
+    }
+
+    /**
+     * The function handler that produces the function response data to send to the server
+     * during a read call. The buffer size is `readSize`.
+     */
+    void onRead(void* buffer) {
+        REQUIRE(readyForRead);
+        uint8_t* di = reinterpret_cast<uint8_t*>(buffer);
+        int toRead = std::min(STREAM_BUFFER_SIZE, (int)(bufferToSend.size()));
+        for (int i = 0; i < toRead; i++, di++) {
+            *di = bufferToSend[0];
+            bufferToSend.erase(bufferToSend.begin());
+        }
+
+        // Done
+        if (bufferToSend.size() == 0) {
+            reset();
+        }
+    }
+
+    /**
+     * The function handler that consumes the function data sent by the server
+     * during a write call. The buffer size is `writeSize`.
+     */
+    void onWrite(const void* buffer) {
+        REQUIRE(!isWritten);
+        int toWrite = std::min(STREAM_BUFFER_SIZE, (int)(writeSize - bufferReceived.size()));
+        const uint8_t* si = reinterpret_cast<const uint8_t*>(buffer);
+        for (int i = 0; i < toWrite; i++, si++) {
+            bufferReceived.push_back(*si);
+        }
+
+        if (bufferReceived.size() == writeSize) {
+            isWritten = true;
+        }
+    }
+
+    void prepareDataToSend(const std::vector<uint8_t>& data) {
+        REQUIRE(!readyForRead);
+        readyForRead = true;
+        bufferToSend = data;
+    }
+    
+    void checkDataReceived(const std::vector<uint8_t>& data) {
+        REQUIRE(isWritten);
+        REQUIRE(bufferReceived == data);
+        // Done
+        reset();
+    }
+};
+
+static FunctionMock mocks[] = { 
+    FunctionMock(0, "FC1", 2, 0),
+    FunctionMock(1, "FC2", 0, 4),
+    FunctionMock(2, "FC3", 8, 8),
+    // Max of stream
+    FunctionMock(3, "FC4", 16, 16),
+    // Requires two calls
+    FunctionMock(4, "FC5", 18, 18)
+};
+
 extern "C" {
-    const uint8_t bus_cl_function_count = 3;
+    const uint8_t bus_cl_function_count = sizeof(mocks) / sizeof(FunctionMock);
     const FunctionDefinition bus_cl_functions[bus_cl_function_count] = {
-        {
-            .id = { .str = "FC1"},
-            .onRead = [](void* buf) { onFunctionRead(0, buf, 2); },
-            .readSize = 2,
-            .onWrite = functionError,
-            .writeSize = 0,
-        },
-        {
-            .id = { .str = "FC2" },
-            .onRead = functionError,
-            .readSize = 0,
-            .onWrite = [](const void* buf) { onFunctionWrite(1, buf, 4); },
-            .writeSize = 4,
-        },
-        {
-            .id = { .str = "FC3" },
-            .onRead = [](void* buf) { onFunctionRead(2, buf, 8); },
-            .readSize = 8,
-            .onWrite = [](const void* buf) { onFunctionWrite(2, buf, 8); },
-            .writeSize = 8,
-        },
+        mocks[0].toDef([](void* buf) { mocks[0].onRead(buf); }, [](const void* buf) { mocks[0].onWrite(buf); }),
+        mocks[1].toDef([](void* buf) { mocks[1].onRead(buf); }, [](const void* buf) { mocks[1].onWrite(buf); }),
+        mocks[2].toDef([](void* buf) { mocks[2].onRead(buf); }, [](const void* buf) { mocks[2].onWrite(buf); }),
+        mocks[3].toDef([](void* buf) { mocks[3].onRead(buf); }, [](const void* buf) { mocks[3].onWrite(buf); }),
+        mocks[4].toDef([](void* buf) { mocks[4].onRead(buf); }, [](const void* buf) { mocks[4].onWrite(buf); })
     };
 
     RS485_LINE_STATE rs485_state;
@@ -111,67 +181,15 @@ extern "C" {
     }
 }
 
-static int s_expectedFuncIdInRead;
-static int s_functionIdInWrite;
-static std::vector<uint8_t> s_functionBufferToSend;
-static std::vector<uint8_t> s_functionBufferReceived;
-
 static void initRs485() {
     rs485_isMarkCondition = true;
     rs485_state = RS485_LINE_RX;
     rs485_discard();
     crc_reset();
 
-    s_expectedFuncIdInRead = -1;
-    s_functionIdInWrite = -1;
-    s_functionBufferToSend.clear();
-    s_functionBufferReceived.clear();
-}
-
-void prepareFunctionDataToSend(int funcId, const std::vector<uint8_t>& data) {
-    REQUIRE(s_expectedFuncIdInRead == -1);
-    REQUIRE(s_functionBufferToSend.size() == 0);
-
-    s_expectedFuncIdInRead = funcId;
-    s_functionBufferToSend = data;
-}
-
-/**
- * The function handler that produces the function response data to send to the server
- * during a read call. The buffer size is `readSize`.
- */
-void onFunctionRead(int functionId, void* buffer, int size) {
-    REQUIRE(functionId == s_expectedFuncIdInRead);
-    REQUIRE(size == s_functionBufferToSend.size());
-    uint8_t* di = reinterpret_cast<uint8_t*>(buffer);
-    for (int i = 0; i < size; i++, di++) {
-        *di = s_functionBufferToSend[i];
+    for (int i = 0; i < bus_cl_function_count; i++) {
+        mocks[i].reset();
     }
-
-    // Done
-    s_expectedFuncIdInRead = -1;
-    s_functionBufferToSend.clear();
-}
-
-/**
- * The function handler that consumes the function data sent by the server
- * during a write call. The buffer size is `writeSize`.
- */
-void onFunctionWrite(int functionId, const void* buffer, int size) {
-    REQUIRE(s_functionIdInWrite == -1);
-    REQUIRE(s_functionBufferReceived.size() == 0);
-    s_functionBufferReceived.resize(size);
-
-    s_functionIdInWrite = functionId;
-    const uint8_t* si = reinterpret_cast<const uint8_t*>(buffer);
-    for (int i = 0; i < size; i++, si++) {
-        s_functionBufferReceived[i] = *si;
-    }
-}
-
-void checkFunctionDataReceived(int funcId, const std::vector<uint8_t>& data) {
-    REQUIRE(s_functionIdInWrite == funcId);
-    REQUIRE(s_functionBufferReceived == data);
 }
 
 // For CRC calculation
@@ -348,7 +366,7 @@ TEST_CASE("Wrong address, low value -1") {
     testWrongAddress(0, 0xff);
 }
 TEST_CASE("Wrong address, high value > sink") {
-    testWrongAddress(3, 0x0);
+    testWrongAddress(5, 0x0);
 }
 TEST_CASE("Wrong address, high value -1") {
     testWrongAddress(0xff, 0x0);
@@ -477,7 +495,7 @@ TEST_CASE("Wrong CRC in write") {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
     simulateData({ 0xf1, 0xf2, 0xf3, 0xf4 });
     REQUIRE(bus_cl_poll() == false);
-    checkFunctionDataReceived(1, { 0xf1, 0xf2, 0xf3, 0xf4 });
+    mocks[1].checkDataReceived({ 0xf1, 0xf2, 0xf3, 0xf4 });
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
     simulateData({ 0xde, 0xad });
@@ -490,7 +508,7 @@ TEST_CASE("Wrong CRC in write") {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
+static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
     testSizeSetup(sinkId, 0, sizeL, 0x3);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
 
@@ -504,10 +522,15 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     for (int i = 0; i < sizeL * 2; i++) {
         dataToSend.push_back((uint8_t)(i + 0x40));
     }
-    prepareFunctionDataToSend(sinkId, dataToSend);
+    mocks[sinkId].prepareDataToSend(dataToSend);
 
     // Since TX buffer is infinite, the whole message will be pushed out
     REQUIRE(bus_cl_poll() == false);
+    while ((--passCount) > 0) {
+        // Multiple stream passes requires multiple poll calls
+        REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM);
+        REQUIRE(bus_cl_poll() == false);
+    }
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Read response
@@ -520,7 +543,7 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
+static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
     testSizeSetup(sinkId, 0, sizeL, 0x10);
     // Still missing the content size
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
@@ -541,8 +564,13 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
         }
         simulateData(dataToSend);
         REQUIRE(bus_cl_poll() == false);
+        while ((--passCount) > 0) {
+            // Multiple stream passes requires multiple poll calls
+            REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
+            REQUIRE(bus_cl_poll() == false);
+        }
 
-        checkFunctionDataReceived(sinkId, dataToSend);
+        mocks[sinkId].checkDataReceived(dataToSend);
     }
     
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
@@ -553,6 +581,7 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
 
     simulateMark();
     REQUIRE(bus_cl_poll() == false);
+    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Read empty response
     REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x10, sinkId, 0x0, 0x0, sizeL }));
@@ -565,14 +594,26 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL) {
 }
 
 TEST_CASE("Correct size, sink 0, read") {
-    testCorrectRead(0, 1);
+    testCorrectRead(0, 1, 1);
 }
 TEST_CASE("Correct size, sink 1, write") {
-    testCorrectWrite(1, 2);
+    testCorrectWrite(1, 2, 1);
 }
 TEST_CASE("Correct size, sink 2, read") {
-    testCorrectRead(2, 4);
+    testCorrectRead(2, 4, 1);
 }
 TEST_CASE("Correct size, sink 2, write") {
-    testCorrectWrite(2, 4);
+    testCorrectWrite(2, 4, 1);
+}
+TEST_CASE("Correct size, sink 3, read") {
+    testCorrectRead(3, 8, 1);
+}
+TEST_CASE("Correct size, sink 3, write") {
+    testCorrectWrite(3, 8, 1);
+}
+TEST_CASE("Correct size, sink 4, read") {
+    testCorrectRead(4, 9, 2);
+}
+TEST_CASE("Correct size, sink 4, write") {
+    testCorrectWrite(4, 9, 2);
 }

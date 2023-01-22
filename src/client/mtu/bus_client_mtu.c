@@ -259,11 +259,3 @@ __bit bus_cl_poll() {
 
     return false;
 }
-
-void bus_cl_closeStream() {
-    if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM) {
-        bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
-    } else if (bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM) {
-        bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
-    }
-}
