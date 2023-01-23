@@ -44,7 +44,9 @@ uint8_t bus_cl_stationAddress;
 
 // If != NO_ERR, write an error
 static uint8_t s_exceptionCode;
-// Store the reg count (low byte) of the last command
+// Store the total reg count (low byte) of the last command
+static uint8_t s_currentSize;
+// Store the bytes remaining for function data streaming
 static uint8_t s_sizeRemaining;
 // The current function in use
 static uint8_t s_function;
@@ -113,6 +115,7 @@ __bit bus_cl_poll() {
             return false;
         }
         s_currentSink = packet.req.registerAddressH;
+        s_currentSize = packet.req.countL;
         s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize;
         if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2 || s_sizeRemaining == 0) {
             // Invalid size, return error
@@ -198,7 +201,7 @@ __bit bus_cl_poll() {
             sizes.registerAddressH = s_currentSink;
             sizes.registerAddressL = 0;
             sizes.countH = 0;
-            sizes.countL = s_sizeRemaining / 2;
+            sizes.countL = s_currentSize;
             rs485_write(&sizes, sizeof(ModbusRtuHoldingRegisterRequest));
             // Now, if write, open stream
             if (s_function == READ_HOLDING_REGISTERS) {
