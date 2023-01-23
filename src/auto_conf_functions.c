@@ -1,6 +1,6 @@
-#include <memory.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include "net/appio.h"
 #include "net/auto_conf_functions.h"
 #include "net/bus_client.h"

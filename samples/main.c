@@ -12,7 +12,6 @@
 void __interrupt(PRIO_TYPE) low_isr() {
     // Update tick timers at ~Khz freq
     timers_poll();
-    rs485_interrupt();
 #ifdef BEAN_INTERRUPT_VECTOR
     dcnt_interrupt();
 #endif
@@ -23,7 +22,7 @@ void main()
     // Analyze RESET reason
     sys_storeResetReason();
 
-    net_init(SERVER_CONTROL_UDP_PORT);
+    net_init();
 
 #ifdef BUSPOWER_PORT
     // Enable bus power to slaves

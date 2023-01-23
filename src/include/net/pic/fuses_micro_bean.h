@@ -1,6 +1,9 @@
 #ifndef FUSES_MICRO_BEAN_H
 #define	FUSES_MICRO_BEAN_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #define SYSTEM_CLOCK 4000000ul
 #define _XTAL_FREQ SYSTEM_CLOCK
 
@@ -77,7 +80,7 @@ typedef uint16_t EXC_STRING_T;
 
 extern __persistent EXC_STRING_T g_exceptionPtr;
 // Reset the device with fatal error
-#define fatal(msg) { g_exceptionPtr = (EXC_STRING_T)msg; RESET(); }
+#define fatal(msg) { g_exceptionPtr = (EXC_STRING_T)msg; asm("reset"); }
 
 #define INIT_PORTS() \
      ANSELBbits.ANSB2 = 0;\

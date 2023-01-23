@@ -1,15 +1,20 @@
 #include <net/net.h>
 #include "./samples.h"
 
-static __bit nil() {
-    CLRWDT();
-    return false;
-}
-
 // REGISTER SINKS
 // Static allocation of sinks
-const char* const SINK_IDS = 
-    SINK_SYS_ID
+const FunctionDefinition bus_cl_functions[] = {
+    {
+        AUTOCONF_NODE_STATUS_ID,
+        (void (*)(void*))autoconf_readNodeStatus,
+        sizeof(AUTOCONF_NODE_STATUS),
+        NULL, 
+        0
+    }
+};
+const uint8_t bus_cl_function_count = 1;
+
+/*
 #ifdef HAS_DIGIO_OUT
     DIGIO_OUT_SINK_ID
 #endif
@@ -119,6 +124,8 @@ const SinkFunction sink_writeHandlers[] = {
     ,anint_sinkWrite
 #endif
 };
+
+*/
 
 void sinks_init() {
 #ifdef HAS_MAX232_SOFTWARE

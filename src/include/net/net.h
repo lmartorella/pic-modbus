@@ -23,29 +23,6 @@
 #include <string.h>
 
 /**
- * Loads the MCU headers and additional fuses
- */
-#if defined(_CONF_ETH_CARD)
-#include "fuses_eth_card.h"
-#define _IS_ETH_CARD
-
-#elif defined(_CONF_GARDEN_BEAN)
-#include "fuses_garden_bean.h"
-#define _IS_PIC16F887_CARD
-
-#elif defined(_CONF_MICRO_BEAN)
-#include "fuses_micro_bean.h"
-#define _IS_PIC16F1827_CARD
-
-#elif defined(_CONF_POSIX)
-#include "configuration.h"
-
-#else
-#error Missing configuration
-#endif
-
-
-/**
  * CONSTANTS
  */
 #define MASTER_MAX_CHILDREN 16
@@ -59,8 +36,8 @@ _Bool net_sec_poll(void);
 #define net_init net_prim_init
 #define net_poll net_prim_poll
 #elif defined(HAS_RS485_BUS_SECONDARY)
-#define net_init net_sec_init
-#define net_poll net_sec_poll
+#define net_init bus_cl_init
+#define net_poll bus_cl_poll
 #endif
 
 /**
