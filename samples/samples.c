@@ -19,6 +19,9 @@ const FunctionDefinition bus_cl_sysFunctions[] = {
 };
 const uint8_t bus_cl_sysFunctionCount = 3;
 
+const AppFunctionDefinition bus_cl_appFunctions[0] = { };
+const uint8_t bus_cl_appFunctionCount = 0;
+
 /*
 #ifdef HAS_DIGIO_OUT
     DIGIO_OUT_SINK_ID
