@@ -51,7 +51,7 @@ static uint8_t s_sizeRemaining;
 // The current function in use
 static uint8_t s_function;
 // The current sink ID addressed
-static uint8_t s_currentSink;
+static uint8_t s_currentAddrL, s_currentAddrH;
 
 BUS_CL_RTU_STATE bus_cl_rtu_state;
 
@@ -108,15 +108,27 @@ __bit bus_cl_poll() {
         }
         
         // register address if the sink id * 256
-        if (packet.req.registerAddressL != 0 || packet.req.registerAddressH >= bus_cl_function_count) {
-            // Invalid address, return error
-            s_exceptionCode = ERR_INVALID_ADDRESS;
-            bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-            return false;
-        }
-        s_currentSink = packet.req.registerAddressH;
+        s_currentAddrL = packet.req.registerAddressL;
+        s_currentAddrH = packet.req.registerAddressH;
         s_currentSize = packet.req.countL;
-        s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_functions[s_currentSink].readSize : bus_cl_functions[s_currentSink].writeSize;
+        if (s_currentAddrH == 0) {
+            if ((s_currentAddrL & 0xf) != 0 || (s_currentAddrL >> 4) >= bus_cl_sysFunctionCount) {
+                // Invalid address, return error
+                s_exceptionCode = ERR_INVALID_ADDRESS;
+                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+                return false;
+            }
+            // Sys functions has fixed size to save program space
+            s_sizeRemaining = 16;
+        } else {
+            if (s_currentAddrL != 0 || (s_currentAddrH - 1) >= bus_cl_appFunctionCount) {
+                // Invalid address, return error
+                s_exceptionCode = ERR_INVALID_ADDRESS;
+                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+                return false;
+            }
+            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_appFunctions[s_currentAddrH - 1].readSize : bus_cl_appFunctions[s_currentAddrH - 1].writeSize;
+        }
         if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2 || s_sizeRemaining == 0) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
@@ -142,24 +154,25 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM) {
         uint8_t avail = rs485_readAvail();
         uint8_t buf[STREAM_BUFFER_SIZE];
-        if (s_sizeRemaining <= STREAM_BUFFER_SIZE) {
-            // A single call can be done to read the rest of the stream
-            if (avail < s_sizeRemaining) {
-                return false;
-            }
-            rs485_read(buf, s_sizeRemaining);
-            bus_cl_functions[s_currentSink].onWrite(buf);
+        uint8_t remaining = s_sizeRemaining;
+        // A single call can be done to read the rest of the stream?
+        if (s_sizeRemaining > STREAM_BUFFER_SIZE) {
+            remaining = STREAM_BUFFER_SIZE;
+        }
+
+        if (avail < remaining) {
+            return false;
+        }
+        rs485_read(buf, remaining);
+        const FunctionDefinition* def = (s_currentAddrH == 0) ? &bus_cl_sysFunctions[s_currentAddrL >> 4] : &bus_cl_appFunctions[s_currentAddrH - 1].def;
+        def->onWrite(buf);
+        s_sizeRemaining -= remaining;
+
+        if (s_sizeRemaining > 0) {
+            return false;
+        } else {
             // Next state
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
-        } else if (avail >= STREAM_BUFFER_SIZE || avail >= s_sizeRemaining) {
-            // Need to read a whole stream buffer size
-            if (avail < STREAM_BUFFER_SIZE) {
-                return false;
-            }
-            rs485_read(buf, STREAM_BUFFER_SIZE);
-            bus_cl_functions[s_currentSink].onWrite(buf);
-            s_sizeRemaining -= STREAM_BUFFER_SIZE;
-            return false;
         }
     }
 
@@ -198,7 +211,7 @@ __bit bus_cl_poll() {
             rs485_write(&header, sizeof(ModbusRtuPacketHeader));
             // Response of read/write registers always contains the address and register count
             ModbusRtuHoldingRegisterRequest sizes;
-            sizes.registerAddressH = s_currentSink;
+            sizes.registerAddressH = s_currentAddrH;
             sizes.registerAddressL = 0;
             sizes.countH = 0;
             sizes.countL = s_currentSize;
@@ -225,24 +238,23 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM) {
         uint8_t avail = rs485_writeAvail();
         uint8_t buf[STREAM_BUFFER_SIZE];
-        if (s_sizeRemaining <= STREAM_BUFFER_SIZE) {
-            // A single call can be done to write the rest of the stream
-            if (avail < s_sizeRemaining) {
-                return false;
-            }
-            bus_cl_functions[s_currentSink].onRead(buf);
-            rs485_write(buf, s_sizeRemaining);
+        uint8_t remaining = s_sizeRemaining;
+        // A single call can be done to read the rest of the stream?
+        if (s_sizeRemaining > STREAM_BUFFER_SIZE) {
+            remaining = STREAM_BUFFER_SIZE;
+        }
+        if (avail < remaining) {
+            return false;
+        }
+        const FunctionDefinition* def = (s_currentAddrH == 0) ? &bus_cl_sysFunctions[s_currentAddrL >> 4] : &bus_cl_appFunctions[s_currentAddrH - 1].def;
+        def->onRead(buf);
+        rs485_write(buf, remaining);
+        s_sizeRemaining -= remaining;
+        if (s_sizeRemaining > 0) {
+            return false;
+        } else {
             // Next state
             bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
-        } else if (avail >= STREAM_BUFFER_SIZE || avail >= s_sizeRemaining) {
-            // Need to write a whole stream buffer size
-            if (avail < STREAM_BUFFER_SIZE) {
-                return false;
-            }
-            bus_cl_functions[s_currentSink].onRead(buf);
-            rs485_write(buf, STREAM_BUFFER_SIZE);
-            s_sizeRemaining -= STREAM_BUFFER_SIZE;
-            return false;
         }
     }
 

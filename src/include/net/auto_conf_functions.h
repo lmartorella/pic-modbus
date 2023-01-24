@@ -14,7 +14,6 @@ extern "C" {
 
 void autoconf_init();
 
-#define AUTOCONF_NODE_STATUS_ID "$IDS"
 typedef struct {
     uint8_t functionCount;
     uint8_t resetReason;

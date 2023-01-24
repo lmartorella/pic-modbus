@@ -3,16 +3,21 @@
 
 // REGISTER SINKS
 // Static allocation of sinks
-const FunctionDefinition bus_cl_functions[] = {
+const FunctionDefinition bus_cl_sysFunctions[] = {
     {
-        AUTOCONF_NODE_STATUS_ID,
         (void (*)(void*))autoconf_readNodeStatus,
-        sizeof(AUTOCONF_NODE_STATUS),
-        NULL, 
-        0
+        NULL
+    },
+    {
+        (void (*)(void*))autoconf_readSinkIds,
+        NULL
+    },
+    {
+        (void (*)(void*))autoconf_readNodeGuid,
+        (void (*)(const void*))autoconf_writeNodeGuid
     }
 };
-const uint8_t bus_cl_function_count = 1;
+const uint8_t bus_cl_sysFunctionCount = 3;
 
 /*
 #ifdef HAS_DIGIO_OUT

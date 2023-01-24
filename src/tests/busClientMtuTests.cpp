@@ -51,13 +51,15 @@ public:
         isWritten = false;
     }
 
-    FunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
-        FunctionDefinition ret = {
+    AppFunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
+        AppFunctionDefinition ret = {
             .id = { .dword = 0 },
-            .onRead = onRead,
+            .def = {
+                .onRead = onRead,
+                .onWrite = onWrite,
+            },
             .readSize = (uint8_t)readSize,
-            .onWrite = onWrite,
-            .writeSize = (uint8_t)writeSize,
+            .writeSize = (uint8_t)writeSize
         };
         strncpy(ret.id.str, name.c_str(), 4);
         return ret;
@@ -113,7 +115,7 @@ public:
     }
 };
 
-static FunctionMock mocks[] = { 
+static FunctionMock appFunMocks[] = { 
     FunctionMock(0, "FC1", 2, 0),
     FunctionMock(1, "FC2", 0, 4),
     FunctionMock(2, "FC3", 8, 8),
@@ -124,13 +126,16 @@ static FunctionMock mocks[] = {
 };
 
 extern "C" {
-    const uint8_t bus_cl_function_count = sizeof(mocks) / sizeof(FunctionMock);
-    const FunctionDefinition bus_cl_functions[bus_cl_function_count] = {
-        mocks[0].toDef([](void* buf) { mocks[0].onRead(buf); }, [](const void* buf) { mocks[0].onWrite(buf); }),
-        mocks[1].toDef([](void* buf) { mocks[1].onRead(buf); }, [](const void* buf) { mocks[1].onWrite(buf); }),
-        mocks[2].toDef([](void* buf) { mocks[2].onRead(buf); }, [](const void* buf) { mocks[2].onWrite(buf); }),
-        mocks[3].toDef([](void* buf) { mocks[3].onRead(buf); }, [](const void* buf) { mocks[3].onWrite(buf); }),
-        mocks[4].toDef([](void* buf) { mocks[4].onRead(buf); }, [](const void* buf) { mocks[4].onWrite(buf); })
+    const uint8_t bus_cl_sysFunctionCount = 0;
+    const FunctionDefinition bus_cl_sysFunctions[0] = { };
+
+    const uint8_t bus_cl_appFunctionCount = sizeof(appFunMocks) / sizeof(FunctionMock);
+    const AppFunctionDefinition bus_cl_appFunctions[bus_cl_appFunctionCount] = {
+        appFunMocks[0].toDef([](void* buf) { appFunMocks[0].onRead(buf); }, [](const void* buf) { appFunMocks[0].onWrite(buf); }),
+        appFunMocks[1].toDef([](void* buf) { appFunMocks[1].onRead(buf); }, [](const void* buf) { appFunMocks[1].onWrite(buf); }),
+        appFunMocks[2].toDef([](void* buf) { appFunMocks[2].onRead(buf); }, [](const void* buf) { appFunMocks[2].onWrite(buf); }),
+        appFunMocks[3].toDef([](void* buf) { appFunMocks[3].onRead(buf); }, [](const void* buf) { appFunMocks[3].onWrite(buf); }),
+        appFunMocks[4].toDef([](void* buf) { appFunMocks[4].onRead(buf); }, [](const void* buf) { appFunMocks[4].onWrite(buf); })
     };
 
     RS485_LINE_STATE rs485_state;
@@ -187,8 +192,8 @@ static void initRs485() {
     rs485_discard();
     crc_reset();
 
-    for (int i = 0; i < bus_cl_function_count; i++) {
-        mocks[i].reset();
+    for (int i = 0; i < bus_cl_appFunctionCount; i++) {
+        appFunMocks[i].reset();
     }
 }
 
@@ -495,7 +500,7 @@ TEST_CASE("Wrong CRC in write") {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM);
     simulateData({ 0xf1, 0xf2, 0xf3, 0xf4 });
     REQUIRE(bus_cl_poll() == false);
-    mocks[1].checkDataReceived({ 0xf1, 0xf2, 0xf3, 0xf4 });
+    appFunMocks[1].checkDataReceived({ 0xf1, 0xf2, 0xf3, 0xf4 });
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
     simulateData({ 0xde, 0xad });
@@ -522,7 +527,7 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
     for (int i = 0; i < sizeL * 2; i++) {
         dataToSend.push_back((uint8_t)(i + 0x40));
     }
-    mocks[sinkId].prepareDataToSend(dataToSend);
+    appFunMocks[sinkId].prepareDataToSend(dataToSend);
 
     // Since TX buffer is infinite, the whole message will be pushed out
     REQUIRE(bus_cl_poll() == false);
@@ -570,7 +575,7 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
             REQUIRE(bus_cl_poll() == false);
         }
 
-        mocks[sinkId].checkDataReceived(dataToSend);
+        appFunMocks[sinkId].checkDataReceived(dataToSend);
     }
     
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
