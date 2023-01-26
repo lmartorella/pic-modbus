@@ -27,19 +27,20 @@ void functionError(T param) {
 }
 
 class FunctionMock { 
-    const int writeSize;
-    const int readSize;
-    const std::string name;
-    const int id;
-    
     bool readyForRead;
     bool isWritten;
+protected:
+    const int writeSize;
+    const int readSize;
+    const int id;
 public:
     std::vector<uint8_t> bufferToSend;
     std::vector<uint8_t> bufferReceived;
+    virtual uint8_t getAddressH() const = 0;
+    virtual uint8_t getAddressL() const = 0;
 
-    FunctionMock(int id, std::string name, int readSize, int writeSize)
-        :id(id), name(name), readSize(readSize), writeSize(writeSize)
+    FunctionMock(int id, int readSize, int writeSize)
+        :id(id), readSize(readSize), writeSize(writeSize)
     { 
         reset();
     }
@@ -49,20 +50,6 @@ public:
         bufferReceived.clear();
         readyForRead = false;
         isWritten = false;
-    }
-
-    AppFunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
-        AppFunctionDefinition ret = {
-            .id = { .dword = 0 },
-            .def = {
-                .onRead = onRead,
-                .onWrite = onWrite,
-            },
-            .readSize = (uint8_t)readSize,
-            .writeSize = (uint8_t)writeSize
-        };
-        strncpy(ret.id.str, name.c_str(), 4);
-        return ret;
     }
 
     /**
@@ -115,21 +102,79 @@ public:
     }
 };
 
-static FunctionMock appFunMocks[] = { 
-    FunctionMock(0, "FC1", 2, 0),
-    FunctionMock(1, "FC2", 0, 4),
-    FunctionMock(2, "FC3", 8, 8),
+class SysFunctionMock : public FunctionMock {
+public:
+    SysFunctionMock(int id)
+        :FunctionMock(id, 16, 16)
+    { }
+
+    FunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
+        return FunctionDefinition {
+            .onRead = onRead,
+            .onWrite = onWrite
+        };
+    }
+
+    virtual uint8_t getAddressH() const {
+        return 0;
+    }
+    virtual uint8_t getAddressL() const {
+        return id * 0x10;
+    }
+};
+
+class AppFunctionMock : public FunctionMock { 
+    const std::string name;
+public:
+    AppFunctionMock(int id, std::string name, int readSize, int writeSize)
+        :FunctionMock(id, readSize, writeSize), name(name)
+    { }
+
+    AppFunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
+        AppFunctionDefinition ret = {
+            .id = { .dword = 0 },
+            .def = {
+                .onRead = onRead,
+                .onWrite = onWrite,
+            },
+            .readSize = (uint8_t)readSize,
+            .writeSize = (uint8_t)writeSize
+        };
+        strncpy(ret.id.str, name.c_str(), 4);
+        return ret;
+    }
+
+    virtual uint8_t getAddressH() const {
+        return id + 1;
+    }
+    virtual uint8_t getAddressL() const {
+        return 0;
+    }
+};
+
+static SysFunctionMock sysFunMocks[] = { 
+    SysFunctionMock(0),
+    SysFunctionMock(1)
+};
+
+static AppFunctionMock appFunMocks[] = { 
+    AppFunctionMock(0, "FC1", 2, 0),
+    AppFunctionMock(1, "FC2", 0, 4),
+    AppFunctionMock(2, "FC3", 8, 8),
     // Max of stream
-    FunctionMock(3, "FC4", 16, 16),
+    AppFunctionMock(3, "FC4", 16, 16),
     // Requires two calls
-    FunctionMock(4, "FC5", 18, 18)
+    AppFunctionMock(4, "FC5", 18, 18)
 };
 
 extern "C" {
-    const uint8_t bus_cl_sysFunctionCount = 0;
-    const FunctionDefinition bus_cl_sysFunctions[0] = { };
+    const uint8_t bus_cl_sysFunctionCount = sizeof(sysFunMocks) / sizeof(SysFunctionMock);
+    const FunctionDefinition bus_cl_sysFunctions[bus_cl_sysFunctionCount] = { 
+        sysFunMocks[0].toDef([](void* buf) { sysFunMocks[0].onRead(buf); }, [](const void* buf) { sysFunMocks[0].onWrite(buf); }),
+        sysFunMocks[1].toDef([](void* buf) { sysFunMocks[1].onRead(buf); }, [](const void* buf) { sysFunMocks[1].onWrite(buf); })
+    };
 
-    const uint8_t bus_cl_appFunctionCount = sizeof(appFunMocks) / sizeof(FunctionMock);
+    const uint8_t bus_cl_appFunctionCount = sizeof(appFunMocks) / sizeof(AppFunctionMock);
     const AppFunctionDefinition bus_cl_appFunctions[bus_cl_appFunctionCount] = {
         appFunMocks[0].toDef([](void* buf) { appFunMocks[0].onRead(buf); }, [](const void* buf) { appFunMocks[0].onWrite(buf); }),
         appFunMocks[1].toDef([](void* buf) { appFunMocks[1].onRead(buf); }, [](const void* buf) { appFunMocks[1].onWrite(buf); }),
@@ -357,27 +402,30 @@ static void testWrongAddress(uint8_t addressH, uint8_t addressL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Function error
-    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, 0x2 }));
+    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, ERR_INVALID_ADDRESS }));
 
     rs485_state = RS485_LINE_RX;
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
 }
 
-TEST_CASE("Wrong address: low value") {
+TEST_CASE("Wrong sys address: low value not modulo 0x10") {
     testWrongAddress(0, 1);
 }
-TEST_CASE("Wrong address, low value -1") {
-    testWrongAddress(0, 0xff);
+TEST_CASE("Wrong sys address: low value > count * 0x10") {
+    testWrongAddress(0, 0x20);
 }
-TEST_CASE("Wrong address, high value > sink") {
-    testWrongAddress(5, 0x0);
+TEST_CASE("Wrong app address: low value") {
+    testWrongAddress(1, 1);
 }
-TEST_CASE("Wrong address, high value -1") {
-    testWrongAddress(0xff, 0x0);
+TEST_CASE("Wrong app address, low value -1") {
+    testWrongAddress(1, 0xff);
+}
+TEST_CASE("Wrong app address, high value > sink + 1") {
+    testWrongAddress(6, 0x0);
 }
 
-static void testSizeSetup(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t function) {
+static void testSizeSetup(const FunctionMock& func, uint8_t sizeH, uint8_t sizeL, uint8_t function) {
     initRs485();
     bus_cl_init();
     bus_cl_stationAddress = 2;
@@ -392,12 +440,12 @@ static void testSizeSetup(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t 
     // After 2 bytes read, the client will wait for address
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
 
-    simulateData({ sinkId, 0x0, sizeH, sizeL });
+    simulateData({ func.getAddressH(), func.getAddressL(), sizeH, sizeL });
     REQUIRE(bus_cl_poll() == false);
 }
 
-static void testWrongSizeRead(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
-    testSizeSetup(sinkId, sizeH, sizeL, 0x03);
+static void testWrongSizeRead(const FunctionMock& func, uint8_t sizeH, uint8_t sizeL) {
+    testSizeSetup(func, sizeH, sizeL, 0x03);
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
 
@@ -407,15 +455,15 @@ static void testWrongSizeRead(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Function size error
-    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, 0x3 }));
+    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x83, ERR_INVALID_SIZE }));
 
     rs485_state = RS485_LINE_RX;
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-static void testWrongSizeWrite(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uint8_t sizeBytes) {
-    testSizeSetup(sinkId, sizeH, sizeL, 0x10);
+static void testWrongSizeWrite(const AppFunctionMock& appFunc, uint8_t sizeH, uint8_t sizeL, uint8_t sizeBytes) {
+    testSizeSetup(appFunc, sizeH, sizeL, 0x10);
     simulateData({ sizeBytes });
     REQUIRE(bus_cl_poll() == false);
 
@@ -434,52 +482,72 @@ static void testWrongSizeWrite(uint8_t sinkId, uint8_t sizeH, uint8_t sizeL, uin
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-TEST_CASE("Wrong size read: high value") {
-    testWrongSizeRead(0, 1, 0);
+TEST_CASE("Wrong sys function size read: high value") {
+    testWrongSizeRead(sysFunMocks[0], 1, 0);
 }
-TEST_CASE("Wrong size read: high value, 2") {
-    testWrongSizeRead(0, 2, 0);
+TEST_CASE("Wrong sys function size read: low value, 0") {
+    testWrongSizeRead(sysFunMocks[0], 0, 0);
 }
-TEST_CASE("Wrong size read: low value, 0") {
-    testWrongSizeRead(0, 0, 0);
-}
-TEST_CASE("Wrong size read: low value, 2 (sink wants 1)") {
-    testWrongSizeRead(0, 0, 2);
-}
-TEST_CASE("Wrong size read: low value, 1 on sink 1") {
-    testWrongSizeRead(1, 0, 1);
-}
-TEST_CASE("Wrong size read: low value, 0xff") {
-    testWrongSizeRead(0, 0, 0xff);
-}
-TEST_CASE("Wrong size read: write-only register with correct size of 0") {
-    testWrongSizeRead(1, 0, 0);
+TEST_CASE("Wrong sys function size read: low value, -1") {
+    testWrongSizeRead(sysFunMocks[0], 0, 0xff);
 }
 
-TEST_CASE("Wrong size write: high value") {
-    testWrongSizeWrite(0, 1, 0, 1);
+TEST_CASE("Wrong app function size read: high value") {
+    testWrongSizeRead(appFunMocks[0], 1, 0);
 }
-TEST_CASE("Wrong size write: high value, 2") {
-    testWrongSizeWrite(0, 2, 0, 2);
+TEST_CASE("Wrong app function size read: high value, 2") {
+    testWrongSizeRead(appFunMocks[0], 2, 0);
 }
-TEST_CASE("Wrong size write: low value, 0") {
-    testWrongSizeWrite(1, 0, 0, 0);
+TEST_CASE("Wrong app function size read: low value, 0") {
+    testWrongSizeRead(appFunMocks[0], 0, 0);
 }
-TEST_CASE("Wrong size write: low value, 1") {
-    testWrongSizeWrite(1, 0, 1, 2);
+TEST_CASE("Wrong app function size read: low value, 2 (sink wants 1)") {
+    testWrongSizeRead(appFunMocks[0], 0, 2);
 }
-TEST_CASE("Wrong size write: low value, 0xff") {
-    testWrongSizeWrite(1, 0, 0xff, 0xff);
+TEST_CASE("Wrong app function size read: low value, 1 on sink 1") {
+    testWrongSizeRead(appFunMocks[1], 0, 1);
 }
-TEST_CASE("Wrong size write: low value wight but not in bytes") {
-    testWrongSizeWrite(1, 0, 2, 5);
+TEST_CASE("Wrong app function size read: low value, 0xff") {
+    testWrongSizeRead(appFunMocks[0], 0, 0xff);
 }
-TEST_CASE("Wrong size read: read-only register with correct size of 0") {
-    testWrongSizeRead(0, 0, 0);
+TEST_CASE("Wrong app function size read: write-only register with correct size of 0") {
+    testWrongSizeRead(appFunMocks[1], 0, 0);
+}
+
+TEST_CASE("Wrong sys function size write: high value") {
+    testWrongSizeRead(sysFunMocks[0], 1, 0);
+}
+TEST_CASE("Wrong sys function size write: low value, 0") {
+    testWrongSizeRead(sysFunMocks[0], 0, 0);
+}
+TEST_CASE("Wrong sys function size write: low value, -1") {
+    testWrongSizeRead(sysFunMocks[0], 0, 0xff);
+}
+
+TEST_CASE("Wrong app function size write: high value") {
+    testWrongSizeWrite(appFunMocks[0], 1, 0, 1);
+}
+TEST_CASE("Wrong app function size write: high value, 2") {
+    testWrongSizeWrite(appFunMocks[0], 2, 0, 2);
+}
+TEST_CASE("Wrong app function size write: low value, 0") {
+    testWrongSizeWrite(appFunMocks[1], 0, 0, 0);
+}
+TEST_CASE("Wrong app function size write: low value, 1") {
+    testWrongSizeWrite(appFunMocks[1], 0, 1, 2);
+}
+TEST_CASE("Wrong app function size write: low value, 0xff") {
+    testWrongSizeWrite(appFunMocks[1], 0, 0xff, 0xff);
+}
+TEST_CASE("Wrong app function size write: low value wight but not in bytes") {
+    testWrongSizeWrite(appFunMocks[1], 0, 2, 5);
+}
+TEST_CASE("Wrong app function size read: read-only register with correct size of 0") {
+    testWrongSizeRead(appFunMocks[0], 0, 0);
 }
 
 TEST_CASE("Wrong CRC in read") {
-    testSizeSetup(0, 0, 1, 0x3);
+    testSizeSetup(appFunMocks[0], 0, 1, 0x3);
 
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
     simulateData({ 0xde, 0xad });
@@ -493,7 +561,7 @@ TEST_CASE("Wrong CRC in read") {
 }
 
 TEST_CASE("Wrong CRC in write") {
-    testSizeSetup(1, 0, 2, 0x10); // write sink 1
+    testSizeSetup(appFunMocks[1], 0, 2, 0x10); // write sink 1
     simulateData({ 4 });
     REQUIRE(bus_cl_poll() == false);
 
@@ -513,8 +581,8 @@ TEST_CASE("Wrong CRC in write") {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
-    testSizeSetup(sinkId, 0, sizeL, 0x3);
+static void testCorrectRead(FunctionMock& func, uint8_t sizeL, int passCount) {
+    testSizeSetup(func, 0, sizeL, 0x3);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
 
     simulateData(crcOf(packetData));
@@ -527,7 +595,7 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
     for (int i = 0; i < sizeL * 2; i++) {
         dataToSend.push_back((uint8_t)(i + 0x40));
     }
-    appFunMocks[sinkId].prepareDataToSend(dataToSend);
+    func.prepareDataToSend(dataToSend);
 
     // Since TX buffer is infinite, the whole message will be pushed out
     REQUIRE(bus_cl_poll() == false);
@@ -539,7 +607,7 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Read response
-    std::vector<uint8_t> expectedMessageHeader({ 0x2, 0x3, sinkId, 0x0, 0x0, sizeL, (uint8_t)(sizeL * 2) });
+    std::vector<uint8_t> expectedMessageHeader({ 0x2, 0x3, func.getAddressH(), func.getAddressL(), 0x0, sizeL, (uint8_t)(sizeL * 2) });
     REQUIRE(simulateRead() == expectedMessageHeader + dataToSend + crcOf(expectedMessageHeader, dataToSend));
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
@@ -548,8 +616,8 @@ static void testCorrectRead(uint8_t sinkId, uint8_t sizeL, int passCount) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
-    testSizeSetup(sinkId, 0, sizeL, 0x10);
+static void testCorrectWrite(FunctionMock& func, uint8_t sizeL, int passCount) {
+    testSizeSetup(func, 0, sizeL, 0x10);
     // Still missing the content size
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA);
 
@@ -575,7 +643,7 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
             REQUIRE(bus_cl_poll() == false);
         }
 
-        appFunMocks[sinkId].checkDataReceived(dataToSend);
+        func.checkDataReceived(dataToSend);
     }
     
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
@@ -589,7 +657,7 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
     // Read empty response
-    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x10, sinkId, 0x0, 0x0, sizeL }));
+    REQUIRE(simulateRead() == padWithCrc({ 0x2, 0x10, func.getAddressH(), func.getAddressL(), 0x0, sizeL }));
     REQUIRE(bus_cl_poll() == false);
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
 
@@ -598,27 +666,40 @@ static void testCorrectWrite(uint8_t sinkId, uint8_t sizeL, int passCount) {
     REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
 }
 
-TEST_CASE("Correct size, sink 0, read") {
-    testCorrectRead(0, 1, 1);
+TEST_CASE("Correct size, sys function 0, read") {
+    testCorrectRead(sysFunMocks[0], 8, 1);
 }
-TEST_CASE("Correct size, sink 1, write") {
-    testCorrectWrite(1, 2, 1);
+TEST_CASE("Correct size, sys function 0, write") {
+    testCorrectWrite(sysFunMocks[0], 8, 1);
 }
-TEST_CASE("Correct size, sink 2, read") {
-    testCorrectRead(2, 4, 1);
+TEST_CASE("Correct size, sys function 1, read") {
+    testCorrectRead(sysFunMocks[1], 8, 1);
 }
-TEST_CASE("Correct size, sink 2, write") {
-    testCorrectWrite(2, 4, 1);
+TEST_CASE("Correct size, sys function 1, write") {
+    testCorrectWrite(sysFunMocks[1], 8, 1);
 }
-TEST_CASE("Correct size, sink 3, read") {
-    testCorrectRead(3, 8, 1);
+
+TEST_CASE("Correct size, app function 0, read") {
+    testCorrectRead(appFunMocks[0], 1, 1);
 }
-TEST_CASE("Correct size, sink 3, write") {
-    testCorrectWrite(3, 8, 1);
+TEST_CASE("Correct size, app function 1, write") {
+    testCorrectWrite(appFunMocks[1], 2, 1);
 }
-TEST_CASE("Correct size, sink 4, read") {
-    testCorrectRead(4, 9, 2);
+TEST_CASE("Correct size, app function 2, read") {
+    testCorrectRead(appFunMocks[2], 4, 1);
 }
-TEST_CASE("Correct size, sink 4, write") {
-    testCorrectWrite(4, 9, 2);
+TEST_CASE("Correct size, app function 2, write") {
+    testCorrectWrite(appFunMocks[2], 4, 1);
+}
+TEST_CASE("Correct size, app function 3, read") {
+    testCorrectRead(appFunMocks[3], 8, 1);
+}
+TEST_CASE("Correct size, app function 3, write") {
+    testCorrectWrite(appFunMocks[3], 8, 1);
+}
+TEST_CASE("Correct size, app function 4, read") {
+    testCorrectRead(appFunMocks[4], 9, 2);
+}
+TEST_CASE("Correct size, app function 4, write") {
+    testCorrectWrite(appFunMocks[4], 9, 2);
 }
