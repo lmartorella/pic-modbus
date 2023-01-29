@@ -28,11 +28,6 @@ void uart_read(uint8_t* data, UART_RX_MD* md);
 _Bool uart_tx_fifo_empty();
 _Bool uart_rx_fifo_empty();
 
-void uart_enable_tx();
-void uart_disable_tx();
-void uart_enable_rx();
-void uart_disable_rx(); 
-
 #ifdef __cplusplus
 }
 #endif

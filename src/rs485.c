@@ -1,3 +1,4 @@
+#include <xc.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "net/crc.h"
@@ -31,9 +32,6 @@ static uint8_t _rs485_writeAvail() {
 static TICK_TYPE s_lastTick;
 
 static void rs485_startRead() {
-    // Disable writing
-    uart_disable_tx();
-
     // Disable RS485 driver
     uart_receive();
     rs485_state = RS485_LINE_RX;
@@ -43,9 +41,6 @@ static void rs485_startRead() {
 
     // Reset circular buffer
     s_readPtr = s_writePtr = 0;
-
-    // Enable UART receiver
-    uart_enable_rx();
 }
 
 void rs485_init() {
@@ -164,19 +159,15 @@ _Bool rs485_poll() {
 void rs485_write(const void* data, uint8_t size) {
     // Abort reader, if in progress
     if (rs485_state == RS485_LINE_RX) {
-        // Truncate reading
-        uart_disable_rx();
+        // Enable RS485 driver
+        uart_transmit();
+
         s_readPtr = s_writePtr = 0;
         crc_reset();
-
-        // Enable UART transmit.
-        uart_enable_tx();
 
         // Engage
         rs485_state = RS485_LINE_WAIT_FOR_START_TRANSMIT;
         s_lastTick = timers_get();
-        // Enable RS485 driver
-        uart_transmit();
     } else if (rs485_state == RS485_LINE_TX_DISENGAGE) {
         // Re-convert it to tx without additional delays
         rs485_state = RS485_LINE_TX;
