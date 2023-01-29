@@ -20,7 +20,6 @@
       <itemPath>../include/net/net.h</itemPath>
       <itemPath>../include/net/persistence.h</itemPath>
       <itemPath>../include/net/rs485.h</itemPath>
-      <itemPath>../include/net/sinks.h</itemPath>
       <itemPath>../include/net/timers.h</itemPath>
       <itemPath>../include/net/uart.h</itemPath>
       <itemPath>../include/net/bus_client.h</itemPath>
