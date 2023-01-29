@@ -22,7 +22,7 @@ void main()
     // Analyze RESET reason
     sys_storeResetReason();
 
-    net_init();
+    net_cl_init();
 
 #ifdef BUSPOWER_PORT
     // Enable bus power to slaves
@@ -40,8 +40,7 @@ void main()
 
     // I'm alive
     while (1) {
-        rs485_poll();
-        net_poll();
+        net_cl_poll();
         sinks_poll();      
     }
 }

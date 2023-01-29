@@ -28,17 +28,9 @@
 #define MASTER_MAX_CHILDREN 16
 
 void net_prim_init(uint16_t serverUdpPort);
-void net_sec_init(void);
+void net_cl_init(void);
 _Bool net_prim_poll(void);
-_Bool net_sec_poll(void);
-
-#if defined(HAS_RS485_BUS_PRIMARY)
-#define net_init net_prim_init
-#define net_poll net_prim_poll
-#elif defined(HAS_RS485_BUS_SECONDARY)
-#define net_init bus_cl_init
-#define net_poll bus_cl_poll
-#endif
+_Bool net_cl_poll(void);
 
 /**
  * API
