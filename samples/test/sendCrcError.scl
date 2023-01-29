@@ -1,0 +1,50 @@
+configuration for "pic16f1827" is
+end configuration;
+
+testbench for "pic16f1827" is
+begin
+
+      process is
+         begin
+            wait for 2000ms;
+            
+            RCREG <= 16#FE#;   // Address of uninitialized stations
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 10;    // Write register
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 0;     // Addres H
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 0;     // Address L
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 0;     // Size H
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 8;     // Size L
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 16#FF#;     // RANDOM CRC
+            wait for 570us;
+            if PIR1.RCIF == '1' then
+                RCSTA.OERR <= '1';
+            end if;
+            RCREG <= 16#FF#;     // RANDOM CRC
+
+            // etc..
+         end process;
+end testbench;
