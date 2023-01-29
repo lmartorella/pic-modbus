@@ -47,14 +47,16 @@ begin
             if PIR1.RCIF == '1' then
                 RCSTA.OERR <= '1';
             end if;
-            RCREG <= 16#FF#;     // RANDOM CRC
+            RCREG <= 16#51#;     // Crc Lo
             PIR1.RCIF <= '1';
             wait for 570us;
             if PIR1.RCIF == '1' then
                 RCSTA.OERR <= '1';
             end if;
-            RCREG <= 16#FF#;     // RANDOM CRC
+            RCREG <= 16#51#;     // Crc Hi
             PIR1.RCIF <= '1';
+
+            wait for 570us;
 
             // etc..
          end process;

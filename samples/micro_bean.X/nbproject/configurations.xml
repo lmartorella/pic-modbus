@@ -96,6 +96,7 @@
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
       <itemPath>../test/sendCrcError.scl</itemPath>
+      <itemPath>../test/correctRead.scl</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

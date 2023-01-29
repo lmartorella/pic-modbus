@@ -64,7 +64,7 @@ void bus_cl_init() {
 
 // Called often
 __bit bus_cl_poll() {
-    if (rs485_isMarkCondition) {
+    if (rs485_isMarkCondition && bus_cl_rtu_state != BUS_CL_RTU_IDLE) {
         if (bus_cl_rtu_state != BUS_CL_RTU_WAIT_FOR_RESPONSE) {
             // Abort reading, go idle
             bus_cl_rtu_state = BUS_CL_RTU_IDLE;
