@@ -39,7 +39,8 @@ void main()
     sys_enableInterrupts();
 
     // I'm alive
-    while (1) {   
+    while (1) {
+        rs485_poll();
         net_poll();
         sinks_poll();      
     }
