@@ -137,6 +137,13 @@ typedef enum {
 } BUS_CL_RTU_STATE;
 extern BUS_CL_RTU_STATE bus_cl_rtu_state;
 
+typedef enum {
+    NO_ERROR = 0,
+    ERR_INVALID_FUNCTION = 1,
+    ERR_INVALID_ADDRESS = 2,
+    ERR_INVALID_SIZE = 3
+} BUL_CL_RTU_EXCEPTION_CODE;
+
 #ifdef __cplusplus
 }
 #endif

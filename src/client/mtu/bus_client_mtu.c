@@ -30,13 +30,6 @@ typedef struct {
     uint8_t countBytes;
 } ModbusRtuHoldingRegisterWriteRequest;
 
-typedef enum {
-    NO_ERROR = 0,
-    ERR_INVALID_FUNCTION = 1,
-    ERR_INVALID_ADDRESS = 2,
-    ERR_INVALID_SIZE = 3
-} EXCEPTION_CODES;
-
 /**
  * The current station address. It is UNASSIGNED_STATION_ADDRESS (255) if the station still doesn't have an address (auto-configuration).
  */
@@ -212,7 +205,7 @@ __bit bus_cl_poll() {
             // Response of read/write registers always contains the address and register count
             ModbusRtuHoldingRegisterRequest sizes;
             sizes.registerAddressH = s_currentAddrH;
-            sizes.registerAddressL = 0;
+            sizes.registerAddressL = s_currentAddrL;
             sizes.countH = 0;
             sizes.countL = s_currentSize;
             rs485_write(&sizes, sizeof(ModbusRtuHoldingRegisterRequest));
