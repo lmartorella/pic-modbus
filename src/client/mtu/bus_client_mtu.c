@@ -94,8 +94,7 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA) {
         ModbusRtuHoldingRegisterWriteRequest packet;
         // In case of write, read the size too
-        uint8_t size = s_function == READ_HOLDING_REGISTERS ? sizeof(ModbusRtuHoldingRegisterRequest) : sizeof(ModbusRtuHoldingRegisterRequest) + 1;
-        if (!rs485_read(&packet, size)) {
+        if (!rs485_read(&packet, s_function == READ_HOLDING_REGISTERS ? sizeof(ModbusRtuHoldingRegisterRequest) : sizeof(ModbusRtuHoldingRegisterRequest) + 1)) {
             // Nothing to do, wait for more data
             return false;
         }
@@ -114,7 +113,7 @@ __bit bus_cl_poll() {
             // Sys functions has fixed size to save program space
             s_sizeRemaining = 16;
         } else {
-            if (s_currentAddrL != 0 || (s_currentAddrH - 1) >= bus_cl_appFunctionCount) {
+            if (s_currentAddrL != 0 || s_currentAddrH > bus_cl_appFunctionCount) {
                 // Invalid address, return error
                 s_exceptionCode = ERR_INVALID_ADDRESS;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -157,8 +156,7 @@ __bit bus_cl_poll() {
             return false;
         }
         rs485_read(buf, remaining);
-        const WriteHandler* handler = (s_currentAddrH == 0) ? &bus_cl_sysFunctionWriteHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionWriteHandlers[s_currentAddrH - 1];
-        (*handler)(buf);
+        (*((s_currentAddrH == 0) ? &bus_cl_sysFunctionWriteHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionWriteHandlers[s_currentAddrH - 1]))(buf);
         s_sizeRemaining -= remaining;
 
         if (s_sizeRemaining > 0) {
@@ -239,8 +237,7 @@ __bit bus_cl_poll() {
         if (avail < remaining) {
             return false;
         }
-        const ReadHandler* handler = (s_currentAddrH == 0) ? &bus_cl_sysFunctionReadHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionReadHandlers[s_currentAddrH - 1];
-        (*handler)(buf);
+        (*((s_currentAddrH == 0) ? &bus_cl_sysFunctionReadHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionReadHandlers[s_currentAddrH - 1]))(buf);
         rs485_write(buf, remaining);
         s_sizeRemaining -= remaining;
         if (s_sizeRemaining > 0) {
