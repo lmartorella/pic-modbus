@@ -122,7 +122,7 @@ __bit bus_cl_poll() {
             }
             s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_appFunctionReadHandlerSizes[s_currentAddrH - 1] : bus_cl_appFunctionWriteHandlerSizes[s_currentAddrH - 1];
         }
-        if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2 || s_sizeRemaining == 0) {
+        if (packet.req.countH != 0 || packet.req.countL != (s_sizeRemaining >> 1) || s_sizeRemaining == 0) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
