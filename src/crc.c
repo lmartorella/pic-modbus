@@ -8,7 +8,7 @@ void crc_reset() {
 
 void crc_update(uint8_t ch) {
     crc16 ^= ch;
-    for (int i = 8; i != 0; i--) {
+    for (uint8_t i = 8; i != 0; i--) {
         if (crc16 & 1) {
             crc16 >>= 1;
             crc16 ^= 0xA001;
