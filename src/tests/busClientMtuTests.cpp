@@ -29,11 +29,10 @@ void functionError(T param) {
 class FunctionMock { 
     bool readyForRead;
     bool isWritten;
-protected:
+public:
     const int writeSize;
     const int readSize;
     const int id;
-public:
     std::vector<uint8_t> bufferToSend;
     std::vector<uint8_t> bufferReceived;
     virtual uint8_t getAddressH() const = 0;
@@ -108,13 +107,6 @@ public:
         :FunctionMock(id, 16, 16)
     { }
 
-    FunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
-        return FunctionDefinition {
-            .onRead = onRead,
-            .onWrite = onWrite
-        };
-    }
-
     virtual uint8_t getAddressH() const {
         return 0;
     }
@@ -130,17 +122,9 @@ public:
         :FunctionMock(id, readSize, writeSize), name(name)
     { }
 
-    AppFunctionDefinition toDef(void (*onRead)(void* buffer), void (*onWrite)(const void* buffer)) {
-        AppFunctionDefinition ret = {
-            .id = { .dword = 0 },
-            .def = {
-                .onRead = onRead,
-                .onWrite = onWrite,
-            },
-            .readSize = (uint8_t)readSize,
-            .writeSize = (uint8_t)writeSize
-        };
-        strncpy(ret.id.str, name.c_str(), 4);
+    FOURCC fourcc() const {
+        FOURCC ret;
+        strncpy(ret.str, name.c_str(), 4);
         return ret;
     }
 
@@ -169,18 +153,50 @@ static AppFunctionMock appFunMocks[] = {
 
 extern "C" {
     const uint8_t bus_cl_sysFunctionCount = sizeof(sysFunMocks) / sizeof(SysFunctionMock);
-    const FunctionDefinition bus_cl_sysFunctions[bus_cl_sysFunctionCount] = { 
-        sysFunMocks[0].toDef([](void* buf) { sysFunMocks[0].onRead(buf); }, [](const void* buf) { sysFunMocks[0].onWrite(buf); }),
-        sysFunMocks[1].toDef([](void* buf) { sysFunMocks[1].onRead(buf); }, [](const void* buf) { sysFunMocks[1].onWrite(buf); })
+    const ReadHandler bus_cl_sysFunctionReadHandlers[bus_cl_sysFunctionCount] = { 
+        [](void* buf) { sysFunMocks[0].onRead(buf); },
+        [](void* buf) { sysFunMocks[1].onRead(buf); }
+    };
+    const WriteHandler bus_cl_sysFunctionWriteHandlers[bus_cl_sysFunctionCount] = { 
+        [](const void* buf) { sysFunMocks[0].onWrite(buf); },
+        [](const void* buf) { sysFunMocks[1].onWrite(buf); }
     };
 
     const uint8_t bus_cl_appFunctionCount = sizeof(appFunMocks) / sizeof(AppFunctionMock);
-    const AppFunctionDefinition bus_cl_appFunctions[bus_cl_appFunctionCount] = {
-        appFunMocks[0].toDef([](void* buf) { appFunMocks[0].onRead(buf); }, [](const void* buf) { appFunMocks[0].onWrite(buf); }),
-        appFunMocks[1].toDef([](void* buf) { appFunMocks[1].onRead(buf); }, [](const void* buf) { appFunMocks[1].onWrite(buf); }),
-        appFunMocks[2].toDef([](void* buf) { appFunMocks[2].onRead(buf); }, [](const void* buf) { appFunMocks[2].onWrite(buf); }),
-        appFunMocks[3].toDef([](void* buf) { appFunMocks[3].onRead(buf); }, [](const void* buf) { appFunMocks[3].onWrite(buf); }),
-        appFunMocks[4].toDef([](void* buf) { appFunMocks[4].onRead(buf); }, [](const void* buf) { appFunMocks[4].onWrite(buf); })
+    const ReadHandler bus_cl_appFunctionReadHandlers[bus_cl_appFunctionCount] = { 
+        [](void* buf) { appFunMocks[0].onRead(buf); },
+        [](void* buf) { appFunMocks[1].onRead(buf); },
+        [](void* buf) { appFunMocks[2].onRead(buf); },
+        [](void* buf) { appFunMocks[3].onRead(buf); },
+        [](void* buf) { appFunMocks[4].onRead(buf); }
+    };
+    const WriteHandler bus_cl_appFunctionWriteHandlers[bus_cl_appFunctionCount] = { 
+        [](const void* buf) { appFunMocks[0].onWrite(buf); },
+        [](const void* buf) { appFunMocks[1].onWrite(buf); },
+        [](const void* buf) { appFunMocks[2].onWrite(buf); },
+        [](const void* buf) { appFunMocks[3].onWrite(buf); },
+        [](const void* buf) { appFunMocks[4].onWrite(buf); }
+    };
+    const uint8_t bus_cl_appFunctionReadHandlerSizes[bus_cl_appFunctionCount] = {
+        (uint8_t)appFunMocks[0].readSize,
+        (uint8_t)appFunMocks[1].readSize,
+        (uint8_t)appFunMocks[2].readSize,
+        (uint8_t)appFunMocks[3].readSize,
+        (uint8_t)appFunMocks[4].readSize
+    };
+    const uint8_t bus_cl_appFunctionWriteHandlerSizes[bus_cl_appFunctionCount] = {
+        (uint8_t)appFunMocks[0].writeSize,
+        (uint8_t)appFunMocks[1].writeSize,
+        (uint8_t)appFunMocks[2].writeSize,
+        (uint8_t)appFunMocks[3].writeSize,
+        (uint8_t)appFunMocks[4].writeSize
+    };
+    const FOURCC bus_cl_appFunctionIds[bus_cl_appFunctionCount] = {
+        appFunMocks[0].fourcc(),
+        appFunMocks[1].fourcc(),
+        appFunMocks[2].fourcc(),
+        appFunMocks[3].fourcc(),
+        appFunMocks[4].fourcc()
     };
 
     RS485_LINE_STATE rs485_state;

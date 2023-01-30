@@ -35,25 +35,19 @@ extern uint8_t bus_cl_stationAddress;
 __bit bus_cl_poll();
 
 /**
- * Function handler descriptor.
- * It is used for both system functions (0-255) and application functions (0x100-)
+ * The external function handler that produces the function response data to send to the server
+ * during a read call. The buffer size is fixed to 16 in case of system functions, or set with the external size tables.
  */
-typedef struct {
-    /**
-     * The function handler that produces the function response data to send to the server
-     * during a read call. The buffer size is `readSize`, or fixed to 16 in case of system functions.
-     */
-    void (*onRead)(void* buffer);
-
-    /**
-     * The function handler that consumes the function data sent by the server
-     * during a write call. The buffer size is `writeSize`, or fixed to 16 in case of system functions.
-     */
-    void (*onWrite)(const void* buffer);
-} FunctionDefinition;
+typedef void (*ReadHandler)(void* buffer);
 
 /**
- * The unnamed system function count.
+ * The external function handler that consumes the function data sent by the server
+ * during a write call. The buffer size is fixed to 16 in case of system functions, or set with the external size tables.
+ */
+typedef void (*WriteHandler)(const void* buffer);
+
+/**
+ * The by-address system function count.
  */
 extern const uint8_t bus_cl_sysFunctionCount;
 
@@ -62,33 +56,8 @@ extern const uint8_t bus_cl_sysFunctionCount;
  * Every function will span 16 registers: the first function will have the address 0x0,
  * the second one the address 0x10, etc...
  */
-extern const FunctionDefinition bus_cl_sysFunctions[];
-
-/**
- * Application function handler descriptor. 
- * The register address is the descriptor index * 256.
- */
-typedef struct {
-    /**
-     * The unique ID of the function, the type
-     */
-    FOURCC id;
-
-    /**
-     * The function def
-     */
-    FunctionDefinition def;
-
-    /**
-     * The required sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
-     */
-    uint8_t readSize;
-
-    /**
-     * The required sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.
-     */
-    uint8_t writeSize;
-} AppFunctionDefinition;
+extern const ReadHandler bus_cl_sysFunctionReadHandlers[];
+extern const WriteHandler bus_cl_sysFunctionWriteHandlers[];
 
 /**
  * The applicative function count in the `bus_cl_appFunctions`. Must be filled by the application.
@@ -96,11 +65,24 @@ typedef struct {
 extern const uint8_t bus_cl_appFunctionCount;
 
 /**
+ * The unique ID of the function, the type
+ */
+extern const FOURCC bus_cl_appFunctionIds[];
+/**
  * The applicative function definitions, of size `bus_cl_appFunctionCount`. Must be filled by the application.
  * Each function has allocated 256 bytes of address space (128 registers): the first function will have
  * the address 0x100, the second one the address 0x200, regardless the read/write size.
  */
-extern const AppFunctionDefinition bus_cl_appFunctions[];
+extern const ReadHandler bus_cl_appFunctionReadHandlers[];
+/**
+ * The required sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
+ */
+extern const uint8_t bus_cl_appFunctionReadHandlerSizes[];
+extern const WriteHandler bus_cl_appFunctionWriteHandlers[];
+/**
+ * The required sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.
+ */
+extern const uint8_t bus_cl_appFunctionWriteHandlerSizes[];
 
 /***
  ***

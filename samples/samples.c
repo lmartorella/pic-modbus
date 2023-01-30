@@ -3,24 +3,24 @@
 
 // REGISTER SINKS
 // Static allocation of sinks
-const FunctionDefinition bus_cl_sysFunctions[] = {
-    {
-        (void (*)(void*))autoconf_readNodeStatus,
-        NULL
-    },
-    {
-        (void (*)(void*))autoconf_readSinkIds,
-        NULL
-    },
-    {
-        (void (*)(void*))autoconf_readNodeGuid,
-        (void (*)(const void*))autoconf_writeNodeGuid
-    }
-};
 const uint8_t bus_cl_sysFunctionCount = 3;
+const ReadHandler bus_cl_sysFunctionReadHandlers[3] = {
+    (ReadHandler)autoconf_readNodeStatus,
+    (ReadHandler)autoconf_readSinkIds,
+    (ReadHandler)autoconf_readNodeGuid
+};
+const WriteHandler bus_cl_sysFunctionWriteHandlers[3] = {
+    NULL,
+    NULL,
+    (WriteHandler)autoconf_writeNodeGuid
+};
 
-const AppFunctionDefinition bus_cl_appFunctions[0] = { };
 const uint8_t bus_cl_appFunctionCount = 0;
+const ReadHandler bus_cl_appFunctionReadHandlers[0] = { };
+const WriteHandler bus_cl_appFunctionWriteHandlers[0] = { };
+const uint8_t bus_cl_appFunctionReadHandlerSizes[0] = { };
+const uint8_t bus_cl_appFunctionWriteHandlerSizes[0] = { };
+const FOURCC bus_cl_appFunctionIds[0] = { };
 
 /*
 #ifdef HAS_DIGIO_OUT

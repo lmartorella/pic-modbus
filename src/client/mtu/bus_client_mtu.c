@@ -120,7 +120,7 @@ __bit bus_cl_poll() {
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                 return false;
             }
-            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_appFunctions[s_currentAddrH - 1].readSize : bus_cl_appFunctions[s_currentAddrH - 1].writeSize;
+            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_appFunctionReadHandlerSizes[s_currentAddrH - 1] : bus_cl_appFunctionWriteHandlerSizes[s_currentAddrH - 1];
         }
         if (packet.req.countH != 0 || packet.req.countL != s_sizeRemaining / 2 || s_sizeRemaining == 0) {
             // Invalid size, return error
@@ -157,8 +157,8 @@ __bit bus_cl_poll() {
             return false;
         }
         rs485_read(buf, remaining);
-        const FunctionDefinition* def = (s_currentAddrH == 0) ? &bus_cl_sysFunctions[s_currentAddrL >> 4] : &bus_cl_appFunctions[s_currentAddrH - 1].def;
-        def->onWrite(buf);
+        const WriteHandler* handler = (s_currentAddrH == 0) ? &bus_cl_sysFunctionWriteHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionWriteHandlers[s_currentAddrH - 1];
+        (*handler)(buf);
         s_sizeRemaining -= remaining;
 
         if (s_sizeRemaining > 0) {
@@ -239,8 +239,8 @@ __bit bus_cl_poll() {
         if (avail < remaining) {
             return false;
         }
-        const FunctionDefinition* def = (s_currentAddrH == 0) ? &bus_cl_sysFunctions[s_currentAddrL >> 4] : &bus_cl_appFunctions[s_currentAddrH - 1].def;
-        def->onRead(buf);
+        const ReadHandler* handler = (s_currentAddrH == 0) ? &bus_cl_sysFunctionReadHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionReadHandlers[s_currentAddrH - 1];
+        (*handler)(buf);
         rs485_write(buf, remaining);
         s_sizeRemaining -= remaining;
         if (s_sizeRemaining > 0) {

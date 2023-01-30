@@ -55,7 +55,7 @@ void autoconf_readNodeStatus(AUTOCONF_NODE_STATUS* buffer) {
  */
 void autoconf_readSinkIds(FOURCC* ids) {
     for (uint8_t i = 0; i < bus_cl_appFunctionCount; i++) {
-        ids[i] = bus_cl_appFunctions[i].id;
+        ids[i] = bus_cl_appFunctionIds[i];
     }
 }
 
