@@ -50,20 +50,16 @@ typedef struct {
  */
 uint8_t bus_cl_stationAddress;
 
+static ModbusRtuHoldingRegisterRequest s_curRequest;
+
 // If != NO_ERR, write an error
 static uint8_t s_exceptionCode;
-// Store the total reg count (low byte) of the last command
-static uint8_t s_currentSize;
 // Store the bytes remaining for function data streaming
 static uint8_t s_sizeRemaining;
 // The current function in use
 static uint8_t s_function;
-// The current sink ID addressed
-static uint8_t s_currentAddrL, s_currentAddrH;
 
 BUS_CL_RTU_STATE bus_cl_rtu_state;
-
-#define INITIAL_CRC_VALUE (0xffff)
 
 void bus_cl_init() {
     // RS485 already in receive mode
@@ -90,9 +86,10 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(sizeof(ModbusRtuPacketHeader));
-        const ModbusRtuPacketHeader* packet = (const ModbusRtuPacketHeader*)rs485_buffer;
-        if (packet->address == bus_cl_stationAddress) {
-            s_function = packet->function;
+
+#define packet_2 ((const ModbusRtuPacketHeader*)rs485_buffer)
+        if (packet_2->address == bus_cl_stationAddress) {
+            s_function = packet_2->function;
             if (s_function == READ_HOLDING_REGISTERS || s_function == WRITE_HOLDING_REGISTERS) {
                 // The message is for reading registers. Address data will follow
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_REGISTER_DATA;
@@ -117,14 +114,13 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(messageSize);
-        const ModbusRtuHoldingRegisterWriteRequest* packet = (const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer;
+
+#define packet_1 ((const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer)
         
+        s_curRequest = packet_1->req;
         // register address if the sink id * 256
-        s_currentAddrL = packet->req.registerAddressL;
-        s_currentAddrH = packet->req.registerAddressH;
-        s_currentSize = packet->req.countL;
-        if (s_currentAddrH == 0) {
-            if ((s_currentAddrL & 0xf) != 0 || (s_currentAddrL >> 4) >= bus_cl_sysFunctionCount) {
+        if (s_curRequest.registerAddressH == 0) {
+            if ((s_curRequest.registerAddressL & 0xf) != 0 || (s_curRequest.registerAddressL >> 4) >= bus_cl_sysFunctionCount) {
                 // Invalid address, return error
                 s_exceptionCode = ERR_INVALID_ADDRESS;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -133,15 +129,17 @@ __bit bus_cl_poll() {
             // Sys functions has fixed size to save program space
             s_sizeRemaining = 16;
         } else {
-            if (s_currentAddrL != 0 || s_currentAddrH > bus_cl_appFunctionCount) {
+            if (s_curRequest.registerAddressL != 0 || s_curRequest.registerAddressH > bus_cl_appFunctionCount) {
                 // Invalid address, return error
                 s_exceptionCode = ERR_INVALID_ADDRESS;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                 return false;
             }
-            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? bus_cl_appFunctionReadHandlerSizes[s_currentAddrH - 1] : bus_cl_appFunctionWriteHandlerSizes[s_currentAddrH - 1];
+            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? 
+                bus_cl_appFunctionReadHandlerSizes[s_curRequest.registerAddressH - 1] : 
+                bus_cl_appFunctionWriteHandlerSizes[s_curRequest.registerAddressH - 1];
         }
-        if (packet->req.countH != 0 || packet->req.countL != (s_sizeRemaining >> 1) || s_sizeRemaining == 0) {
+        if (packet_1->req.countH != 0 || packet_1->req.countL != (s_sizeRemaining >> 1) || s_sizeRemaining == 0) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -152,7 +150,7 @@ __bit bus_cl_poll() {
             // Ok, sink data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
-            if (packet->countBytes != s_sizeRemaining) {
+            if (packet_1->countBytes != s_sizeRemaining) {
                 // Invalid size, return error
                 s_exceptionCode = ERR_INVALID_SIZE;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -176,7 +174,9 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(remaining);
-        (*((s_currentAddrH == 0) ? &bus_cl_sysFunctionWriteHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionWriteHandlers[s_currentAddrH - 1]))();
+        (*((s_curRequest.registerAddressH == 0) ? 
+            &bus_cl_sysFunctionWriteHandlers[s_curRequest.registerAddressL >> 4] : 
+            &bus_cl_appFunctionWriteHandlers[s_curRequest.registerAddressH - 1]))();
         s_sizeRemaining -= remaining;
 
         if (s_sizeRemaining > 0) {
@@ -197,10 +197,9 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(sizeof(uint16_t));
-        const uint16_t* readCrc = (const uint16_t*)rs485_buffer;
 
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-        if (expectedCrc != *readCrc) {
+        if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
             // Invalid CRC, skip data.
             // TODO: However the sink data was already written if piped!
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
@@ -218,17 +217,14 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
         if (s_exceptionCode == NO_ERROR) {
             // Transmit packet data in one go
-            ModbusRtuPacketReadResponse* resp = (ModbusRtuPacketReadResponse*)rs485_buffer;
-            resp->resp.header.address = bus_cl_stationAddress;
-            resp->resp.header.function = s_function;
+#define resp_1 ((ModbusRtuPacketReadResponse*)rs485_buffer)
+            resp_1->resp.header.address = bus_cl_stationAddress;
+            resp_1->resp.header.function = s_function;
             // Response of read/write registers always contains the address and register count
-            resp->resp.address.registerAddressH = s_currentAddrH;
-            resp->resp.address.registerAddressL = s_currentAddrL;
-            resp->resp.address.countH = 0;
-            resp->resp.address.countL = s_currentSize;
+            resp_1->resp.address = s_curRequest;
             // Now, if write, open stream
             if (s_function == READ_HOLDING_REGISTERS) {
-                resp->countBytes = s_sizeRemaining;
+                resp_1->countBytes = s_sizeRemaining;
                 rs485_write(sizeof(ModbusRtuPacketReadResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_STREAM;
             } else {
@@ -237,10 +233,10 @@ __bit bus_cl_poll() {
             }
         } else {
             // Transmit error data in one go
-            ModbusRtuPacketErrorResponse* resp = (ModbusRtuPacketErrorResponse*)rs485_buffer;
-            resp->header.address = bus_cl_stationAddress;
-            resp->header.function = s_function | 0x80;
-            resp->error = s_exceptionCode;
+#define resp_2 ((ModbusRtuPacketErrorResponse*)rs485_buffer)
+            resp_2->header.address = bus_cl_stationAddress;
+            resp_2->header.function = s_function | 0x80;
+            resp_2->error = s_exceptionCode;
             rs485_write(sizeof(ModbusRtuPacketErrorResponse));
             bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
         }
@@ -255,7 +251,9 @@ __bit bus_cl_poll() {
         if (s_sizeRemaining > RS485_BUF_SIZE) {
             remaining = RS485_BUF_SIZE;
         }
-        (*((s_currentAddrH == 0) ? &bus_cl_sysFunctionReadHandlers[s_currentAddrL >> 4] : &bus_cl_appFunctionReadHandlers[s_currentAddrH - 1]))();
+        (*((s_curRequest.registerAddressH == 0) ? 
+            &bus_cl_sysFunctionReadHandlers[s_curRequest.registerAddressL >> 4] : 
+            &bus_cl_appFunctionReadHandlers[s_curRequest.registerAddressH - 1]))();
         rs485_write(remaining);
         s_sizeRemaining -= remaining;
         if (s_sizeRemaining > 0) {

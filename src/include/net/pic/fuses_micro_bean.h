@@ -38,7 +38,7 @@ typedef uint16_t TICK_TYPE;
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
 // ******
-#define RS485_BUF_SIZE 32
+#define RS485_BUF_SIZE 16
 #define RS485_RCSTA RCSTAbits
 #define RS485_TXSTA TXSTAbits
 #define RS485_TXREG TXREG
