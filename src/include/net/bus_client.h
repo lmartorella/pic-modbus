@@ -36,15 +36,15 @@ __bit bus_cl_poll();
 
 /**
  * The external function handler that produces the function response data to send to the server
- * during a read call. The buffer size is fixed to 16 in case of system functions, or set with the external size tables.
+ * during a read call. The buffer to use is `rs485_buffer`
  */
-typedef void (*ReadHandler)(void* buffer);
+typedef void (*ReadHandler)();
 
 /**
  * The external function handler that consumes the function data sent by the server
- * during a write call. The buffer size is fixed to 16 in case of system functions, or set with the external size tables.
+ * during a write call. The buffer to use is `rs485_buffer`
  */
-typedef void (*WriteHandler)(const void* buffer);
+typedef void (*WriteHandler)();
 
 /**
  * The by-address system function count.

@@ -2,7 +2,6 @@
 #define _STD_CONF_H
 
 #define RS485_BAUD 19200
-#define STREAM_BUFFER_SIZE 16
 #define le16toh(b) (b)
 #define htole16(b) (b)
 

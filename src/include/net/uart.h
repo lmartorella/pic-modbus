@@ -1,5 +1,5 @@
-#ifndef UART_H
-#define	UART_H
+#ifndef _MODBUS_UART_H
+#define	_MODBUS_UART_H
 
 #ifdef __cplusplus
 extern "C" {

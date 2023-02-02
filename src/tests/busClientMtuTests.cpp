@@ -55,10 +55,10 @@ public:
      * The function handler that produces the function response data to send to the server
      * during a read call. The buffer size is `readSize`.
      */
-    void onRead(void* buffer) {
+    void onRead() {
         REQUIRE(readyForRead);
-        uint8_t* di = reinterpret_cast<uint8_t*>(buffer);
-        int toRead = std::min(STREAM_BUFFER_SIZE, (int)(bufferToSend.size()));
+        uint8_t* di = rs485_buffer;
+        int toRead = std::min(RS485_BUF_SIZE, (int)(bufferToSend.size()));
         for (int i = 0; i < toRead; i++, di++) {
             *di = bufferToSend[0];
             bufferToSend.erase(bufferToSend.begin());
@@ -74,10 +74,10 @@ public:
      * The function handler that consumes the function data sent by the server
      * during a write call. The buffer size is `writeSize`.
      */
-    void onWrite(const void* buffer) {
+    void onWrite() {
         REQUIRE(!isWritten);
-        int toWrite = std::min(STREAM_BUFFER_SIZE, (int)(writeSize - bufferReceived.size()));
-        const uint8_t* si = reinterpret_cast<const uint8_t*>(buffer);
+        int toWrite = std::min(RS485_BUF_SIZE, (int)(writeSize - bufferReceived.size()));
+        const uint8_t* si = rs485_buffer;
         for (int i = 0; i < toWrite; i++, si++) {
             bufferReceived.push_back(*si);
         }
@@ -154,28 +154,28 @@ static AppFunctionMock appFunMocks[] = {
 extern "C" {
     const uint8_t bus_cl_sysFunctionCount = sizeof(sysFunMocks) / sizeof(SysFunctionMock);
     const ReadHandler bus_cl_sysFunctionReadHandlers[bus_cl_sysFunctionCount] = { 
-        [](void* buf) { sysFunMocks[0].onRead(buf); },
-        [](void* buf) { sysFunMocks[1].onRead(buf); }
+        []() { sysFunMocks[0].onRead(); },
+        []() { sysFunMocks[1].onRead(); }
     };
     const WriteHandler bus_cl_sysFunctionWriteHandlers[bus_cl_sysFunctionCount] = { 
-        [](const void* buf) { sysFunMocks[0].onWrite(buf); },
-        [](const void* buf) { sysFunMocks[1].onWrite(buf); }
+        []() { sysFunMocks[0].onWrite(); },
+        []() { sysFunMocks[1].onWrite(); }
     };
 
     const uint8_t bus_cl_appFunctionCount = sizeof(appFunMocks) / sizeof(AppFunctionMock);
     const ReadHandler bus_cl_appFunctionReadHandlers[bus_cl_appFunctionCount] = { 
-        [](void* buf) { appFunMocks[0].onRead(buf); },
-        [](void* buf) { appFunMocks[1].onRead(buf); },
-        [](void* buf) { appFunMocks[2].onRead(buf); },
-        [](void* buf) { appFunMocks[3].onRead(buf); },
-        [](void* buf) { appFunMocks[4].onRead(buf); }
+        []() { appFunMocks[0].onRead(); },
+        []() { appFunMocks[1].onRead(); },
+        []() { appFunMocks[2].onRead(); },
+        []() { appFunMocks[3].onRead(); },
+        []() { appFunMocks[4].onRead(); }
     };
     const WriteHandler bus_cl_appFunctionWriteHandlers[bus_cl_appFunctionCount] = { 
-        [](const void* buf) { appFunMocks[0].onWrite(buf); },
-        [](const void* buf) { appFunMocks[1].onWrite(buf); },
-        [](const void* buf) { appFunMocks[2].onWrite(buf); },
-        [](const void* buf) { appFunMocks[3].onWrite(buf); },
-        [](const void* buf) { appFunMocks[4].onWrite(buf); }
+        []() { appFunMocks[0].onWrite(); },
+        []() { appFunMocks[1].onWrite(); },
+        []() { appFunMocks[2].onWrite(); },
+        []() { appFunMocks[3].onWrite(); },
+        []() { appFunMocks[4].onWrite(); }
     };
     const uint8_t bus_cl_appFunctionReadHandlerSizes[bus_cl_appFunctionCount] = {
         (uint8_t)appFunMocks[0].readSize,
@@ -201,21 +201,21 @@ extern "C" {
 
     RS485_LINE_STATE rs485_state;
     bool rs485_isMarkCondition;
+    uint8_t rs485_buffer[RS485_BUF_SIZE];
 
-    uint8_t rs485_writeAvail() {
-        return 255; // Infinite
+    _Bool rs485_writeInProgress() {
+        return false;
     }
 
-    void rs485_write(const void* buffer, uint8_t size) {
+    void rs485_write(uint8_t size) {
         if (rs485_state != RS485_LINE_TX) {
             crc_reset();
         }
         rs485_isMarkCondition = false;
         rs485_state = RS485_LINE_TX;
-        const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer);
         for (auto i = 0; i < size; ++i) {
-            txQueue.push(data[i]);
-            crc_update(data[i]);
+            txQueue.push(rs485_buffer[i]);
+            crc_update(rs485_buffer[i]);
         }
     }
 
@@ -223,25 +223,24 @@ extern "C" {
         return (uint8_t)rxQueue.size();
     }
 
-    bool rs485_read(void* buffer, uint8_t size) {
+    void rs485_read() {
         if (rs485_state != RS485_LINE_RX) {
             crc_reset();
         }
         rs485_state = RS485_LINE_RX;
-        if (size > rxQueue.size()) {
-            return false;
-        }
-        uint8_t* di = reinterpret_cast<uint8_t*>(buffer);
-        for (int i = 0; i < size; i++, di++) {
-            *di = rxQueue.front();
-            crc_update(*di);
-            rxQueue.pop();
-        }
-        return true;
     }
 
-    void rs485_discard() {
-        while (!rxQueue.empty()) {
+    void rs485_discard(uint8_t size) {
+        if (rxQueue.size() != size) {
+            if (rxQueue.size() > size && size == RS485_BUF_SIZE) {
+                // Ok the test is actually pre-buffering more data
+            } else {
+                throw std::runtime_error("Discard called with the wrong current buffer size");
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            rs485_buffer[i] = rxQueue.front();
+            crc_update(rs485_buffer[i]);
             rxQueue.pop();
         }
     }
@@ -250,11 +249,17 @@ extern "C" {
 static void initRs485() {
     rs485_isMarkCondition = true;
     rs485_state = RS485_LINE_RX;
-    rs485_discard();
+    rs485_discard(rs485_readAvail());
     crc_reset();
 
     for (int i = 0; i < bus_cl_appFunctionCount; i++) {
         appFunMocks[i].reset();
+    }
+    while (txQueue.size() > 0) {
+        txQueue.pop();
+    }
+    while (rxQueue.size() > 0) {
+        rxQueue.pop();
     }
 }
 

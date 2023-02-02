@@ -10,12 +10,14 @@ extern "C" {
 /**
  * High-level generic RS485 operation module virtualization. 
  * It basically encapsulate a 8-bit UART with additional direction bit (usually RTS on RS485 USB dongles).
+ * To ease XC8 compiler, it uses a shared static read/write buffer without intermediate buffering. This will require
+ * strict polling for flushing the buffer in real-time.
  */
 
 /**
  * Initialize asynchronous mode, but only half-duplex is used
  */
-void rs485_init(void);
+void rs485_init();
 
 /**
  * When the bus is engaged and a packet is transiting, poll should be called with 
@@ -25,33 +27,44 @@ void rs485_init(void);
  * slower on a more buffered UART, but at least able to detect a message before his end).
  * Returns `true` if the bus is active (so fast poll is required).
  */
-_Bool rs485_poll(void);
+_Bool rs485_poll();
 
 /**
- * Enqueue bytes to send. Buffer is copied so it is safe to be reused.
- * If size > rs485_writeAvail() if raise fatal error for buffer overrun.
+ * Set to true when the line is not active from more than 3.5 characters (ModBus mark condition)
+ */
+extern _Bool rs485_isMarkCondition;
+
+/**
+ * The whole buffer. `RS485_BUF_SIZE` should be at least 16 bytes.
+ * The buffer data should not be accessed until operation is completed.
+ */
+extern uint8_t rs485_buffer[RS485_BUF_SIZE];
+
+/**
+ * Start writing the data in the `rs485_buffer`.
+ * `size` is the number of bytes valid in the buffer to write.
  */ 
-void rs485_write(const void* data, uint8_t size);
+void rs485_write(uint8_t size);
 
 /**
- * Read data, if size <= rs485_readAvail(), otherwise it returns false.
+ * Start reading stream to the `rs485_buffer`.
  */
-_Bool rs485_read(void* data, uint8_t size);
+void rs485_read();
 
 /**
- * Skip read buffer
+ * Discard `count` bytes from the read buffer
  */
-void rs485_discard();
+void rs485_discard(uint8_t count);
 
 /**
- * Get count of available bytes in the read buffer
+ * Get count of available bytes in the read `rs485_buffer`
  */
 uint8_t rs485_readAvail();
 
 /**
- * Get count of available bytes in the write buffer
+ * Check if the buffer contains data still to be sent
  */
-uint8_t rs485_writeAvail(void);
+_Bool rs485_writeInProgress();
 
 // The following timings are required to avoid the two-wire RS485 line to remain floating, potentially
 // triggering frame errors. The line will be driven low by two stations at the same time.
@@ -89,9 +102,6 @@ typedef enum {
     RS485_LINE_WAIT_FOR_START_TRANSMIT
 } RS485_LINE_STATE;
 extern RS485_LINE_STATE rs485_state;
-
-// Set to true when the line is not active from more than 3.5 characters (ModBus mark condition)
-extern _Bool rs485_isMarkCondition;
 
 #ifdef __cplusplus
 }
