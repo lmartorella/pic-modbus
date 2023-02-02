@@ -118,7 +118,7 @@ __bit bus_cl_poll() {
 #define packet_1 ((const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer)
         
         s_curRequest = packet_1->req;
-        // register address if the sink id * 256
+        // register address if the function id * 256
         if (s_curRequest.registerAddressH == 0) {
             if ((s_curRequest.registerAddressL & 0xf) != 0 || (s_curRequest.registerAddressL >> 4) >= bus_cl_sysFunctionCount) {
                 // Invalid address, return error
@@ -147,7 +147,7 @@ __bit bus_cl_poll() {
         }
 
         if (s_function == READ_HOLDING_REGISTERS) {
-            // Ok, sink data must be read. Wait for packet to end
+            // Ok, function data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
         } else {
             if (packet_1->countBytes != s_sizeRemaining) {
@@ -201,7 +201,7 @@ __bit bus_cl_poll() {
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
         if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
             // Invalid CRC, skip data.
-            // TODO: However the sink data was already written if piped!
+            // TODO: However the function data was already written if piped!
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         } else {
             // Ok, go on with the response
