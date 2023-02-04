@@ -37,6 +37,9 @@ extern "C" {
 
 void fatal(const char* str);
 
+#define EEPROM_MODIFIER
+#define __ADDRESS
+
 #ifdef __cplusplus
 }
 #endif
