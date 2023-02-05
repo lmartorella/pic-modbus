@@ -6,25 +6,26 @@
  * (e.g. saves node ID)
  */
 
-void rom_read(uint8_t sourceAddress, void* destination, uint8_t length) {
-    uint8_t* dest = destination;
+// Data still to write
+static uint8_t s_length;
+static uint8_t s_destinationAddr;
+static const uint8_t* s_source;
+
+void pers_load() {
+    uint8_t* dest = (uint8_t*)&pers_data;
 #ifdef _IS_PIC16F887_CARD
     EECON1bits.EEPGD = 0;
 #endif
-    for (; length > 0; length--) { 
+    s_destinationAddr = (uint8_t)&rom_data;
+    for (uint8_t i = sizeof(PersistentData); i != 0; i--) { 
         // Wait for previous WR to finish
         while (EECON1bits.WR);
-        EEADR = sourceAddress++;
+        EEADR = s_destinationAddr++;
         EECON1bits.RD = 1;
         *(dest++) = EEDATA;
         CLRWDT();
     }
 }
-
-// Data still to write
-static uint8_t s_length;
-static uint8_t s_destinationAddr;
-static const uint8_t* s_source;
 
 // Since writing is slow, cannot lose protocol data. Hence polling
 _Bool pers_poll() {
@@ -50,9 +51,8 @@ _Bool pers_poll() {
     }
 }
 
-void rom_write(uint8_t destinationAddr, const void* source, uint8_t length)
-{
-    s_length = length;
-    s_destinationAddr = destinationAddr;
-    s_source = source;
+void pers_save() {
+    s_length = sizeof(PersistentData);
+    s_destinationAddr = (uint8_t)&rom_data;
+    s_source = &pers_data;
 }

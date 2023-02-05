@@ -22,18 +22,18 @@ typedef struct {
 /**
  * Register 0x0: get sinks count, sink status (reset reason), and exception code.
  */
-void autoconf_readNodeStatus(AUTOCONF_NODE_STATUS* status);
+void autoconf_readNodeStatus();
 
 /**
  * Register 0x1: get sinks IDs. The buffer is 4bytes * functionCount
  */
-void autoconf_readSinkIds(FOURCC* ids);
+void autoconf_readSinkIds();
 
 /**
  * Register 0x2: get/set current node GUID as 16 raw bytes
  */
-void autoconf_readNodeGuid(GUID* guid);
-void autoconf_writeNodeGuid(const GUID* guid);
+void autoconf_readNodeGuid();
+void autoconf_writeNodeGuid();
 
 #ifdef __cplusplus
 }

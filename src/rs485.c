@@ -114,7 +114,6 @@ _Bool rs485_poll() {
                 // Only read data if not in skip mode
                 if (!rs485_frameError) {
                     rs485_buffer[s_bufferPtr++] = ch;
-                    crc_update(ch);
                     if (s_bufferPtr > RS485_BUF_SIZE) {
                         // Overflow error
                         fatal("U.rov");
@@ -166,6 +165,9 @@ void rs485_read() {
 void rs485_discard(uint8_t count) {
     if (count != s_bufferPtr) {
         fatal("U.dov");
+    }
+    for (uint8_t i = 0; i < count; i++) {
+        crc_update(rs485_buffer[i]);
     }
     s_bufferPtr = 0;
 }
