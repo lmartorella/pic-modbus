@@ -25,7 +25,7 @@ typedef struct {
 void autoconf_readNodeStatus();
 
 /**
- * Register 0x1: get sinks ID. The buffer is 4bytes * functionCount
+ * Register 0x1: get sinks IDs. The buffer is 4bytes * functionCount
  */
 void autoconf_readSinkIds();
 

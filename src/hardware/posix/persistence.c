@@ -17,11 +17,7 @@ static PersistentData s_persistentData = {
     {
         UNASSIGNED_STATION_ADDRESS, 
         0xff
-    },
-    
-#ifdef HAS_PERSISTENT_SINK_DATA
-    PERSISTENT_SINK_DATA_DEFAULT_DATA
-#endif
+    }
 };
 
 static FILE* pers_fopen(const char* mode) {

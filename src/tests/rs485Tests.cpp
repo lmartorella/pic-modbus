@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <queue>
 
+#include "net/crc.h"
 #include "net/uart.h"
 #include "net/rs485.h"
 
@@ -426,4 +427,38 @@ TEST_CASE("Test mark condition") {
     advanceTime(TICKS_PER_CHAR * 4);
     REQUIRE(rs485_poll() == false);
     REQUIRE(rs485_isMarkCondition);
+}
+
+TEST_CASE("Test CRC on read") {
+    initMock(1);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    // Packed data
+    advanceTime(TICKS_PER_CHAR);
+    simulateSend({ (uint8_t)0x1, (uint8_t)0x2 });
+    REQUIRE(rs485_poll() == false);
+    REQUIRE(!rs485_isMarkCondition);
+    REQUIRE(rs485_readAvail() == 2);
+
+    // Calculated on read
+    REQUIRE(crc16 == 0xffff);
+    rs485_discard(2);
+    REQUIRE(crc16 == 0xE181);
+}
+
+TEST_CASE("Test CRC on write") {
+    initMock(16);
+    rs485_init();
+    REQUIRE(rs485_poll() == false);
+
+    rs485_buffer[0] = 0x01;
+    rs485_buffer[1] = 0x02;
+    rs485_write(2);
+    REQUIRE(crc16 == 0xFFFF);
+    REQUIRE(rs485_poll() == true);
+    advanceTime(START_TRANSMIT_TIMEOUT + 1);
+    REQUIRE(rs485_poll() == true);
+    REQUIRE(rs485_state == RS485_LINE_TX_DISENGAGE);
+    REQUIRE(crc16 == 0xE181);
 }
