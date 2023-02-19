@@ -34,8 +34,13 @@ extern __bank0 unsigned char __resetbits;
 __persistent EXC_STRING_T g_exceptionPtr;
 
 void sys_storeResetReason() {
-    // Set 4MHz oscillator
-    OSCCON = 0xea;// b11101010; = PLL en, 4Mhz, internal
+    // Set 16MHz oscillator
+    // SCS = 10b: Internal oscillator block
+    OSCCONbits.SCS = 2;
+    // IRCF = 1111b = 16 MHz 
+    OSCCONbits.IRCF = 0xf;
+    // PLL disabled
+    OSCCONbits.SPLLEN = 0;
 
     // See datasheet table 7.10
     if (!PCONbits.nPOR) {
