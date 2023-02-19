@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define SYSTEM_CLOCK 16000000ul
+#define SYSTEM_CLOCK 16000000ull
 #define _XTAL_FREQ SYSTEM_CLOCK
 
 // Internal core clock drives timer with 1:256 prescaler
@@ -55,9 +55,10 @@ typedef uint16_t TICK_TYPE;
 #define RS485_PORT_EN PORTAbits.RA6
 #define RS485_INIT_BAUD() \
      TXSTAbits.BRGH = 1;\
-     SPBRG = SYSTEM_CLOCK / ((19200 + 1) * 16);\
+     BAUDCONbits.BRG16 = 1;\
+     SPBRGL = 208; /* (SYSTEM_CLOCK / ((RS485_BAUD + 1) * 4)) & 0xff; */\
+     SPBRGH = 0; /* (SYSTEM_CLOCK / ((RS485_BAUD + 1) * 4)) / 0x100; */\
      BAUDCONbits.SCKP = 0;\
-     BAUDCONbits.BRG16 = 0;\
      APFCON0bits.RXDTSEL = 1;\
      APFCON1bits.TXCKSEL = 1;
 
