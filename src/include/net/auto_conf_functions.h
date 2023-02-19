@@ -17,7 +17,8 @@ void autoconf_init();
 typedef struct {
     uint8_t functionCount;
     uint8_t resetReason;
-    char errMsg[14];
+    uint8_t crcErrors;
+    char errMsg[13];
 } AUTOCONF_NODE_STATUS;
 /**
  * Register 0x0: get sinks count, sink status (reset reason), and exception code.

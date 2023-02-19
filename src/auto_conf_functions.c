@@ -50,10 +50,8 @@ void autoconf_readNodeStatus() {
 #define MSG_1 ((AUTOCONF_NODE_STATUS*)rs485_buffer)
     MSG_1->functionCount = bus_cl_appFunctionCount;
     MSG_1->resetReason = g_resetReason;
+    MSG_1->crcErrors = bus_crcErrors;
     memcpy(MSG_1->errMsg, (const void*)g_lastException, sizeof(MSG_1->errMsg));
-/*    for (uint8_t i = 0; i < sizeof(MSG_1->errMsg); i++) {
-        MSG_1->errMsg[i] = ((uint8_t*)g_lastException)[i];
-    } */
 }
 
 /**

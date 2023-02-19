@@ -90,6 +90,11 @@ extern const uint8_t bus_cl_appFunctionWriteHandlerSizes[];
  ***
  **/
 
+/**
+ * Count of un-adertised CRC errors in receiving message
+ */
+extern uint8_t bus_crcErrors;
+
 // RS485 Modbus defines station address in the range 1 to 247. 0 is used for broadcast messages without acknowledge.
 // So use 254 as special "unassigned" address. When the AUTO_REGISTER function is called, the only device in auto mode in the bus
 // should reply and change his address.

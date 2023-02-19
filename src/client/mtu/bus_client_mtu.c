@@ -49,7 +49,7 @@ typedef struct {
  * The current station address. It is UNASSIGNED_STATION_ADDRESS (255) if the station still doesn't have an address (auto-configuration).
  */
 uint8_t bus_cl_stationAddress;
-
+uint8_t bus_crcErrors;
 static ModbusRtuHoldingRegisterRequest s_curRequest;
 
 // If != NO_ERR, write an error
@@ -64,6 +64,7 @@ BUS_CL_RTU_STATE bus_cl_rtu_state;
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
+    bus_crcErrors = 0;
 }
 
 // Called often
@@ -202,6 +203,7 @@ __bit bus_cl_poll() {
         if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
             // Invalid CRC, skip data.
             // TODO: However the sink data was already written if piped!
+            bus_crcErrors++;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         } else {
             // Ok, go on with the response
