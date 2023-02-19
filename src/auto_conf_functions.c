@@ -14,7 +14,9 @@
  */
 
 void autoconf_init() {
-    bus_cl_stationAddress = pers_data.sec.address;
+#if HARDCODED_STATION_ADDRESS
+    bus_cl_stationAddress = HARDCODED_STATION_ADDRESS;
+#else    
     // Address should be reset?
     if (g_resetReason == RESET_MCLR
 #ifdef _IS_ETH_CARD
@@ -26,11 +28,13 @@ void autoconf_init() {
         bus_cl_stationAddress = pers_data.sec.address = UNASSIGNED_STATION_ADDRESS;
         pers_save();
     }
-
+    
+    bus_cl_stationAddress = pers_data.sec.address;
     if (bus_cl_stationAddress == UNASSIGNED_STATION_ADDRESS) {
         // Signal unattended secondary client, but doesn't auto-assign to avoid line clash at multiple boot
         led_on();
     }
+#endif
 }
 
 static void storeAddress(uint8_t address) {

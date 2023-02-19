@@ -35,6 +35,8 @@ typedef uint16_t TICK_TYPE;
 #define LED_PORTBIT PORTAbits.RA7
 #define LED_TRISBIT TRISAbits.TRISA7
 
+#define HARDCODED_STATION_ADDRESS 1
+
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
 // ******
