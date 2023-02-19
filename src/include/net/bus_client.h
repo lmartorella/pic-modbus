@@ -75,12 +75,12 @@ extern const FOURCC bus_cl_appFunctionIds[];
  */
 extern const ReadHandler bus_cl_appFunctionReadHandlers[];
 /**
- * The required sink read stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports write.
+ * The required function read stream size, in bytes. Must by mutiple of 2. It is 0 if the function only supports write.
  */
 extern const uint8_t bus_cl_appFunctionReadHandlerSizes[];
 extern const WriteHandler bus_cl_appFunctionWriteHandlers[];
 /**
- * The required sink write stream size, in bytes. Must by mutiple of 2. It is 0 if the sink only supports reads.
+ * The required function write stream size, in bytes. Must by mutiple of 2. It is 0 if the function only supports reads.
  */
 extern const uint8_t bus_cl_appFunctionWriteHandlerSizes[];
 
@@ -113,9 +113,9 @@ typedef enum {
     BUS_CL_RTU_WAIT_FOR_RESPONSE,
     // Transmit response
     BUS_CL_RTU_RESPONSE,
-    // The sink read function is piped to the "Write Register" function request
+    // The function read function is piped to the "Write Register" function request
     BUS_CL_RTU_READ_STREAM,
-    // The sink write function is piped to the "Read Register" function response
+    // The function write function is piped to the "Read Register" function response
     BUS_CL_RTU_WRITE_STREAM,
     // When the response is completed and the response CRC should be written
     BUS_CL_RTU_WRITE_RESPONSE_CRC,
