@@ -135,7 +135,29 @@ const SinkFunction sink_writeHandlers[] = {
 
 */
 
+static TICK_TYPE test_timer;
+static _Bool test_led;
+
+static void test_timer_init() {
+    test_timer = timers_get();
+    test_led = false;
+}
+
+static void test_timer_poll() {
+    TICK_TYPE elapsed = timers_get() - test_timer;
+    if (elapsed > TICKS_PER_SECOND) {
+        test_timer = timers_get();
+        test_led = !test_led;
+        if (test_led) {
+            led_off();
+        } else {
+            led_on();
+        }
+    }
+}
+
 void sinks_init() {
+    test_timer_init();
 #ifdef HAS_MAX232_SOFTWARE
     max232_init();
 #endif
@@ -164,6 +186,7 @@ void sinks_init() {
 }
 
 void sinks_poll() {
+    test_timer_poll();
 #ifdef HAS_DIGITAL_COUNTER
     if (prot_slowTimer) {
         dcnt_poll();

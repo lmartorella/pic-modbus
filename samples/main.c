@@ -40,8 +40,9 @@ void main()
 
     // I'm alive
     while (1) {
+        CLRWDT();
         net_cl_poll();
-        sinks_poll();      
+        sinks_poll();
     }
 }
 
