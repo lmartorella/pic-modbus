@@ -41,7 +41,6 @@ typedef struct {
 } ModbusRtuPacketErrorResponse;
 
 typedef struct {
-    ModbusRtuPacketResponse resp;
     uint8_t countBytes;
 } ModbusRtuPacketReadResponse;
 
@@ -217,17 +216,18 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
         if (s_exceptionCode == NO_ERROR) {
             // Transmit packet data in one go
-#define resp_1 ((ModbusRtuPacketReadResponse*)rs485_buffer)
-            resp_1->resp.header.address = bus_cl_stationAddress;
-            resp_1->resp.header.function = s_function;
-            // Response of read/write registers always contains the address and register count
-            resp_1->resp.address = s_curRequest;
-            // Now, if write, open stream
             if (s_function == READ_HOLDING_REGISTERS) {
-                resp_1->countBytes = s_sizeRemaining;
+#define resp_1r ((ModbusRtuPacketReadResponse*)rs485_buffer)
+                // Now, if write, open stream
+                resp_1r->countBytes = s_sizeRemaining;
                 rs485_write(sizeof(ModbusRtuPacketReadResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_STREAM;
             } else {
+#define resp_1w ((ModbusRtuPacketResponse*)rs485_buffer)
+                resp_1w->header.address = bus_cl_stationAddress;
+                resp_1w->header.function = s_function;
+                // Response of write registers always contains the address and register count
+                resp_1w->address = s_curRequest;
                 rs485_write(sizeof(ModbusRtuPacketResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
