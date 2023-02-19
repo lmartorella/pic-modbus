@@ -18,8 +18,8 @@
 #define RS232_TCON_IF PIR1bits.TMR2IF
 #define RS232_TCON_ACC TMR2
 #define RS232_BAUD 9600
-#define RS232_TCON_VALUE ((SYSTEM_CLOCK/4) / RS232_BAUD)   // 104
-#define RS232_TCON_VALUE_HALF ((SYSTEM_CLOCK/4) / RS232_BAUD / 2 - 38)  // 52-38. 38 Here is the result of checking with oscilloscope the exact poll point
+#define RS232_TCON_VALUE ((uint8_t)((SYSTEM_CLOCK / 4ul) / RS232_BAUD))   // 104
+#define RS232_TCON_VALUE_HALF ((uint8_t)((SYSTEM_CLOCK / 4ul) / RS232_BAUD / 2ul - 38))  // 52-38. 38 Here is the result of checking with oscilloscope the exact poll point
 // Solar needs 0x48 for the biggest message(get fw version)
 #define MAX232_BUFSIZE1 0x30
 #define MAX232_BUFSIZE2 0x30
