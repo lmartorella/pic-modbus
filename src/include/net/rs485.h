@@ -85,7 +85,7 @@ _Bool rs485_writeInProgress();
 #define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * (1.5 + 1))
 
 // Mark condition that separates messages in Modbus
-#define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 3.5)
+#define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 2)
 
 /**
  * State of the RS485 line

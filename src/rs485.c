@@ -70,6 +70,7 @@ _Bool rs485_poll() {
         rs485_startRead();
     } else if (rs485_state == RS485_LINE_RX && elapsed >= MARK_CONDITION_TIMEOUT) {
         rs485_isMarkCondition = true;
+        rs485_frameError = false;
         crc_reset();
     }
 
@@ -120,7 +121,9 @@ _Bool rs485_poll() {
                     }
                 }
             }
+            
             if (haveData) {
+                // Mark the last byte received timestamp
                 s_lastTick = timers_get();
                 rs485_isMarkCondition = false;
             }
@@ -149,6 +152,7 @@ void rs485_write(uint8_t size) {
         // Re-convert it to tx without additional delays
         rs485_state = RS485_LINE_TX;
     }
+    rs485_isMarkCondition = false;
     s_bufferPtr = 0;
     s_writeDataSize = size;
 }
@@ -163,7 +167,7 @@ void rs485_read() {
 }
 
 void rs485_discard(uint8_t count) {
-    if (count != s_bufferPtr) {
+    if (count != s_bufferPtr || rs485_state != RS485_LINE_RX) {
         fatal("U.dov");
     }
     for (uint8_t i = 0; i < count; i++) {

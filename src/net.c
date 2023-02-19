@@ -29,15 +29,13 @@ void net_cl_init() {
 }
 
 _Bool net_prim_poll() {
-    CLRWDT(); 
     _Bool active = bus_srv_poll(); 
     active = rs485_poll() || active;
     return pers_poll() || active;
 }
 
 _Bool net_cl_poll() {
-    CLRWDT();
-    _Bool active = bus_cl_poll();
-    active = rs485_poll() || active;
+    _Bool active = rs485_poll();
+    active = bus_cl_poll() || active;
     return pers_poll() || active;
 }
