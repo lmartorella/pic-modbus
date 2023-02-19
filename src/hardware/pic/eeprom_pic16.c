@@ -25,6 +25,8 @@ void pers_load() {
         *(dest++) = EEDATA;
         CLRWDT();
     }
+    
+    s_length = 0;
 }
 
 // Since writing is slow, cannot lose protocol data. Hence polling
@@ -52,7 +54,9 @@ _Bool pers_poll() {
 }
 
 void pers_save() {
+#ifndef DISABLE_PERSISTENCE
     s_length = sizeof(PersistentData);
     s_destinationAddr = (uint8_t)&rom_data;
     s_source = &pers_data;
+#endif
 }

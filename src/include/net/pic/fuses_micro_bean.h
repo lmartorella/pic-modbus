@@ -36,6 +36,8 @@ typedef uint16_t TICK_TYPE;
 #define LED_TRISBIT TRISAbits.TRISA7
 
 #define HARDCODED_STATION_ADDRESS 1
+// To save EEPROM cycles during debug
+#define DISABLE_PERSISTENCE
 
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
