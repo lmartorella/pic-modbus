@@ -1612,6 +1612,14 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../hardware/an_integrator.c" ex="true" overriding="false">
+      </item>
+      <item path="../hardware/counter.c" ex="true" overriding="false">
+      </item>
+      <item path="../hardware/i2c.c" ex="true" overriding="false">
+      </item>
+      <item path="../hardware/max232_sw.c" ex="true" overriding="false">
+      </item>
       <item path="../sinks/bmp180.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>

@@ -36,6 +36,11 @@ _Bool net_prim_poll() {
 
 _Bool net_cl_poll() {
     _Bool active = rs485_poll();
-    active = bus_cl_poll() || active;
-    return pers_poll() || active;
+    if (bus_cl_poll()) {
+        active = true;
+    }
+    if (pers_poll()) {
+        active = true;
+    }
+    return active;
 }

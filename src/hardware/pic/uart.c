@@ -20,6 +20,8 @@
 #define uart_disable_rx() RS485_RCSTA.CREN = 0;
 #endif
 
+UART_LAST_CH uart_lastCh;
+
 void uart_init() {
     RS485_RCSTA.SPEN = 1;
     RS485_TXSTA.SYNC = 0;
@@ -56,11 +58,10 @@ void uart_write(uint8_t b) {
     RS485_TXREG = b;
 }
 
-void uart_read(uint8_t* data, UART_RX_MD* md) {
+void uart_read() {
     /* Check for errors BEFORE reading RCREG */
-    (md)->overrunErr = RS485_RCSTA.OERR;
-    (md)->frameErr = RS485_RCSTA.FERR;
-    *(data) = RS485_RCREG;
+    uart_lastCh.errs = RS485_RCSTA;
+    uart_lastCh.data = RS485_RCREG;
 }
 
 _Bool uart_tx_fifo_empty() {

@@ -133,6 +133,8 @@ const SinkFunction sink_writeHandlers[] = {
 
 */
 
+#ifdef HAS_SAMPLE_LED_BLINK
+
 static TICK_TYPE test_timer;
 static _Bool test_led;
 
@@ -154,8 +156,12 @@ static void test_timer_poll() {
     }
 }
 
+#endif
+
 void sinks_init() {
+#ifdef HAS_SAMPLE_LED_BLINK
     test_timer_init();
+#endif
 #ifdef HAS_MAX232_SOFTWARE
     max232_init();
 #endif
@@ -184,7 +190,9 @@ void sinks_init() {
 }
 
 void sinks_poll() {
+#ifdef HAS_SAMPLE_LED_BLINK
     test_timer_poll();
+#endif
 #ifdef HAS_DIGITAL_COUNTER
     if (prot_slowTimer) {
         dcnt_poll();

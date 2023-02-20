@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <xc.h>
 #include "net/crc.h"
 #include "net/rs485.h"
 #include "net/timers.h"
@@ -74,63 +75,58 @@ _Bool rs485_poll() {
         crc_reset();
     }
 
-    switch (rs485_state) {
-        case RS485_LINE_TX: {
-            // Empty TX buffer? Check for more data
-            while (uart_tx_fifo_empty()) {
-                if (rs485_writeInProgress()) {
-                    // Feed more data, read at read pointer and then increase
-                    uint8_t ch = rs485_buffer[s_bufferPtr++];
-                    uart_write(ch);
-                    crc_update(ch);
-                } else {
-                    // NO MORE data to transmit
-                    // goto first phase of tx end
-                    rs485_state = RS485_LINE_TX_DISENGAGE;
-                    s_lastTick = timers_get();
-                    return true;
-                }
-            };
-            // Wait for a character to be written: slow timer
-            return false;
-        } 
-        case RS485_LINE_RX: {
-            // Data received
-            _Bool haveData = false;
-            while (!uart_rx_fifo_empty()) {
-                haveData = true;
-                uint8_t ch;
-                UART_RX_MD md;
-
-                uart_read(&ch, &md);
-
-                if (md.overrunErr) {
-                    // Not enough fast polling, reboot
-                    fatal("U.OER");
-                }
-                if (md.frameErr) {
-                    rs485_frameError = true;
-                }
-                
-                // Only read data if not in skip mode
-                if (!rs485_frameError) {
-                    rs485_buffer[s_bufferPtr++] = ch;
-                    if (s_bufferPtr > RS485_BUF_SIZE) {
-                        // Overflow error
-                        fatal("U.rov");
-                    }
-                }
-            }
-            
-            if (haveData) {
-                // Mark the last byte received timestamp
+    if (rs485_state == RS485_LINE_TX) {
+        // Empty TX buffer? Check for more data
+        while (uart_tx_fifo_empty()) {
+            if (rs485_writeInProgress()) {
+                // Feed more data, read at read pointer and then increase
+                uint8_t ch = rs485_buffer[s_bufferPtr++];
+                uart_write(ch);
+                crc_update(ch);
+            } else {
+                // NO MORE data to transmit
+                // goto first phase of tx end
+                rs485_state = RS485_LINE_TX_DISENGAGE;
                 s_lastTick = timers_get();
-                rs485_isMarkCondition = false;
+                return true;
+            }
+        };
+        // Wait for a character to be written: slow timer
+        return false;
+    } else if (rs485_state == RS485_LINE_RX) {
+        // Data received
+        _Bool haveData = false;
+        while (!uart_rx_fifo_empty()) {
+            haveData = true;
+
+            uart_read();
+
+            if (uart_lastCh.errs.OERR) {
+                // Not enough fast polling, reboot
+                fatal("U.OER");
+            }
+            if (uart_lastCh.errs.FERR) {
+                rs485_frameError = true;
             }
 
-            // Wait for a character to be read: slow timer
-            return false;
+            // Only read data if not in skip mode
+            if (!rs485_frameError) {
+                rs485_buffer[s_bufferPtr++] = uart_lastCh.data;
+                if (s_bufferPtr > RS485_BUF_SIZE) {
+                    // Overflow error
+                    fatal("U.rov");
+                }
+            }
         }
+
+        if (haveData) {
+            // Mark the last byte received timestamp
+            s_lastTick = timers_get();
+            rs485_isMarkCondition = false;
+        }
+
+        // Wait for a character to be read: slow timer
+        return false;
     }
 
     // More granularity required for Timer-based activities 

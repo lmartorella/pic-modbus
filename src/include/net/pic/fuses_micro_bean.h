@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <xc.h>
 
 #define SYSTEM_CLOCK 16000000ul
 #define _XTAL_FREQ SYSTEM_CLOCK
@@ -35,6 +36,8 @@ typedef uint16_t TICK_TYPE;
 #define LED_PORTBIT PORTAbits.RA7
 #define LED_TRISBIT TRISAbits.TRISA7
 
+#undef HAS_SAMPLE_LED_BLINK
+
 #define HARDCODED_STATION_ADDRESS 1
 // To save EEPROM cycles during debug
 #define DISABLE_PERSISTENCE
@@ -63,6 +66,8 @@ typedef uint16_t TICK_TYPE;
      BAUDCONbits.SCKP = 0;\
      APFCON0bits.RXDTSEL = 1;\
      APFCON1bits.TXCKSEL = 1;
+
+typedef RCSTAbits_t UART_ERR_BITS;
 
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5

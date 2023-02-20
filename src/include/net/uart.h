@@ -11,19 +11,18 @@ extern "C" {
  * will probably kill performances.
  * Declared to decouple UART implementation, that can be native Microchip MCU or Linux based (via USB dongle).
  */
-
+    
 typedef struct {
-    // Frame error occurred?
-    unsigned frameErr :1;
-    // Overflow error occurred?
-    unsigned overrunErr :1;
-} UART_RX_MD;
+    uint8_t data;
+    UART_ERR_BITS errs;
+} UART_LAST_CH;
+extern UART_LAST_CH uart_lastCh;
 
 void uart_init();
 void uart_transmit();
 void uart_receive();
 void uart_write(uint8_t b);
-void uart_read(uint8_t* data, UART_RX_MD* md);
+void uart_read();
 
 _Bool uart_tx_fifo_empty();
 _Bool uart_rx_fifo_empty();
