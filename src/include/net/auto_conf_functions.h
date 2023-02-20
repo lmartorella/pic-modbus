@@ -36,6 +36,16 @@ void autoconf_readSinkIds();
 void autoconf_readNodeGuid();
 void autoconf_writeNodeGuid();
 
+/**
+ * The applicative function count in the `autoconf_appFunctionIds`. 
+ */
+extern const uint8_t autoconf_appFunctionCount;
+
+/**
+ * The unique ID of the named function, his type
+ */
+extern const FOURCC autoconf_appFunctionIds[];
+
 #ifdef __cplusplus
 }
 #endif

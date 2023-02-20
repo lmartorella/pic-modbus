@@ -44,29 +44,28 @@ static void storeAddress(uint8_t address) {
 }
 
 /**
- * Register 0x0: get sinks count, sink status (reset reason), and exception code.
+ * Registers 0x0-0x7: get sinks count, sink status (reset reason), and exception code.
  */
 void autoconf_readNodeStatus() {
 #define MSG_1 ((AUTOCONF_NODE_STATUS*)rs485_buffer)
-    MSG_1->functionCount = bus_cl_appFunctionCount;
+    MSG_1->functionCount = autoconf_appFunctionCount;
     MSG_1->resetReason = g_resetReason;
     MSG_1->crcErrors = bus_crcErrors;
     memcpy(MSG_1->errMsg, (const void*)g_lastException, sizeof(MSG_1->errMsg));
 }
 
 /**
- * Register 0x1: get sinks ID
+ * Registers 0x8-0xF: get sinks ID
  */
 void autoconf_readSinkIds() {
 #define MSG_2 ((FOURCC*)rs485_buffer)
-    for (uint8_t i = 0; i < bus_cl_appFunctionCount; i++) {
-        MSG_2[i] = bus_cl_appFunctionIds[i];
+    for (uint8_t i = 0; i < autoconf_appFunctionCount; i++) {
+        MSG_2[i] = autoconf_appFunctionIds[i];
     }
 }
 
 /**
- * Register 0x2: get/set current node GUID as 16 raw bytes
- * Read: 16
+ * Register 0x10-0x17: get/set current node GUID as 16 raw bytes
  */
 void autoconf_readNodeGuid() {
 #define MSG_3 ((GUID*)rs485_buffer)

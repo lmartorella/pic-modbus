@@ -1,26 +1,24 @@
 #include <net/net.h>
 #include "./samples.h"
 
+static void noop() { }
+
 // REGISTER SINKS
 // Static allocation of sinks
-const uint8_t bus_cl_sysFunctionCount = 3;
-const ReadHandler bus_cl_sysFunctionReadHandlers[3] = {
+const uint8_t bus_cl_functionCount = 3;
+const ReadHandler bus_cl_functionReadHandlers[3] = {
     (ReadHandler)autoconf_readNodeStatus,
     (ReadHandler)autoconf_readSinkIds,
     (ReadHandler)autoconf_readNodeGuid
 };
-const WriteHandler bus_cl_sysFunctionWriteHandlers[3] = {
-    NULL,
-    NULL,
+const WriteHandler bus_cl_functionWriteHandlers[3] = {
+    noop,
+    noop,
     (WriteHandler)autoconf_writeNodeGuid
 };
 
-const uint8_t bus_cl_appFunctionCount = 0;
-const ReadHandler bus_cl_appFunctionReadHandlers[0] = { };
-const WriteHandler bus_cl_appFunctionWriteHandlers[0] = { };
-const uint8_t bus_cl_appFunctionReadHandlerSizes[0] = { };
-const uint8_t bus_cl_appFunctionWriteHandlerSizes[0] = { };
-const FOURCC bus_cl_appFunctionIds[0] = { };
+const uint8_t autoconf_appFunctionCount = 0;
+const FOURCC autoconf_appFunctionIds[0] = { };
 
 /*
 #ifdef HAS_DIGIO_OUT

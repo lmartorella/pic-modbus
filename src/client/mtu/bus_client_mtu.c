@@ -50,7 +50,7 @@ typedef struct {
  */
 uint8_t bus_cl_stationAddress;
 uint8_t bus_crcErrors;
-static ModbusRtuHoldingRegisterRequest s_curRequest;
+static uint8_t s_curRequestAddressL;
 
 // If != NO_ERR, write an error
 static uint8_t s_exceptionCode;
@@ -118,35 +118,24 @@ __bit bus_cl_poll() {
 
 #define packet_1 ((const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer)
         
-        s_curRequest = packet_1->req;
-        // register address if the function id * 256
-        if (s_curRequest.registerAddressH == 0) {
-            if ((s_curRequest.registerAddressL & 0xf) != 0 || (s_curRequest.registerAddressL >> 4) >= bus_cl_sysFunctionCount) {
-                // Invalid address, return error
-                s_exceptionCode = ERR_INVALID_ADDRESS;
-                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-                return false;
-            }
-            // Sys functions has fixed size to save program space
-            s_sizeRemaining = 16;
-        } else {
-            if (s_curRequest.registerAddressL != 0 || s_curRequest.registerAddressH > bus_cl_appFunctionCount) {
-                // Invalid address, return error
-                s_exceptionCode = ERR_INVALID_ADDRESS;
-                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-                return false;
-            }
-            s_sizeRemaining = (s_function == READ_HOLDING_REGISTERS) ? 
-                bus_cl_appFunctionReadHandlerSizes[s_curRequest.registerAddressH - 1] : 
-                bus_cl_appFunctionWriteHandlerSizes[s_curRequest.registerAddressH - 1];
+        // register address if the function id * 8
+        // Max 32 functions, so 256 registers
+        if (packet_1->req.registerAddressH != 0 || (packet_1->req.registerAddressL & 0x8) != 0 || (packet_1->req.registerAddressL >> 3) >= bus_cl_functionCount) {
+            // Invalid address, return error
+            s_exceptionCode = ERR_INVALID_ADDRESS;
+            bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+            return false;
         }
-        if (packet_1->req.countH != 0 || packet_1->req.countL != (s_sizeRemaining >> 1) || s_sizeRemaining == 0) {
+        // Functions has fixed size of 16 bytes (8 registers) to save program space
+        if (packet_1->req.countH != 0 || packet_1->req.countL != 8) {
             // Invalid size, return error
             s_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
-
+        s_sizeRemaining = 16;
+        s_curRequestAddressL = packet_1->req.registerAddressL;
+        
         if (s_function == READ_HOLDING_REGISTERS) {
             // Ok, function data must be read. Wait for packet to end
             bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
@@ -175,9 +164,7 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(remaining);
-        (*((s_curRequest.registerAddressH == 0) ? 
-            &bus_cl_sysFunctionWriteHandlers[s_curRequest.registerAddressL >> 4] : 
-            &bus_cl_appFunctionWriteHandlers[s_curRequest.registerAddressH - 1]))();
+        bus_cl_functionWriteHandlers[s_curRequestAddressL >> 3]();
         s_sizeRemaining -= remaining;
 
         if (s_sizeRemaining > 0) {
@@ -231,7 +218,10 @@ __bit bus_cl_poll() {
             } else {
 #define resp_1w ((ModbusRtuPacketResponse*)rs485_buffer)
                 // Response of write registers always contains the address and register count
-                resp_1w->address = s_curRequest;
+                resp_1w->address.registerAddressH = 0;
+                resp_1w->address.registerAddressL = s_curRequestAddressL;
+                resp_1w->address.countH = 0;
+                resp_1w->address.countL = 8;
                 rs485_write(sizeof(ModbusRtuPacketResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
@@ -254,9 +244,7 @@ __bit bus_cl_poll() {
         if (s_sizeRemaining > RS485_BUF_SIZE) {
             remaining = RS485_BUF_SIZE;
         }
-        (*((s_curRequest.registerAddressH == 0) ? 
-            &bus_cl_sysFunctionReadHandlers[s_curRequest.registerAddressL >> 4] : 
-            &bus_cl_appFunctionReadHandlers[s_curRequest.registerAddressH - 1]))();
+        bus_cl_functionReadHandlers[s_curRequestAddressL >> 3]();
         rs485_write(remaining);
         s_sizeRemaining -= remaining;
         if (s_sizeRemaining > 0) {

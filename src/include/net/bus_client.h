@@ -47,42 +47,17 @@ typedef void (*ReadHandler)();
 typedef void (*WriteHandler)();
 
 /**
- * The by-address system function count.
+ * The total function count (system + apps). Must be filled by the application.
  */
-extern const uint8_t bus_cl_sysFunctionCount;
+extern const uint8_t bus_cl_functionCount;
 
 /**
- * The system function definitions, of size `bus_cl_sysFunctionCount`.
- * Every function will span 16 registers: the first function will have the address 0x0,
- * the second one the address 0x10, etc...
+ * The function definitions, of size `bus_cl_functionCount`.
+ * Every function will span 8 16-bit registers: the first function will have the address 0x0,
+ * the second one the address 0x08, etc...
  */
-extern const ReadHandler bus_cl_sysFunctionReadHandlers[];
-extern const WriteHandler bus_cl_sysFunctionWriteHandlers[];
-
-/**
- * The applicative function count in the `bus_cl_appFunctions`. Must be filled by the application.
- */
-extern const uint8_t bus_cl_appFunctionCount;
-
-/**
- * The unique ID of the function, the type
- */
-extern const FOURCC bus_cl_appFunctionIds[];
-/**
- * The applicative function definitions, of size `bus_cl_appFunctionCount`. Must be filled by the application.
- * Each function has allocated 256 bytes of address space (128 registers): the first function will have
- * the address 0x100, the second one the address 0x200, regardless the read/write size.
- */
-extern const ReadHandler bus_cl_appFunctionReadHandlers[];
-/**
- * The required function read stream size, in bytes. Must by mutiple of 2. It is 0 if the function only supports write.
- */
-extern const uint8_t bus_cl_appFunctionReadHandlerSizes[];
-extern const WriteHandler bus_cl_appFunctionWriteHandlers[];
-/**
- * The required function write stream size, in bytes. Must by mutiple of 2. It is 0 if the function only supports reads.
- */
-extern const uint8_t bus_cl_appFunctionWriteHandlerSizes[];
+extern const ReadHandler bus_cl_functionReadHandlers[];
+extern const WriteHandler bus_cl_functionWriteHandlers[];
 
 /***
  ***
