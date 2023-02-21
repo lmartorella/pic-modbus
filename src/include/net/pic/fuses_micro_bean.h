@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xc.h>
+#include "../guid.h"
 
 #define SYSTEM_CLOCK 16000000ul
 #define _XTAL_FREQ SYSTEM_CLOCK
@@ -72,17 +73,8 @@ typedef RCSTAbits_t UART_ERR_BITS;
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5
 
-// persistent char* are not supported by xc8 1.37
-typedef uint16_t EXC_STRING_T; 
-#define EXC_STRING_NULL (0)
-
-extern __persistent EXC_STRING_T g_exceptionPtr;
-// Reset the device with fatal error
-#define fatal(msg) { g_exceptionPtr = (EXC_STRING_T)msg; asm("reset"); }
-
-#define INIT_PORTS() \
-     ANSELBbits.ANSB2 = 0;\
-     ANSELBbits.ANSB5 = 0;\
+// Reset the device with sys (non-hw) error
+#define fatal(code) { sys_resetReason = code; asm("reset"); }
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

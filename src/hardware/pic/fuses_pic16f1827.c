@@ -29,11 +29,7 @@ void sys_enableInterrupts() {
 extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
 
-// The pointer is pointing to ROM space that will not be reset
-// otherwise after the RESET the variable content can be lost.
-__persistent EXC_STRING_T g_exceptionPtr;
-
-void sys_storeResetReason() {
+void sys_init() {
     // Set 16MHz oscillator
     // SCS = 10b: Internal oscillator block
     OSCCONbits.SCS = 2;
@@ -44,21 +40,23 @@ void sys_storeResetReason() {
 
     // See datasheet table 7.10
     if (!PCONbits.nPOR) {
-        g_resetReason = RESET_POWER;        
+        sys_resetReason = RESET_POWER;        
     } else if (!PCONbits.nBOR) {
-        g_resetReason = RESET_BROWNOUT;
+        sys_resetReason = RESET_BROWNOUT;
     } else if (!(__resetbits & nTObit)) {
-        g_resetReason = RESET_WATCHDOG;
+        sys_resetReason = RESET_WATCHDOG;
     } else if (!PCONbits.nRMCLR) {
-        g_resetReason = RESET_MCLR;
+        sys_resetReason = RESET_MCLR;
     } else if (!PCONbits.nRI) {
-        g_resetReason = RESET_EXC;
-        g_lastException = g_exceptionPtr;
+        // Software exception, RESET was called via code
+        // In that case, sys_resetReason already contains the right code
     } else if (PCONbits.STKOVF || PCONbits.STKUNF) {
-        g_resetReason = RESET_STACKFAIL;
+        sys_resetReason = RESET_STACKFAIL;
     }
 
     PCON = 0xf; // reset all reset reasons
-    g_exceptionPtr = 0;
+    
+    // Disable analog ports by default
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB5 = 0;
 }
-

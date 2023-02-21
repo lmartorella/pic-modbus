@@ -35,7 +35,6 @@ _Bool net_cl_poll(void);
 /**
  * API
  */
-#include "appio.h"
 #include "auto_conf_functions.h"
 #include "bus_client.h"
 #include "bus_server.h"
@@ -43,6 +42,7 @@ _Bool net_cl_poll(void);
 #include "leds.h"
 #include "persistence.h"
 #include "rs485.h"
+#include "sys.h"
 #include "timers.h"
 #include "uart.h"
 

@@ -108,7 +108,10 @@ __bit bus_cl_poll() {
 
     if (bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA) {
         // In case of write, read the size too
-        uint8_t messageSize = (s_function == READ_HOLDING_REGISTERS ? sizeof(ModbusRtuHoldingRegisterRequest) : sizeof(ModbusRtuHoldingRegisterRequest) + 1);
+        uint8_t messageSize = sizeof(ModbusRtuHoldingRegisterRequest);
+        if (s_function == WRITE_HOLDING_REGISTERS) {
+            messageSize = sizeof(ModbusRtuHoldingRegisterRequest) + 1;
+        }
         if (rs485_readAvail() < messageSize) {
             // Nothing to do, wait for more data
             return false;

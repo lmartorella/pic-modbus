@@ -3,6 +3,7 @@
 #include <xc.h>
 #include "net/crc.h"
 #include "net/rs485.h"
+#include "net/sys.h"
 #include "net/timers.h"
 #include "net/uart.h"
 
@@ -103,7 +104,7 @@ _Bool rs485_poll() {
 
             if (uart_lastCh.errs.OERR) {
                 // Not enough fast polling, reboot
-                fatal("U.OER");
+                fatal(EXC_CODE_RS485_READ_UNDERRUN);
             }
             if (uart_lastCh.errs.FERR) {
                 rs485_frameError = true;
@@ -114,7 +115,7 @@ _Bool rs485_poll() {
                 rs485_buffer[s_bufferPtr++] = uart_lastCh.data;
                 if (s_bufferPtr > RS485_BUF_SIZE) {
                     // Overflow error
-                    fatal("U.rov");
+                    fatal(EXC_CODE_RS485_READ_OVERRUN);
                 }
             }
         }
@@ -164,7 +165,7 @@ void rs485_read() {
 
 void rs485_discard(uint8_t count) {
     if (count != s_bufferPtr || rs485_state != RS485_LINE_RX) {
-        fatal("U.dov");
+        fatal(EXC_CODE_RS485_DISCARD_MISMATCH);
     }
     for (uint8_t i = 0; i < count; i++) {
         crc_update(rs485_buffer[i]);

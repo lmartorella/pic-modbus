@@ -10,7 +10,6 @@ void net_prim_init(uint16_t serverUdpPort) {
     s_acknowledged = false;
 
     timers_init();
-    io_init();
     led_init();
     pers_load();
     bus_srv_init(serverUdpPort);
@@ -20,7 +19,6 @@ void net_prim_init(uint16_t serverUdpPort) {
 
 void net_cl_init() {
     timers_init();
-    io_init();
     led_init();
     pers_load();
     bus_cl_init();

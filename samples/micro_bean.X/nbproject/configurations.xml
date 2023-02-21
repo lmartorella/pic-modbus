@@ -17,7 +17,6 @@
               <itemPath>../../../src/nodes/include/net/pic/configuration.h</itemPath>
               <itemPath>../../../src/nodes/include/net/pic/fuses_micro_bean.h</itemPath>
             </logicalFolder>
-            <itemPath>../../../src/nodes/include/net/appio.h</itemPath>
             <itemPath>../../../src/nodes/include/net/auto_conf_functions.h</itemPath>
             <itemPath>../../../src/nodes/include/net/bus_client.h</itemPath>
             <itemPath>../../../src/nodes/include/net/crc.h</itemPath>
@@ -28,6 +27,7 @@
             <itemPath>../../../src/nodes/include/net/rs485.h</itemPath>
             <itemPath>../../../src/nodes/include/net/timers.h</itemPath>
             <itemPath>../../../src/nodes/include/net/uart.h</itemPath>
+            <itemPath>../../../src/nodes/include/net/sys.h</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -64,13 +64,13 @@
           </logicalFolder>
           <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
             <logicalFolder name="pic" displayName="pic" projectFiles="true">
-              <itemPath>../../../src/nodes/hardware/pic/appio.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/fuses_pic16f1827.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/uart.c</itemPath>
+              <itemPath>../../../src/nodes/hardware/pic/sys.c</itemPath>
             </logicalFolder>
           </logicalFolder>
           <itemPath>../../../src/nodes/auto_conf_functions.c</itemPath>

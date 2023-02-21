@@ -14,18 +14,6 @@ typedef struct
 } GUID;
 
 /**
- * Two-cc is used by protocol
- */
-typedef union {
-    char str[2];
-    struct {
-        char c1;
-        char c2;
-    } chars;
-    uint8_t bytes[2];
-} TWOCC;
-
-/**
  * Four-cc is used by sink type IDs
  */
 typedef union {

@@ -1,12 +1,11 @@
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
-#include "net/appio.h"
 #include "net/auto_conf_functions.h"
 #include "net/bus_client.h"
 #include "net/leds.h"
 #include "net/persistence.h"
 #include "net/rs485.h"
+#include "net/sys.h"
 
 /**
  * Module that implements the system sinks to reflect the node content.
@@ -49,9 +48,8 @@ static void storeAddress(uint8_t address) {
 void autoconf_readNodeStatus() {
 #define MSG_1 ((AUTOCONF_NODE_STATUS*)rs485_buffer)
     MSG_1->functionCount = autoconf_appFunctionCount;
-    MSG_1->resetReason = g_resetReason;
+    MSG_1->resetReason = sys_resetReason;
     MSG_1->crcErrors = bus_crcErrors;
-    memcpy(MSG_1->errMsg, (const void*)g_lastException, sizeof(MSG_1->errMsg));
 }
 
 /**
