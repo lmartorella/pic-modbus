@@ -7,6 +7,8 @@
 #include "net/rs485.h"
 #include "net/sys.h"
 
+static uint8_t s_readIdSlotCount;
+
 /**
  * Module that implements the system sinks to reflect the node content.
  * Exposed as system ModBus registers
@@ -34,9 +36,10 @@ void autoconf_init() {
         led_on();
     }
 #endif
+    s_readIdSlotCount = 0;
 }
 
-static void storeAddress(uint8_t address) {
+static void storeAddress() {
     pers_data.sec.address = bus_cl_stationAddress;
     pers_save();
     led_off();
@@ -46,10 +49,25 @@ static void storeAddress(uint8_t address) {
  * Registers 0x0-0x7: get sinks count, sink status (reset reason), and exception code.
  */
 void autoconf_readNodeStatus() {
-#define MSG_1 ((AUTOCONF_NODE_STATUS*)rs485_buffer)
+#define MSG_1 ((AUTOCONF_READ_NODE_STATUS*)rs485_buffer)
     MSG_1->functionCount = autoconf_appFunctionCount;
     MSG_1->resetReason = sys_resetReason;
     MSG_1->crcErrors = bus_crcErrors;
+    s_readIdSlotCount = 0;
+}
+void autoconf_writeNodeStatus() {
+#define MSG_1w ((AUTOCONF_WRITE_NODE_STATUS*)rs485_buffer)
+    if (MSG_1w->reset) {
+        fatal(RESET_NONE);
+    }
+    if (MSG_1w->resetCounters) {
+        bus_crcErrors = 0;
+    }
+    if (MSG_1w->stationNode != 255) {
+        bus_cl_stationAddress = MSG_1w->stationNode;
+        storeAddress();
+    }
+    s_readIdSlotCount = 0;
 }
 
 /**
@@ -57,8 +75,8 @@ void autoconf_readNodeStatus() {
  */
 void autoconf_readSinkIds() {
 #define MSG_2 ((FOURCC*)rs485_buffer)
-    for (uint8_t i = 0; i < autoconf_appFunctionCount; i++) {
-        MSG_2[i] = autoconf_appFunctionIds[i];
+    for (uint8_t i = 0, si = s_readIdSlotCount * 4; i < 4; i++, si++) {
+        MSG_2[i] = autoconf_appFunctionIds[si];
     }
 }
 

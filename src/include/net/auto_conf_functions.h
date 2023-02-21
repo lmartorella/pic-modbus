@@ -14,18 +14,62 @@ extern "C" {
 
 void autoconf_init();
 
-typedef struct {
-    uint8_t functionCount;
-    uint8_t resetReason;
-    uint8_t crcErrors;
-} AUTOCONF_NODE_STATUS;
 /**
- * Register 0x0: get sinks count, sink status (reset reason), and exception code.
+ * Used by function 0 when reading
  */
-void autoconf_readNodeStatus();
+typedef struct {
+    /**
+     * Application functions, count
+     */
+    uint8_t functionCount;
+
+    /**
+     * Application functions, first slot (in 8 registers ranges)
+     */
+    uint8_t functionStart;
+
+    /**
+     * See RESET_REASON
+     */
+    uint8_t resetReason;
+    
+    /**
+     * Count of CRC errors in the reading period
+     */
+    uint8_t crcErrors;
+} AUTOCONF_READ_NODE_STATUS;
 
 /**
- * Register 0x1: get sinks IDs. The buffer is 4bytes * functionCount
+ * Used by function 0 when writing
+ */
+typedef struct {
+    /**
+     * Reset error counters
+     */
+    uint8_t resetCounters;
+
+    /**
+     * If set, reset the node
+     */
+    uint8_t reset;
+
+    /**
+     * Set a new station node (RS485)
+     */
+    uint8_t stationNode;
+} AUTOCONF_WRITE_NODE_STATUS;
+
+/**
+ * Register 0x0: get sinks count, sink status (reset reason), and exception code.
+ * Write node address, reset counters.
+ */
+void autoconf_readNodeStatus();
+void autoconf_writeNodeStatus();
+
+/**
+ * Register 0x1: get application function IDs. At every read, read 4 IDs (each ID is a fourcc, so 2 16-bit registers)
+ * Continue to read to read the whole `functionCount`. 
+ * Reading or writing the node status (address 0) resets the reading pointer to the begin.
  */
 void autoconf_readSinkIds();
 

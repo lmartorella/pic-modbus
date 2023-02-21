@@ -12,7 +12,7 @@ const ReadHandler bus_cl_functionReadHandlers[3] = {
     (ReadHandler)autoconf_readNodeGuid
 };
 const WriteHandler bus_cl_functionWriteHandlers[3] = {
-    noop,
+    (ReadHandler)autoconf_writeNodeStatus,
     noop,
     (WriteHandler)autoconf_writeNodeGuid
 };
