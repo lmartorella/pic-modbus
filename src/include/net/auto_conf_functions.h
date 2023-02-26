@@ -21,22 +21,22 @@ typedef struct {
     /**
      * Application functions, count
      */
-    uint8_t functionCount;
+    uint16_t functionCount;
 
     /**
      * Application functions, first slot (in 8 registers ranges)
      */
-    uint8_t functionStart;
+    uint16_t functionStart;
 
     /**
      * See RESET_REASON
      */
-    uint8_t resetReason;
+    uint16_t resetReason;
     
     /**
      * Count of CRC errors in the reading period
      */
-    uint8_t crcErrors;
+    uint16_t crcErrors;
 } AUTOCONF_READ_NODE_STATUS;
 
 /**
@@ -46,17 +46,17 @@ typedef struct {
     /**
      * Reset error counters
      */
-    uint8_t resetCounters;
+    uint16_t resetCounters;
 
     /**
      * If set, reset the node
      */
-    uint8_t reset;
+    uint16_t reset;
 
     /**
      * Set a new station node (RS485)
      */
-    uint8_t stationNode;
+    uint16_t stationNode;
 } AUTOCONF_WRITE_NODE_STATUS;
 
 /**

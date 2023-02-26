@@ -123,7 +123,7 @@ __bit bus_cl_poll() {
         
         // register address if the function id * 8
         // Max 32 functions, so 256 registers
-        if (packet_1->req.registerAddressH != 0 || (packet_1->req.registerAddressL & 0x8) != 0 || (packet_1->req.registerAddressL >> 3) >= bus_cl_functionCount) {
+        if (packet_1->req.registerAddressH != 0 || (packet_1->req.registerAddressL & 0x7) != 0 || (packet_1->req.registerAddressL >> 3) >= bus_cl_functionCount) {
             // Invalid address, return error
             s_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;

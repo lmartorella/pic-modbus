@@ -111,7 +111,7 @@
         <targetDevice>PIC16F1827</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.32</languageToolchainVersion>
         <platform>3</platform>
@@ -147,12 +147,44 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../hardware/an_integrator.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/counter.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/i2c.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/max232_sw.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../sinks/bmp180.c" ex="true" overriding="false">
         <HI-TECH-COMP>
@@ -1613,12 +1645,44 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../hardware/an_integrator.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/counter.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/i2c.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../hardware/max232_sw.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-CO>
+        </XC8-CO>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../sinks/bmp180.c" ex="true" overriding="false">
         <HI-TECH-COMP>
