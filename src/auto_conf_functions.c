@@ -51,6 +51,8 @@ static void storeAddress() {
 void autoconf_readNodeStatus() {
 #define MSG_1 ((AUTOCONF_READ_NODE_STATUS*)rs485_buffer)
     MSG_1->functionCount = autoconf_appFunctionCount;
+    // 0, 1, 2 functions range are system calls
+    MSG_1->functionStart = 3;
     MSG_1->resetReason = sys_resetReason;
     MSG_1->crcErrors = bus_crcErrors;
     s_readIdSlotCount = 0;
