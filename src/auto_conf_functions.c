@@ -66,7 +66,7 @@ void autoconf_writeNodeStatus() {
         bus_crcErrors = 0;
     }
     if (MSG_1w->stationNode != 255) {
-        bus_cl_stationAddress = MSG_1w->stationNode;
+        bus_cl_stationAddress = (uint8_t)MSG_1w->stationNode;
         storeAddress();
     }
     s_readIdSlotCount = 0;
