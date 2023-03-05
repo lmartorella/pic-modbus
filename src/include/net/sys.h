@@ -73,6 +73,29 @@ typedef enum {
      * Mismatch between read data and processed data (discard)
      */
     EXC_CODE_RS485_DISCARD_MISMATCH = 0x12,
+            
+    // Generic applicative fatal errors
+
+    /**
+     * Function/device not polled enough
+     */
+    ERR_DEVICE_DEADLINE_MISSED = 0x20,
+            
+    /**
+     * Function/device generic HW unrecoverable fail
+     */
+    ERR_DEVICE_HW_FAIL = 0x21,
+
+    /**
+     * Function/device read overrun
+     */
+    ERR_DEVICE_READ_OVERRUN = 0x22,
+
+    /**
+     * Function/device HW communication error, missing ack, etc..
+     */
+    ERR_DEVICE_HW_NOT_ACK = 0x23
+
 } RESET_REASON;
 
 /**

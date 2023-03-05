@@ -103,8 +103,18 @@ typedef enum {
     NO_ERROR = 0,
     ERR_INVALID_FUNCTION = 1,
     ERR_INVALID_ADDRESS = 2,
-    ERR_INVALID_SIZE = 3
+    ERR_INVALID_SIZE = 3,
+            
+    // Used by applicative code
+    ERR_DEVICE_BUSY = 6,
+    ERR_DEVICE_NACK = 7
 } BUL_CL_RTU_EXCEPTION_CODE;
+
+// If != NO_ERR, write an error
+extern uint8_t bus_cl_exceptionCode;
+
+// Access the read/write buffer as 8 16-bit registers (little-endian)
+#define bus_cl_buffer_le16 ((uint16_t*)rs485_buffer)
 
 #ifdef __cplusplus
 }
