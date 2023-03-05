@@ -51,6 +51,8 @@ static void storeAddress() {
 void autoconf_readNodeStatus() {
 #define MSG_1 ((AUTOCONF_READ_NODE_STATUS*)rs485_buffer)
     MSG_1->functionCount = autoconf_appFunctionCount;
+    // 0, 1, 2 functions range are system calls
+    MSG_1->functionStart = 3;
     MSG_1->resetReason = sys_resetReason;
     MSG_1->crcErrors = bus_crcErrors;
     s_readIdSlotCount = 0;
@@ -64,7 +66,7 @@ void autoconf_writeNodeStatus() {
         bus_crcErrors = 0;
     }
     if (MSG_1w->stationNode != 255) {
-        bus_cl_stationAddress = MSG_1w->stationNode;
+        bus_cl_stationAddress = (uint8_t)MSG_1w->stationNode;
         storeAddress();
     }
     s_readIdSlotCount = 0;

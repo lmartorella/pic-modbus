@@ -13,12 +13,12 @@
 #include "hardware/i2c.h"
 #include "hardware/max232.h"
 
+#define HAS_BMP180
 /*
 #define HAS_DIGIO_OUT
 #define HAS_DIGIO_IN
 #define HAS_DHT11
 #define HAS_MAX232_SOFTWARE
-#define HAS_BMP180
 #define HAS_DIGITAL_COUNTER
 #define HAS_ANALOG_INTEGRATOR
 */

@@ -53,7 +53,7 @@ uint8_t bus_crcErrors;
 static uint8_t s_curRequestAddressL;
 
 // If != NO_ERR, write an error
-static uint8_t s_exceptionCode;
+uint8_t bus_cl_exceptionCode;
 // Store the bytes remaining for function data streaming
 static uint8_t s_sizeRemaining;
 // The current function in use
@@ -96,7 +96,7 @@ __bit bus_cl_poll() {
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_REGISTER_DATA;
             } else {
                 // Invalid function, return error
-                s_exceptionCode = ERR_INVALID_FUNCTION;
+                bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                 return false;
             }
@@ -125,14 +125,14 @@ __bit bus_cl_poll() {
         // Max 32 functions, so 256 registers
         if (packet_1->req.registerAddressH != 0 || (packet_1->req.registerAddressL & 0x7) != 0 || (packet_1->req.registerAddressL >> 3) >= bus_cl_functionCount) {
             // Invalid address, return error
-            s_exceptionCode = ERR_INVALID_ADDRESS;
+            bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
         // Functions has fixed size of 16 bytes (8 registers) to save program space
         if (packet_1->req.countH != 0 || packet_1->req.countL != 8) {
             // Invalid size, return error
-            s_exceptionCode = ERR_INVALID_SIZE;
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
@@ -145,7 +145,7 @@ __bit bus_cl_poll() {
         } else {
             if (packet_1->countBytes != s_sizeRemaining) {
                 // Invalid size, return error
-                s_exceptionCode = ERR_INVALID_SIZE;
+                bus_cl_exceptionCode = ERR_INVALID_SIZE;
                 bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                 return false;
             } else {
@@ -197,7 +197,7 @@ __bit bus_cl_poll() {
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         } else {
             // Ok, go on with the response
-            s_exceptionCode = NO_ERROR;
+            bus_cl_exceptionCode = NO_ERROR;
         }
     }
 
@@ -209,7 +209,7 @@ __bit bus_cl_poll() {
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
 #define resp_1b ((ModbusRtuPacketHeader*)rs485_buffer)
         resp_1b->address = bus_cl_stationAddress;
-        if (s_exceptionCode == NO_ERROR) {
+        if (bus_cl_exceptionCode == NO_ERROR) {
             resp_1b->function = s_function;
             // Transmit packet data in one go
             if (s_function == READ_HOLDING_REGISTERS) {
@@ -232,7 +232,7 @@ __bit bus_cl_poll() {
             // Transmit error data in one go
 #define resp_2 ((ModbusRtuPacketErrorResponse*)rs485_buffer)
             resp_2->header.function = s_function | 0x80;
-            resp_2->error = s_exceptionCode;
+            resp_2->error = bus_cl_exceptionCode;
             rs485_write(sizeof(ModbusRtuPacketErrorResponse));
             bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
         }
