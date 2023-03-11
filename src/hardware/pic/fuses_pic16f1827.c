@@ -29,7 +29,7 @@ void enableInterrupts() {
 extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
 
-void sys_init() {
+void regs_init() {
     // Set 16MHz oscillator
     // SCS = 10b: Internal oscillator block
     OSCCONbits.SCS = 2;

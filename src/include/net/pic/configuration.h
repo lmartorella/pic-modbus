@@ -4,6 +4,7 @@
 #define RS485_BAUD 19200
 #define le16toh(b) (b)
 #define htole16(b) (b)
+#define STATION_NODE (1)
 
 /**
  * Loads the MCU headers and additional fuses

@@ -103,12 +103,6 @@ typedef enum {
  */
 typedef struct {
     /**
-     * Set a new station node (RS485)
-     */
-    uint8_t stationNode;
-    uint8_t _filler;
-
-    /**
      * See RESET_REASON
      */
     RESET_REASON resetReason;

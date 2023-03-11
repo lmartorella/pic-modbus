@@ -1,5 +1,3 @@
-#include "assert.h"
-#include "endian.h"
 #include "net/bus_client.h"
 #include "net/crc.h"
 #include "net/registers.h"
@@ -88,7 +86,7 @@ __bit bus_cl_poll() {
         rs485_discard(sizeof(ModbusRtuPacketHeader));
 
 #define packet_2 ((const ModbusRtuPacketHeader*)rs485_buffer)
-        if (packet_2->address == regs_registers.stationNode) {
+        if (packet_2->address == STATION_NODE) {
             s_function = packet_2->function;
             if (s_function == READ_HOLDING_REGISTERS || s_function == WRITE_HOLDING_REGISTERS) {
                 // The message is for reading registers. Address data will follow
@@ -205,7 +203,7 @@ __bit bus_cl_poll() {
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
 #define resp_1b ((ModbusRtuPacketHeader*)rs485_buffer)
-        resp_1b->address = regs_registers.stationNode;
+        resp_1b->address = STATION_NODE;
         if (bus_cl_exceptionCode == NO_ERROR) {
             resp_1b->function = s_function;
             // Transmit packet data in one go

@@ -18,8 +18,6 @@ _Bool net_poll(void);
  * API
  */
 #include "bus_client.h"
-#include "leds.h"
-#include "persistence.h"
 #include "rs485.h"
 #include "registers.h"
 #include "timers.h"
