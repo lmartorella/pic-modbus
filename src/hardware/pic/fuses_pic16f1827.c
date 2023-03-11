@@ -40,18 +40,18 @@ void sys_init() {
 
     // See datasheet table 7.10
     if (!PCONbits.nPOR) {
-        sys_resetReason = RESET_POWER;        
+        regs_registers.resetReason = RESET_POWER;        
     } else if (!PCONbits.nBOR) {
-        sys_resetReason = RESET_BROWNOUT;
+        regs_registers.resetReason = RESET_BROWNOUT;
     } else if (!(__resetbits & nTObit)) {
-        sys_resetReason = RESET_WATCHDOG;
+        regs_registers.resetReason = RESET_WATCHDOG;
     } else if (!PCONbits.nRMCLR) {
-        sys_resetReason = RESET_MCLR;
+        regs_registers.resetReason = RESET_MCLR;
     } else if (!PCONbits.nRI) {
         // Software exception, RESET was called via code
         // In that case, sys_resetReason already contains the right code
     } else if (PCONbits.STKOVF || PCONbits.STKUNF) {
-        sys_resetReason = RESET_STACKFAIL;
+        regs_registers.resetReason = RESET_STACKFAIL;
     }
 
     PCON = 0xf; // reset all reset reasons

@@ -1,33 +1,6 @@
 #include <net/net.h>
 #include "./samples.h"
 
-static void noop() { }
-
-// REGISTER SINKS
-// Static allocation of sinks
-const uint8_t bus_cl_functionCount = 6;
-const ReadHandler bus_cl_functionReadHandlers[6] = {
-    (ReadHandler)autoconf_readNodeStatus,
-    (ReadHandler)autoconf_readSinkIds,
-    (ReadHandler)autoconf_readNodeGuid,
-    
-    (ReadHandler)bmp180_read_reg1,
-    (ReadHandler)bmp180_read_reg2,
-    (ReadHandler)bmp180_read_reg3,
-};
-const WriteHandler bus_cl_functionWriteHandlers[6] = {
-    (ReadHandler)autoconf_writeNodeStatus,
-    noop,
-    (WriteHandler)autoconf_writeNodeGuid,
-    
-    (ReadHandler)bmp180_write_reg1,
-    noop,
-    noop,
-};
-
-const uint8_t autoconf_appFunctionCount = 1;
-const FOURCC autoconf_appFunctionIds[1] = { SINK_BMP180_ID };
-
 #ifdef HAS_SAMPLE_LED_BLINK
 
 static TICK_TYPE test_timer;

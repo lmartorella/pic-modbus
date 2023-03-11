@@ -13,6 +13,7 @@
 #include "hardware/i2c.h"
 #include "hardware/max232.h"
 
+#define HAS_I2C
 #define HAS_BMP180
 /*
 #define HAS_DIGIO_OUT

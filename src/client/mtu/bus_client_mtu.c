@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "endian.h"
+#include "net/auto_conf_functions.h"
 #include "net/bus_client.h"
 #include "net/crc.h"
 #include "net/rs485.h"
@@ -48,8 +49,6 @@ typedef struct {
 /**
  * The current station address. It is UNASSIGNED_STATION_ADDRESS (255) if the station still doesn't have an address (auto-configuration).
  */
-uint8_t bus_cl_stationAddress;
-uint8_t bus_crcErrors;
 static uint8_t s_curRequestAddressL;
 
 // If != NO_ERR, write an error
@@ -64,7 +63,7 @@ BUS_CL_RTU_STATE bus_cl_rtu_state;
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
-    bus_crcErrors = 0;
+    regs_registers.crcErrors = 0;
 }
 
 // Called often
@@ -89,7 +88,7 @@ __bit bus_cl_poll() {
         rs485_discard(sizeof(ModbusRtuPacketHeader));
 
 #define packet_2 ((const ModbusRtuPacketHeader*)rs485_buffer)
-        if (packet_2->address == bus_cl_stationAddress) {
+        if (packet_2->address == regs_registers.stationNode) {
             s_function = packet_2->function;
             if (s_function == READ_HOLDING_REGISTERS || s_function == WRITE_HOLDING_REGISTERS) {
                 // The message is for reading registers. Address data will follow
@@ -121,16 +120,14 @@ __bit bus_cl_poll() {
 
 #define packet_1 ((const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer)
         
-        // register address if the function id * 8
-        // Max 32 functions, so 256 registers
-        if (packet_1->req.registerAddressH != 0 || (packet_1->req.registerAddressL & 0x7) != 0 || (packet_1->req.registerAddressL >> 3) >= bus_cl_functionCount) {
+        if (packet_1->req.registerAddressH != 0 || packet_1->req.registerAddressL > REGS_COUNT) {
             // Invalid address, return error
             bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
             return false;
         }
         // Functions has fixed size of 16 bytes (8 registers) to save program space
-        if (packet_1->req.countH != 0 || packet_1->req.countL != 8) {
+        if (packet_1->req.countH != 0 || packet_1->req.countL == 0 || (packet_1->req.registerAddressL + packet_1->req.countL > REGS_COUNT)) {
             // Invalid size, return error
             bus_cl_exceptionCode = ERR_INVALID_SIZE;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
@@ -167,7 +164,7 @@ __bit bus_cl_poll() {
         }
         // Free the buffer
         rs485_discard(remaining);
-        bus_cl_functionWriteHandlers[s_curRequestAddressL >> 3]();
+        regs_onRead();
         s_sizeRemaining -= remaining;
 
         if (s_sizeRemaining > 0) {
@@ -193,7 +190,7 @@ __bit bus_cl_poll() {
         if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
             // Invalid CRC, skip data.
             // TODO: However the function data was already written if piped!
-            bus_crcErrors++;
+            regs_registers.crcErrors++;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         } else {
             // Ok, go on with the response
@@ -208,7 +205,7 @@ __bit bus_cl_poll() {
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
 #define resp_1b ((ModbusRtuPacketHeader*)rs485_buffer)
-        resp_1b->address = bus_cl_stationAddress;
+        resp_1b->address = regs_registers.stationNode;
         if (bus_cl_exceptionCode == NO_ERROR) {
             resp_1b->function = s_function;
             // Transmit packet data in one go
@@ -247,7 +244,7 @@ __bit bus_cl_poll() {
         if (s_sizeRemaining > RS485_BUF_SIZE) {
             remaining = RS485_BUF_SIZE;
         }
-        bus_cl_functionReadHandlers[s_curRequestAddressL >> 3]();
+        regs_onWrite();
         rs485_write(remaining);
         s_sizeRemaining -= remaining;
         if (s_sizeRemaining > 0) {

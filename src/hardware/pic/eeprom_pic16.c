@@ -54,9 +54,7 @@ _Bool pers_poll() {
 }
 
 void pers_save() {
-#ifndef DISABLE_PERSISTENCE
     s_length = sizeof(PersistentData);
     s_destinationAddr = (uint8_t)&rom_data;
-    s_source = &pers_data;
-#endif
+    s_source = (const uint8_t*)&pers_data;
 }

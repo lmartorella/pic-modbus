@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xc.h>
+#include "net/auto_conf_functions.h"
 #include "net/crc.h"
 #include "net/rs485.h"
 #include "net/sys.h"

@@ -1,8 +1,6 @@
 #ifndef PERSISTENCE_INCLUDE_
 #define PERSISTENCE_INCLUDE_
 
-#include "guid.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,27 +31,11 @@ void rom_write();
 /**
  * The system persistence record
  */
-typedef struct
-{
+typedef struct {
     /**
-     * The stored device ID
+     * The modbus slave bus address
      */
-	GUID deviceId;
-    
-    /**
-     * The bean node bus address (only used by bus secondary)
-     */
-    struct {
-        uint8_t address;
-        uint8_t filler;
-    } sec;
-    
-    /**
-     * Custom data (16 bytes)
-     */
-    struct {
-        uint8_t custom[16];        
-    } custom;
+    uint8_t address;
 } PersistentData;
 
 // The cached copy of the EEPROM data, read at startup/init

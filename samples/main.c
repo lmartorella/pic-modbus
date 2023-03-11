@@ -13,7 +13,7 @@ void main() {
     // Analyze RESET reason
     sys_init();
 
-    net_cl_init();
+    net_init();
                 
     sinks_init();
         
@@ -22,7 +22,7 @@ void main() {
     // I'm alive
     while (1) {
         CLRWDT();
-        net_cl_poll();
+        net_poll();
         sinks_poll();
     }
 }

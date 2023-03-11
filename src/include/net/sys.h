@@ -98,12 +98,7 @@ typedef enum {
 
 } RESET_REASON;
 
-/**
- * Contains the reset reason code
- */
-extern __persistent RESET_REASON sys_resetReason;
-
-void sys_enableInterrupts(void);
+void sys_enableInterrupts();
 
 #ifdef __cplusplus
 }

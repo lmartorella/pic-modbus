@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xc.h>
-#include "../guid.h"
 
 #define SYSTEM_CLOCK 16000000ul
 #define _XTAL_FREQ SYSTEM_CLOCK
@@ -39,10 +38,6 @@ typedef uint16_t TICK_TYPE;
 
 #undef HAS_SAMPLE_LED_BLINK
 
-#define HARDCODED_STATION_ADDRESS 1
-// To save EEPROM cycles during debug
-#define DISABLE_PERSISTENCE
-
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
 // ******
@@ -74,7 +69,7 @@ typedef RCSTAbits_t UART_ERR_BITS;
 //TXCKSEL:1  TX/CK function is on RB5
 
 // Reset the device with sys (non-hw) error
-#define fatal(code) { sys_resetReason = code; asm("reset"); }
+#define fatal(code) { regs_registers.resetReason = code; asm("reset"); }
 
 #endif	/* FUSES_MICRO_BEAN_H */
 
