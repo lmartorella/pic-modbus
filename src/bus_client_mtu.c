@@ -1,8 +1,8 @@
 #include "assert.h"
 #include "endian.h"
-#include "net/auto_conf_functions.h"
 #include "net/bus_client.h"
 #include "net/crc.h"
+#include "net/registers.h"
 #include "net/rs485.h"
 
 /**

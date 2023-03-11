@@ -14,7 +14,7 @@ extern "C" {
 /**
  * This should be called as very first line of code in MCUs to analyze the reset flags
  */
-void sys_init();
+void regs_init();
 
 /**
  * Enumerates the reason of a reset. Contains MCU codes and code exceptions
@@ -98,7 +98,41 @@ typedef enum {
 
 } RESET_REASON;
 
-void sys_enableInterrupts();
+/**
+ * Holding rgisters [0-2]
+ */
+typedef struct {
+    /**
+     * Set a new station node (RS485)
+     */
+    uint8_t stationNode;
+    uint8_t _filler;
+
+    /**
+     * See RESET_REASON
+     */
+    RESET_REASON resetReason;
+    uint8_t _filler2;
+    
+    /**
+     * Count of CRC errors in the reading period
+     */
+    uint16_t crcErrors;
+} SYS_REGISTERS;
+
+#define REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
+
+extern __persistent SYS_REGISTERS regs_registers;
+
+/**
+ * Called when the registers are read
+ */
+void regs_onRead();
+
+/**
+ * Called when the registers are written
+ */
+void regs_onWrite();
 
 #ifdef __cplusplus
 }

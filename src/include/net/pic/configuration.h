@@ -24,4 +24,6 @@
 #error Missing configuration
 #endif
 
+void enableInterrupts();
+
 #endif

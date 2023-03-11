@@ -1,12 +1,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include "net/auto_conf_functions.h"
 #include "net/bus_client.h"
 #include "net/leds.h"
 #include "net/persistence.h"
+#include "net/registers.h"
 #include "net/rs485.h"
-#include "net/sys.h"
+#include "net/registers.h"
 
 __persistent SYS_REGISTERS regs_registers;
 

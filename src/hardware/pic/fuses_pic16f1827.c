@@ -19,7 +19,7 @@
 #pragma config BORV = LO        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), low trip point selected.)
 #pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
  
-void sys_enableInterrupts() {
+void enableInterrupts() {
     // Disable low/high interrupt mode
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;

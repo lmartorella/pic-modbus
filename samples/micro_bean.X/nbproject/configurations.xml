@@ -17,7 +17,6 @@
               <itemPath>../../../src/nodes/include/net/pic/configuration.h</itemPath>
               <itemPath>../../../src/nodes/include/net/pic/fuses_micro_bean.h</itemPath>
             </logicalFolder>
-            <itemPath>../../../src/nodes/include/net/auto_conf_functions.h</itemPath>
             <itemPath>../../../src/nodes/include/net/bus_client.h</itemPath>
             <itemPath>../../../src/nodes/include/net/crc.h</itemPath>
             <itemPath>../../../src/nodes/include/net/leds.h</itemPath>
@@ -26,7 +25,7 @@
             <itemPath>../../../src/nodes/include/net/rs485.h</itemPath>
             <itemPath>../../../src/nodes/include/net/timers.h</itemPath>
             <itemPath>../../../src/nodes/include/net/uart.h</itemPath>
-            <itemPath>../../../src/nodes/include/net/sys.h</itemPath>
+            <itemPath>../../../src/nodes/include/net/registers.h</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -56,11 +55,6 @@
       </logicalFolder>
       <logicalFolder name="f1" displayName="net" projectFiles="true">
         <logicalFolder name="nodes" displayName="nodes" projectFiles="true">
-          <logicalFolder name="client" displayName="client" projectFiles="true">
-            <logicalFolder name="mtu" displayName="mtu" projectFiles="true">
-              <itemPath>../../../src/nodes/client/mtu/bus_client_mtu.c</itemPath>
-            </logicalFolder>
-          </logicalFolder>
           <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
             <logicalFolder name="pic" displayName="pic" projectFiles="true">
               <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
@@ -71,10 +65,11 @@
               <itemPath>../../../src/nodes/hardware/pic/uart.c</itemPath>
             </logicalFolder>
           </logicalFolder>
-          <itemPath>../../../src/nodes/auto_conf_functions.c</itemPath>
           <itemPath>../../../src/nodes/crc.c</itemPath>
           <itemPath>../../../src/nodes/net.c</itemPath>
           <itemPath>../../../src/nodes/rs485.c</itemPath>
+          <itemPath>../../../src/nodes/bus_client_mtu.c</itemPath>
+          <itemPath>../../../src/nodes/registers.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">

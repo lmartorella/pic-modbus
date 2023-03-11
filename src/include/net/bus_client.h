@@ -2,7 +2,7 @@
 #define	_MODBUS_CLIENT_H
 
 #include "configuration.h"
-#include "sys.h"
+#include "registers.h"
 
 #ifdef __cplusplus
 extern "C" {

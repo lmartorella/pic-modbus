@@ -11,13 +11,13 @@ void __interrupt(PRIO_TYPE) low_isr() {
 
 void main() {
     // Analyze RESET reason
-    sys_init();
+    regs_init();
 
     net_init();
                 
     sinks_init();
         
-    sys_enableInterrupts();
+    enableInterrupts();
 
     // I'm alive
     while (1) {
