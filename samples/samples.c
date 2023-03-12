@@ -1,53 +1,79 @@
 #include <net/net.h>
-#include "./samples.h"
+#include "samples.h"
 
-void sinks_init() {
-#ifdef HAS_SAMPLE_LED_BLINK
-    test_timer_init();
-#endif
-#ifdef HAS_MAX232_SOFTWARE
-    max232_init();
-#endif
+#define SYS_REGS_ADDRESS (0)
 
-#ifdef HAS_I2C
-    i2c_init();
+void samples_init() {
+#ifdef HAS_LED_BLINK
+    blinker_init();
 #endif
-        
-#if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
-    digio_init();
-#endif
-
-#ifdef HAS_DIGITAL_COUNTER
-    dcnt_init();
-#endif
-
-#ifdef HAS_BMP180
-    bmp180_init();
-#endif
-#ifdef HAS_DHT11
-    dht11_init();
-#endif
-#ifdef HAS_ANALOG_INTEGRATOR
-    anint_init();
-#endif   
 }
 
-void sinks_poll() {
-#ifdef HAS_BMP180
-    bmp180_poll();
+void samples_poll() {
+#ifdef HAS_LED_BLINK
+    blinker_poll();
 #endif
-#ifdef HAS_SAMPLE_LED_BLINK
-    test_timer_poll();
-#endif
-#ifdef HAS_DIGITAL_COUNTER
-    if (prot_slowTimer) {
-        dcnt_poll();
+}
+
+static uint16_t address;
+
+static void be16toh(const uint16_t* dest, const uint16_t* src) {
+    ((uint8_t*)dest)[1] = ((const uint8_t*)src)[0];
+    ((uint8_t*)dest)[0] = ((const uint8_t*)src)[1];
+}
+
+_Bool regs_validateAddr() {
+    uint8_t count = bus_cl_header.address.countL;
+    be16toh(&address, &bus_cl_header.address.registerAddressBe);
+    
+    // Exposes the system registers in the rane 0-2
+    if (address == SYS_REGS_ADDRESS) {
+        if (count != SYS_REGS_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+            return false;
+        }
+        return true;
+    }
+    
+#ifdef HAS_LED_BLINK
+    if (address == LEDBLINK_REGS_ADDRESS) {
+        if (count != LEDBLINK_REGS_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        return true;
     }
 #endif
-#ifdef HAS_DIGIO_IN
-    digio_in_poll();
-#endif
-#ifdef HAS_ANALOG_INTEGRATOR
-    anint_poll();
-#endif   
+    
+    bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+    return false;
 }
+
+_Bool regs_onReceive() {
+#ifdef HAS_LED_BLINK
+    if (address == LEDBLINK_REGS_ADDRESS) {
+        memcpy(&blinker_regs, rs485_buffer, sizeof(LedBlinkRegsiters));
+        return blinker_conf();
+    }
+#endif
+    return false;
+}
+
+void regs_onSend() {
+    if (address == SYS_REGS_ADDRESS) {
+        memcpy(rs485_buffer, &regs_registers, sizeof(SYS_REGISTERS));
+        return;
+    }
+    
+#ifdef HAS_LED_BLINK
+    if (address == LEDBLINK_REGS_ADDRESS) {
+        memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
+        return;
+    }
+#endif
+}
+

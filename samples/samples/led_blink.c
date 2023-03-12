@@ -1,23 +1,31 @@
 #include "net/net.h"
-#include "../ssamples"
-#include "./hardware/led.h"
+#include "samples.h"
+#include "samples/hardware/led.h"
 
 #ifdef HAS_LED_BLINK
 
-static TICK_TYPE test_timer;
-static _Bool test_led;
+LedBlinkRegsiters blinker_regs;
 
-static void test_timer_init() {
-    test_timer = timers_get();
-    test_led = false;
+static TICK_TYPE timer;
+static _Bool state;
+
+void blinker_init() {
+    led_init();
+    timer = timers_get();
+    state = false;
+    blinker_regs.period = TICKS_PER_SECOND;
 }
 
-static void test_timer_poll() {
-    TICK_TYPE elapsed = timers_get() - test_timer;
-    if (elapsed > TICKS_PER_SECOND) {
-        test_timer = timers_get();
-        test_led = !test_led;
-        if (test_led) {
+_Bool blinker_conf() {
+    // Always ok
+    return true;
+}
+
+void blinker_poll() {
+    TICK_TYPE elapsed = timers_get() - timer;
+    if (elapsed > blinker_regs.period) {
+        timer = timers_get();
+        if ((state = !state)) {
             led_off();
         } else {
             led_on();

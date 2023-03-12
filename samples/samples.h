@@ -1,29 +1,19 @@
 #ifndef SAMPLES_H
 #define	SAMPLES_H
     
-#include "samples/bmp180.h"
-#include "samples/dht11.h"
-#include "samples/digio.h"
-#include "samples/flowCounter.h"
-#include "samples/integratorSink.h"
+#include "sample_config.h"
+#include "samples/led_blink.h"
 
-#undef HAS_ANALOG_INTEGRATOR
-#undef HAS_BMP180
-#undef HAS_DIGIO_OUT
-#undef HAS_DIGIO_IN
-#undef HAS_DHT11
-#undef HAS_DIGITAL_COUNTER
-#undef HAS_LED_BLINK
 
 /**
  * Init samples
  */
-void samples_init(void);
+void samples_init();
 
 /**
  * Returns true if active and require polling
  */
-void samples_poll(void);
+void samples_poll();
 
 #endif	/* SAMPLES_H */
 

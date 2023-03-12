@@ -114,7 +114,6 @@ typedef struct {
     uint16_t crcErrors;
 } SYS_REGISTERS;
 
-#define SYS_REGS_ADDRESS (0)
 #define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
 
 // In RAM

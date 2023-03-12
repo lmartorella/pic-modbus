@@ -78,16 +78,26 @@ extern uint8_t bus_cl_exceptionCode;
 
 // The very header of every Modbus message
 typedef struct {
-    uint8_t address;
+    uint8_t stationAddress;
     uint8_t function;
 } ModbusRtuPacketHeader;
 
 // Used in both reading and writing holding registers
 typedef struct {
-    uint8_t registerAddressH; // big endian
-    uint8_t registerAddressL; // big endian
-    uint8_t countH;           // big endian
-    uint8_t countL;           // big endian
+    union {
+        struct {
+            uint8_t registerAddressH;     // in big-endian
+            uint8_t registerAddressL;     // in big-endian
+        };
+        uint16_t registerAddressBe;     // in big-endian
+    };
+    union {
+        struct {
+            uint8_t countH;     // in big-endian
+            uint8_t countL;     // in big-endian
+        };
+        uint16_t countBe;               // in big-endian
+    };
 } ModbusRtuHoldingRegisterData;
 
 typedef struct {

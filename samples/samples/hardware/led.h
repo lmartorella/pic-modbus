@@ -2,7 +2,7 @@
 #define	LEDS_H
 
 /**
- * Functions to regulate notification led
+ * Functions to regulate the notification led in the micro-bean board
  */
 
 #ifdef __cplusplus

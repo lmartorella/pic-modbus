@@ -11,9 +11,11 @@ extern "C" {
 void timers_init(void);
 
 /**
- * Poll the interrupt flag of the timer for overflow, and in case increments the MSB tick bytes
+ * To be called from ISR interrupt handler, optimized for minimal stack usage.
+ * Update tick timers at ~Khz freq
+ * Check flag of the timer for overflow, and in case increments the MSB tick bytes
  */
-void timers_poll(void);
+void timers_isr(void);
 
 /**
  * Get current timer value in ticks

@@ -8,6 +8,10 @@
  * for 8-bit CPUs with low memory.
  */
 
+// At reset the values of the registers will remain, so the reset reason / error
+// can be sent out
+__persistent SYS_REGISTERS regs_registers;
+
 ModbusRtuHoldingRegisterRequest bus_cl_header;
 
 typedef struct {
@@ -57,14 +61,15 @@ __bit bus_cl_poll() {
         bus_cl_header = *((const ModbusRtuHoldingRegisterRequest*)rs485_buffer);
         rs485_discard(sizeof(ModbusRtuHoldingRegisterRequest));
 
-        if (bus_cl_header.header.address == STATION_NODE) {
+        if (bus_cl_header.header.stationAddress == STATION_NODE) {
             if (bus_cl_header.header.function == READ_HOLDING_REGISTERS || bus_cl_header.header.function == WRITE_HOLDING_REGISTERS) {
                 if (!regs_validateAddr()) {
                     // Error was set, respond with error
                     bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                     return false;
                 }
-                messageSize = bus_cl_header.address.countL * 2;
+                // Count(16) is always < 128
+                messageSize = ((uint8_t)bus_cl_header.address.countL) * 2;
 
                 if (bus_cl_header.header.function == READ_HOLDING_REGISTERS) {
                     // Ok, function data must be read. Wait for packet to end with CRC and then send
