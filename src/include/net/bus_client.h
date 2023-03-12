@@ -40,18 +40,18 @@ typedef enum {
     BUS_CL_RTU_IDLE,
     // Read mode: skipping input data and waiting for the next idle state.
     BUS_CL_RTU_WAIT_FOR_IDLE,
-    // Read the address and size of the data to read/write
-    BUS_CL_RTU_WAIT_REGISTER_DATA,
     // Wait the checksum to validate the message
     BUS_CL_RTU_CHECK_REQUEST_CRC,
     // Wait the end of the packet and then start response
     BUS_CL_RTU_WAIT_FOR_RESPONSE,
     // Transmit response
     BUS_CL_RTU_RESPONSE,
-    // The function read function is piped to the "Write Register" function request
-    BUS_CL_RTU_READ_STREAM,
+    // Wait for the byte of data size
+    BUS_CL_RTU_RECEIVE_DATA_SIZE,
+    // Wait for the data to be received 
+    BUS_CL_RTU_RECEIVE_DATA,
     // The function write function is piped to the "Read Register" function response
-    BUS_CL_RTU_WRITE_STREAM,
+    BUS_CL_RTU_SEND_DATA,
     // When the response is completed and the response CRC should be written
     BUS_CL_RTU_WRITE_RESPONSE_CRC,
     // Wait for the RS485 module to end the transmission
@@ -70,11 +70,35 @@ typedef enum {
     ERR_DEVICE_NACK = 7
 } BUL_CL_RTU_EXCEPTION_CODE;
 
+#define READ_HOLDING_REGISTERS (3)
+#define WRITE_HOLDING_REGISTERS (16)
+
 // If != NO_ERR, write an error
 extern uint8_t bus_cl_exceptionCode;
 
-// Access the read/write buffer as 8 16-bit registers (little-endian)
-#define bus_cl_buffer_le16 ((uint16_t*)rs485_buffer)
+// The very header of every Modbus message
+typedef struct {
+    uint8_t address;
+    uint8_t function;
+} ModbusRtuPacketHeader;
+
+// Used in both reading and writing holding registers
+typedef struct {
+    uint8_t registerAddressH; // big endian
+    uint8_t registerAddressL; // big endian
+    uint8_t countH;           // big endian
+    uint8_t countL;           // big endian
+} ModbusRtuHoldingRegisterData;
+
+typedef struct {
+    ModbusRtuPacketHeader header;
+    ModbusRtuHoldingRegisterData address;
+} ModbusRtuHoldingRegisterRequest;
+
+/**
+ * Header of the last request received
+ */
+extern ModbusRtuHoldingRegisterRequest bus_cl_header;
 
 #ifdef __cplusplus
 }

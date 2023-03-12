@@ -114,19 +114,28 @@ typedef struct {
     uint16_t crcErrors;
 } SYS_REGISTERS;
 
-#define REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
+#define SYS_REGS_ADDRESS (0)
+#define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
 
+// In RAM
 extern __persistent SYS_REGISTERS regs_registers;
 
 /**
- * Called when the registers are read
+ * Validate request of read/write a register range. Header to check: bus_cl_header
  */
-void regs_onRead();
+_Bool regs_validateAddr();
 
 /**
- * Called when the registers are written
+ * Called when the registers (sys or app) are about to be read (sent out).
+ * The rs485_buffer contains the data.
  */
-void regs_onWrite();
+_Bool regs_onReceive();
+
+/**
+ * Called when the registers (sys or app) was written
+ * The rs485_buffer should be filled with the data.
+ */
+void regs_onSend();
 
 #ifdef __cplusplus
 }

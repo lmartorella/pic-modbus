@@ -12,10 +12,32 @@ __persistent SYS_REGISTERS regs_registers;
  * Exposed as system ModBus registers
  */
 
-void regs_onRead() {
+_Bool regs_validateAddr() {
+    // Only supports whole read
+    if (bus_cl_header.address.registerAddressH != 0 || bus_cl_header.address.registerAddressL != 0) {
+        // Invalid address, return error
+        bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+        return false;
+    }
+    if (bus_cl_header.address.countH != 0 || bus_cl_header.address.countL != SYS_REGS_COUNT) {
+        // Invalid size, return error
+        bus_cl_exceptionCode = ERR_INVALID_SIZE;
+        return false;
+    }
+    // Only supports read
+    if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+        // Invalid size, return error
+        bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+        return false;
+    }
+    return true;
+}
+
+_Bool regs_onReceive() {
     memcpy(rs485_buffer, &regs_registers, sizeof(SYS_REGISTERS));
 }
 
-void regs_onWrite() {
+void regs_onSend() {
+    // Never called
 }
 

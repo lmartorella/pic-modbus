@@ -8,53 +8,24 @@
  * for 8-bit CPUs with low memory.
  */
 
-typedef struct {
-    uint8_t address;
-    uint8_t function;
-} ModbusRtuPacketHeader;
-
-#define READ_HOLDING_REGISTERS (3)
-#define WRITE_HOLDING_REGISTERS (16)
-
-typedef struct {
-    uint8_t registerAddressH; // big endian
-    uint8_t registerAddressL; // big endian
-    uint8_t countH;           // big endian
-    uint8_t countL;           // big endian
-} ModbusRtuHoldingRegisterRequest;
-
-// Optimize number of read operations, for Write Register read also count;
-typedef struct {
-    ModbusRtuHoldingRegisterRequest req;
-    uint8_t countBytes;
-} ModbusRtuHoldingRegisterWriteRequest;
-
-typedef struct {
-    ModbusRtuPacketHeader header;
-    ModbusRtuHoldingRegisterRequest address;
-} ModbusRtuPacketResponse;
+ModbusRtuHoldingRegisterRequest bus_cl_header;
 
 typedef struct {
     ModbusRtuPacketHeader header;
     uint8_t error;
 } ModbusRtuPacketErrorResponse;
 
+// Write response is the same of the request header
+typedef ModbusRtuHoldingRegisterRequest ModbusRtuPacketWriteResponse;
+
 typedef struct {
     ModbusRtuPacketHeader header;
-    uint8_t countBytes;
+    uint8_t size;
 } ModbusRtuPacketReadResponse;
-
-/**
- * The current station address. It is UNASSIGNED_STATION_ADDRESS (255) if the station still doesn't have an address (auto-configuration).
- */
-static uint8_t s_curRequestAddressL;
 
 // If != NO_ERR, write an error
 uint8_t bus_cl_exceptionCode;
-// Store the bytes remaining for function data streaming
-static uint8_t s_sizeRemaining;
-// The current function in use
-static uint8_t s_function;
+static uint8_t messageSize;
 
 BUS_CL_RTU_STATE bus_cl_rtu_state;
 
@@ -77,20 +48,31 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_IDLE) {
-        // Else decode the packet header
-        if (rs485_readAvail() < sizeof(ModbusRtuPacketHeader)) {
+        // Wait for at least a read message request size
+        if (rs485_readAvail() < sizeof(ModbusRtuHoldingRegisterRequest)) {
             // Nothing to do, wait for more data
             return false;
         }
-        // Free the buffer
-        rs485_discard(sizeof(ModbusRtuPacketHeader));
+        // Read and free the buffer
+        bus_cl_header = *((const ModbusRtuHoldingRegisterRequest*)rs485_buffer);
+        rs485_discard(sizeof(ModbusRtuHoldingRegisterRequest));
 
-#define packet_2 ((const ModbusRtuPacketHeader*)rs485_buffer)
-        if (packet_2->address == STATION_NODE) {
-            s_function = packet_2->function;
-            if (s_function == READ_HOLDING_REGISTERS || s_function == WRITE_HOLDING_REGISTERS) {
-                // The message is for reading registers. Address data will follow
-                bus_cl_rtu_state = BUS_CL_RTU_WAIT_REGISTER_DATA;
+        if (bus_cl_header.header.address == STATION_NODE) {
+            if (bus_cl_header.header.function == READ_HOLDING_REGISTERS || bus_cl_header.header.function == WRITE_HOLDING_REGISTERS) {
+                if (!regs_validateAddr()) {
+                    // Error was set, respond with error
+                    bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+                    return false;
+                }
+                messageSize = bus_cl_header.address.countL * 2;
+
+                if (bus_cl_header.header.function == READ_HOLDING_REGISTERS) {
+                    // Ok, function data must be read. Wait for packet to end with CRC and then send
+                    // response
+                    bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
+                } else {
+                    bus_cl_rtu_state = BUS_CL_RTU_RECEIVE_DATA_SIZE;
+                }
             } else {
                 // Invalid function, return error
                 bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
@@ -102,70 +84,33 @@ __bit bus_cl_poll() {
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         }
     }
-
-    if (bus_cl_rtu_state == BUS_CL_RTU_WAIT_REGISTER_DATA) {
-        // In case of write, read the size too
-        uint8_t messageSize = sizeof(ModbusRtuHoldingRegisterRequest);
-        if (s_function == WRITE_HOLDING_REGISTERS) {
-            messageSize = sizeof(ModbusRtuHoldingRegisterRequest) + 1;
+    
+    if (bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA_SIZE) {
+        if (rs485_readAvail() < 1) {
+            // Nothing to do, wait for more data
+            return false;
         }
+        if (rs485_buffer[0] != messageSize) {
+            // Invalid size, return error
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
+            return false;
+        } else {
+            bus_cl_rtu_state = BUS_CL_RTU_RECEIVE_DATA;
+        }
+    }
+
+    if (bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA) {
+        // Wait for register data + count byte
         if (rs485_readAvail() < messageSize) {
             // Nothing to do, wait for more data
             return false;
         }
         // Free the buffer
         rs485_discard(messageSize);
-
-#define packet_1 ((const ModbusRtuHoldingRegisterWriteRequest*)rs485_buffer)
-        
-        if (packet_1->req.registerAddressH != 0 || packet_1->req.registerAddressL > REGS_COUNT) {
-            // Invalid address, return error
-            bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+        if (!regs_onReceive()) {
+            // Data/custom error, error is set
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-            return false;
-        }
-        // Functions has fixed size of 16 bytes (8 registers) to save program space
-        if (packet_1->req.countH != 0 || packet_1->req.countL == 0 || (packet_1->req.registerAddressL + packet_1->req.countL > REGS_COUNT)) {
-            // Invalid size, return error
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
-            bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-            return false;
-        }
-        s_sizeRemaining = 16;
-        s_curRequestAddressL = packet_1->req.registerAddressL;
-        
-        if (s_function == READ_HOLDING_REGISTERS) {
-            // Ok, function data must be read. Wait for packet to end
-            bus_cl_rtu_state = BUS_CL_RTU_CHECK_REQUEST_CRC;
-        } else {
-            if (packet_1->countBytes != s_sizeRemaining) {
-                // Invalid size, return error
-                bus_cl_exceptionCode = ERR_INVALID_SIZE;
-                bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
-                return false;
-            } else {
-                bus_cl_rtu_state = BUS_CL_RTU_READ_STREAM;
-            }
-        }
-    }
-
-    if (bus_cl_rtu_state == BUS_CL_RTU_READ_STREAM) {
-        uint8_t avail = rs485_readAvail();
-        uint8_t remaining = s_sizeRemaining;
-        // A single call can be done to read the rest of the stream?
-        if (s_sizeRemaining > RS485_BUF_SIZE) {
-            remaining = RS485_BUF_SIZE;
-        }
-
-        if (avail < remaining) {
-            return false;
-        }
-        // Free the buffer
-        rs485_discard(remaining);
-        regs_onRead();
-        s_sizeRemaining -= remaining;
-
-        if (s_sizeRemaining > 0) {
             return false;
         } else {
             // Next state
@@ -202,55 +147,37 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
-#define resp_1b ((ModbusRtuPacketHeader*)rs485_buffer)
-        resp_1b->address = STATION_NODE;
+        // Copy whole header (and overwrite data in case of error)
+        // Response of write registers always contains the address and register count
+        *((ModbusRtuHoldingRegisterRequest*)rs485_buffer) = bus_cl_header;
         if (bus_cl_exceptionCode == NO_ERROR) {
-            resp_1b->function = s_function;
             // Transmit packet data in one go
-            if (s_function == READ_HOLDING_REGISTERS) {
-#define resp_1r ((ModbusRtuPacketReadResponse*)rs485_buffer)
+            if (bus_cl_header.header.function == READ_HOLDING_REGISTERS) {
                 // Now, if write, open stream
-                resp_1r->countBytes = s_sizeRemaining;
+                ((ModbusRtuPacketReadResponse*)rs485_buffer)->size = messageSize;
                 rs485_write(sizeof(ModbusRtuPacketReadResponse));
-                bus_cl_rtu_state = BUS_CL_RTU_WRITE_STREAM;
+                bus_cl_rtu_state = BUS_CL_RTU_SEND_DATA;
             } else {
-#define resp_1w ((ModbusRtuPacketResponse*)rs485_buffer)
-                // Response of write registers always contains the address and register count
-                resp_1w->address.registerAddressH = 0;
-                resp_1w->address.registerAddressL = s_curRequestAddressL;
-                resp_1w->address.countH = 0;
-                resp_1w->address.countL = 8;
-                rs485_write(sizeof(ModbusRtuPacketResponse));
+                rs485_write(sizeof(ModbusRtuPacketWriteResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
         } else {
             // Transmit error data in one go
-#define resp_2 ((ModbusRtuPacketErrorResponse*)rs485_buffer)
-            resp_2->header.function = s_function | 0x80;
-            resp_2->error = bus_cl_exceptionCode;
+            ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function = ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function | 0x80;
+            ((ModbusRtuPacketErrorResponse*)rs485_buffer)->error = bus_cl_exceptionCode;
             rs485_write(sizeof(ModbusRtuPacketErrorResponse));
             bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
         }
     }
 
-    if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_STREAM) {
+    if (bus_cl_rtu_state == BUS_CL_RTU_SEND_DATA) {
+        // Wait for the bus to switch over
         if (rs485_writeInProgress()) {
             return false;
         }
-        uint8_t remaining = s_sizeRemaining;
-        // A single call can be done to read the rest of the stream?
-        if (s_sizeRemaining > RS485_BUF_SIZE) {
-            remaining = RS485_BUF_SIZE;
-        }
-        regs_onWrite();
-        rs485_write(remaining);
-        s_sizeRemaining -= remaining;
-        if (s_sizeRemaining > 0) {
-            return false;
-        } else {
-            // Next state
-            bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
-        }
+        regs_onSend();
+        rs485_write(messageSize);
+        bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_WRITE_RESPONSE_CRC) {
