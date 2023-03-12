@@ -26,7 +26,7 @@
             <itemPath>../../../src/nodes/include/net/rs485.h</itemPath>
             <itemPath>../../../src/nodes/include/net/timers.h</itemPath>
             <itemPath>../../../src/nodes/include/net/uart.h</itemPath>
-            <itemPath>../../../src/nodes/include/net/registers.h</itemPath>
+            <itemPath>../../../src/nodes/include/net/mapping.h</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -69,8 +69,8 @@
           <itemPath>../../../src/nodes/crc.c</itemPath>
           <itemPath>../../../src/nodes/net.c</itemPath>
           <itemPath>../../../src/nodes/rs485.c</itemPath>
-          <itemPath>../../../src/nodes/bus_client_mtu.c</itemPath>
-          <itemPath>../../../src/nodes/registers.c</itemPath>
+          <itemPath>../../../src/nodes/bus_client.c</itemPath>
+          <itemPath>../../../src/nodes/mapping.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
@@ -89,8 +89,6 @@
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
-      <itemPath>../test/sendCrcError.scl</itemPath>
-      <itemPath>../test/correctRead.scl</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

@@ -2,7 +2,7 @@
 #define	_MODBUS_CLIENT_H
 
 #include "configuration.h"
-#include "registers.h"
+#include "mapping.h"
 
 #ifdef __cplusplus
 extern "C" {

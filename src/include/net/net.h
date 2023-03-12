@@ -19,7 +19,7 @@ _Bool net_poll(void);
  */
 #include "bus_client.h"
 #include "rs485.h"
-#include "registers.h"
+#include "mapping.h"
 #include "timers.h"
 #include "uart.h"
 

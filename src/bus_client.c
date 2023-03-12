@@ -1,6 +1,6 @@
 #include "net/bus_client.h"
 #include "net/crc.h"
-#include "net/registers.h"
+#include "net/mapping.h"
 #include "net/rs485.h"
 
 /**

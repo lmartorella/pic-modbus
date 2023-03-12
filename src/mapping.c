@@ -1,6 +1,6 @@
 #include <string.h>
 #include "net/bus_client.h"
-#include "net/registers.h"
+#include "net/mapping.h"
 #include "net/rs485.h"
 
 // At reset the values of the registers will remain, so the reset reason / error
@@ -34,10 +34,12 @@ _Bool regs_validateAddr() {
 }
 
 _Bool regs_onReceive() {
-    memcpy(rs485_buffer, &regs_registers, sizeof(SYS_REGISTERS));
+    // Never called
+    bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+    return false;
 }
 
 void regs_onSend() {
-    // Never called
+    memcpy(rs485_buffer, &regs_registers, sizeof(SYS_REGISTERS));
 }
 

@@ -1,6 +1,6 @@
 #include "net/crc.h"
 #include "net/rs485.h"
-#include "net/registers.h"
+#include "net/mapping.h"
 #include "net/timers.h"
 #include "net/uart.h"
 
