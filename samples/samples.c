@@ -1,7 +1,25 @@
 #include <net/net.h>
 #include "samples.h"
 
+/**
+ * Holding registers [0-2]
+ */
+typedef struct {
+    /**
+     * See SYS_RESET_REASON
+     */
+    uint8_t resetReason;
+    uint8_t _filler1;
+    
+    /**
+     * Count of CRC errors in the reading period
+     */
+    uint8_t crcErrors;
+    uint8_t _filler2;
+} SYS_REGISTERS;
+
 #define SYS_REGS_ADDRESS (0)
+#define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
 
 void samples_init() {
 #ifdef HAS_LED_BLINK
@@ -54,6 +72,12 @@ _Bool regs_validateAddr() {
 }
 
 _Bool regs_onReceive() {
+    if (address == SYS_REGS_ADDRESS) {
+        // Ignore data, reset flags and counters
+        sys_resetReason = RESET_NONE;
+        bus_cl_crcErrors = 0;
+        return true;
+    }
 #ifdef HAS_LED_BLINK
     if (address == LEDBLINK_REGS_ADDRESS) {
         memcpy(&blinker_regs, rs485_buffer, sizeof(LedBlinkRegsiters));
@@ -65,7 +89,8 @@ _Bool regs_onReceive() {
 
 void regs_onSend() {
     if (address == SYS_REGS_ADDRESS) {
-        memcpy(rs485_buffer, &regs_registers, sizeof(SYS_REGISTERS));
+        ((SYS_REGISTERS*)rs485_buffer)->crcErrors = bus_cl_crcErrors;
+        ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
         return;
     }
     

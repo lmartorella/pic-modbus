@@ -1,16 +1,11 @@
 #include "net/bus_client.h"
 #include "net/crc.h"
-#include "net/mapping.h"
 #include "net/rs485.h"
 
 /**
  * Specific module for client Modbus RTU nodes (RS485), optimized
  * for 8-bit CPUs with low memory.
  */
-
-// At reset the values of the registers will remain, so the reset reason / error
-// can be sent out
-__persistent SYS_REGISTERS regs_registers;
 
 ModbusRtuHoldingRegisterRequest bus_cl_header;
 
@@ -32,11 +27,12 @@ uint8_t bus_cl_exceptionCode;
 static uint8_t messageSize;
 
 BUS_CL_RTU_STATE bus_cl_rtu_state;
+uint8_t bus_cl_crcErrors;
 
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
-    regs_registers.crcErrors = 0;
+    bus_cl_crcErrors = 0;
 }
 
 // Called often
@@ -137,8 +133,8 @@ __bit bus_cl_poll() {
         bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
         if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
             // Invalid CRC, skip data.
-            // TODO: However the function data was already written if piped!
-            regs_registers.crcErrors++;
+            // TODO: However the function data was already sent to registers!
+            bus_cl_crcErrors++;
             bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_IDLE;
         } else {
             // Ok, go on with the response

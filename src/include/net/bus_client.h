@@ -2,7 +2,6 @@
 #define	_MODBUS_CLIENT_H
 
 #include "configuration.h"
-#include "mapping.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +57,7 @@ typedef enum {
     BUS_CL_RTU_WAIT_FOR_FLUSH
 } BUS_CL_RTU_STATE;
 extern BUS_CL_RTU_STATE bus_cl_rtu_state;
+extern uint8_t bus_cl_crcErrors;
 
 typedef enum {
     NO_ERROR = 0,
@@ -109,6 +109,23 @@ typedef struct {
  * Header of the last request received
  */
 extern ModbusRtuHoldingRegisterRequest bus_cl_header;
+
+/**
+ * Validate request of read/write a register range. Header to check: bus_cl_header
+ */
+_Bool regs_validateAddr();
+
+/**
+ * Called when the registers (sys or app) are about to be read (sent out).
+ * The rs485_buffer contains the data.
+ */
+_Bool regs_onReceive();
+
+/**
+ * Called when the registers (sys or app) was written
+ * The rs485_buffer should be filled with the data.
+ */
+void regs_onSend();
 
 #ifdef __cplusplus
 }

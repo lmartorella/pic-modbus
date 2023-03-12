@@ -3,7 +3,6 @@
 void net_init() {
     timers_init();
     bus_cl_init();
-    regs_init();
     rs485_init();
 }
 

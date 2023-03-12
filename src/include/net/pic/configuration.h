@@ -25,10 +25,4 @@
 
 #define _XTAL_FREQ SYSTEM_CLOCK
 
-// Reset the device with sys (non-hw) error
-#define fatal(code) {\
-    regs_registers.resetReason = code;\
-    RESET();\
-}
-
 #endif

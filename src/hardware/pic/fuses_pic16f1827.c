@@ -23,7 +23,10 @@
 extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
 
-void regs_init() {
+// Non-volatile to resets
+__persistent SYS_RESET_REASON sys_resetReason;
+
+void sys_init() {
     // Set 16MHz oscillator
     // SCS = 10b: Internal oscillator block
     OSCCONbits.SCS = 2;
@@ -34,18 +37,18 @@ void regs_init() {
 
     // See datasheet table 7.10
     if (!PCONbits.nPOR) {
-        regs_registers.resetReason = RESET_POWER;        
+        sys_resetReason = RESET_POWER;        
     } else if (!PCONbits.nBOR) {
-        regs_registers.resetReason = RESET_BROWNOUT;
+        sys_resetReason = RESET_BROWNOUT;
     } else if (!(__resetbits & nTObit)) {
-        regs_registers.resetReason = RESET_WATCHDOG;
+        sys_resetReason = RESET_WATCHDOG;
     } else if (!PCONbits.nRMCLR) {
-        regs_registers.resetReason = RESET_MCLR;
+        sys_resetReason = RESET_MCLR;
     } else if (!PCONbits.nRI) {
         // Software exception, RESET was called via code
         // In that case, sys_resetReason already contains the right code
     } else if (PCONbits.STKOVF || PCONbits.STKUNF) {
-        regs_registers.resetReason = RESET_STACKFAIL;
+        sys_resetReason = RESET_STACKFAIL;
     }
 
     PCON = 0xf; // reset all reset reasons

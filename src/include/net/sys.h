@@ -1,20 +1,9 @@
-#ifndef _SYS_INCLUDE_
-#define _SYS_INCLUDE_
+#ifndef SYS_H
+#define	SYS_H
 
-#include "configuration.h"
-
-#ifdef __cplusplus
+#ifdef	__cplusplus
 extern "C" {
 #endif
-
-/**
- * General module for system-related functions
- */
-
-/**
- * This should be called as very first line of code in MCUs to analyze the reset flags
- */
-void regs_init();
 
 /**
  * Enumerates the reason of a reset. Contains MCU codes and code exceptions
@@ -96,48 +85,23 @@ typedef enum {
      */
     ERR_DEVICE_HW_NOT_ACK = 0x23
 
-} RESET_REASON;
+} SYS_RESET_REASON;
+extern __persistent SYS_RESET_REASON sys_resetReason;
 
 /**
- * Holding rgisters [0-2]
+ * This should be called as very first line of code in MCUs to analyze the reset flags
  */
-typedef struct {
-    /**
-     * See RESET_REASON
-     */
-    RESET_REASON resetReason;
-    uint8_t _filler2;
-    
-    /**
-     * Count of CRC errors in the reading period
-     */
-    uint16_t crcErrors;
-} SYS_REGISTERS;
+void sys_init();
 
-#define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
+// Reset the device with sys (non-hw) error
+#define sys_fatal(code) {\
+    sys_resetReason = code;\
+    RESET();\
+}
 
-// In RAM
-extern __persistent SYS_REGISTERS regs_registers;
-
-/**
- * Validate request of read/write a register range. Header to check: bus_cl_header
- */
-_Bool regs_validateAddr();
-
-/**
- * Called when the registers (sys or app) are about to be read (sent out).
- * The rs485_buffer contains the data.
- */
-_Bool regs_onReceive();
-
-/**
- * Called when the registers (sys or app) was written
- * The rs485_buffer should be filled with the data.
- */
-void regs_onSend();
-
-#ifdef __cplusplus
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* SYS_H */
+

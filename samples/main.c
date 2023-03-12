@@ -13,7 +13,7 @@ static void enableInterrupts() {
 
 void main() {
     // Analyze RESET reason
-    regs_init();
+    sys_init();
     net_init();
     samples_init();
     enableInterrupts();
