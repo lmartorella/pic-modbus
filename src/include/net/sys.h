@@ -1,20 +1,9 @@
-#ifndef _SYS_INCLUDE_
-#define _SYS_INCLUDE_
+#ifndef SYS_H
+#define	SYS_H
 
-#include "configuration.h"
-
-#ifdef __cplusplus
+#ifdef	__cplusplus
 extern "C" {
 #endif
-
-/**
- * General module for system-related functions
- */
-
-/**
- * This should be called as very first line of code in MCUs to analyze the reset flags
- */
-void sys_init();
 
 /**
  * Enumerates the reason of a reset. Contains MCU codes and code exceptions
@@ -96,17 +85,23 @@ typedef enum {
      */
     ERR_DEVICE_HW_NOT_ACK = 0x23
 
-} RESET_REASON;
+} SYS_RESET_REASON;
+extern __persistent SYS_RESET_REASON sys_resetReason;
 
 /**
- * Contains the reset reason code
+ * This should be called as very first line of code in MCUs to analyze the reset flags
  */
-extern __persistent RESET_REASON sys_resetReason;
+void sys_init();
 
-void sys_enableInterrupts(void);
+// Reset the device with sys (non-hw) error
+#define sys_fatal(code) {\
+    sys_resetReason = code;\
+    RESET();\
+}
 
-#ifdef __cplusplus
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* SYS_H */
+

@@ -4,12 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../hardware/counter.h</itemPath>
-        <itemPath>../hardware/i2c.h</itemPath>
-        <itemPath>../hardware/max232.h</itemPath>
-        <itemPath>../hardware/an_integrator.h</itemPath>
-      </logicalFolder>
       <logicalFolder name="f1" displayName="net" projectFiles="true">
         <logicalFolder name="include" displayName="include" projectFiles="true">
           <logicalFolder name="net" displayName="net" projectFiles="true">
@@ -17,13 +11,9 @@
               <itemPath>../../../src/nodes/include/net/pic/configuration.h</itemPath>
               <itemPath>../../../src/nodes/include/net/pic/fuses_micro_bean.h</itemPath>
             </logicalFolder>
-            <itemPath>../../../src/nodes/include/net/auto_conf_functions.h</itemPath>
             <itemPath>../../../src/nodes/include/net/bus_client.h</itemPath>
             <itemPath>../../../src/nodes/include/net/crc.h</itemPath>
-            <itemPath>../../../src/nodes/include/net/guid.h</itemPath>
-            <itemPath>../../../src/nodes/include/net/leds.h</itemPath>
             <itemPath>../../../src/nodes/include/net/net.h</itemPath>
-            <itemPath>../../../src/nodes/include/net/persistence.h</itemPath>
             <itemPath>../../../src/nodes/include/net/rs485.h</itemPath>
             <itemPath>../../../src/nodes/include/net/timers.h</itemPath>
             <itemPath>../../../src/nodes/include/net/uart.h</itemPath>
@@ -31,16 +21,16 @@
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f2" displayName="sinks" projectFiles="true">
-        <itemPath>../sinks/bmp180.h</itemPath>
-        <itemPath>../sinks/dht11.h</itemPath>
-        <itemPath>../sinks/digio.h</itemPath>
-        <itemPath>../sinks/displaySink.h</itemPath>
-        <itemPath>../sinks/flowCounter.h</itemPath>
-        <itemPath>../sinks/halfduplex.h</itemPath>
-        <itemPath>../sinks/integratorSink.h</itemPath>
+      <logicalFolder name="f2" displayName="samples" projectFiles="true">
+        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+          <itemPath>../samples/hardware/led.h</itemPath>
+          <itemPath>../samples/hardware/i2c.h</itemPath>
+        </logicalFolder>
+        <itemPath>../samples/led_blink.h</itemPath>
+        <itemPath>../samples/bmp180.h</itemPath>
       </logicalFolder>
       <itemPath>../samples.h</itemPath>
+      <itemPath>../sample_config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -49,44 +39,28 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
-        <itemPath>../hardware/counter.c</itemPath>
-        <itemPath>../hardware/i2c.c</itemPath>
-        <itemPath>../hardware/max232_sw.c</itemPath>
-        <itemPath>../hardware/an_integrator.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="f1" displayName="net" projectFiles="true">
         <logicalFolder name="nodes" displayName="nodes" projectFiles="true">
-          <logicalFolder name="client" displayName="client" projectFiles="true">
-            <logicalFolder name="mtu" displayName="mtu" projectFiles="true">
-              <itemPath>../../../src/nodes/client/mtu/bus_client_mtu.c</itemPath>
-            </logicalFolder>
-          </logicalFolder>
           <logicalFolder name="hardware" displayName="hardware" projectFiles="true">
             <logicalFolder name="pic" displayName="pic" projectFiles="true">
-              <itemPath>../../../src/nodes/hardware/pic/eeprom_pic16.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/fuses_pic16f1827.c</itemPath>
-              <itemPath>../../../src/nodes/hardware/pic/leds.c</itemPath>
-              <itemPath>../../../src/nodes/hardware/pic/persistence.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/tick_pic16.c</itemPath>
               <itemPath>../../../src/nodes/hardware/pic/uart.c</itemPath>
-              <itemPath>../../../src/nodes/hardware/pic/sys.c</itemPath>
             </logicalFolder>
           </logicalFolder>
-          <itemPath>../../../src/nodes/auto_conf_functions.c</itemPath>
           <itemPath>../../../src/nodes/crc.c</itemPath>
           <itemPath>../../../src/nodes/net.c</itemPath>
           <itemPath>../../../src/nodes/rs485.c</itemPath>
+          <itemPath>../../../src/nodes/bus_client.c</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="sinks" displayName="sinks" projectFiles="true">
-        <itemPath>../sinks/bmp180.c</itemPath>
-        <itemPath>../sinks/dht11.c</itemPath>
-        <itemPath>../sinks/digio.c</itemPath>
-        <itemPath>../sinks/displaySink.c</itemPath>
-        <itemPath>../sinks/flowCounter.c</itemPath>
-        <itemPath>../sinks/halfduplex.c</itemPath>
-        <itemPath>../sinks/integratorSink.c</itemPath>
+      <logicalFolder name="sinks" displayName="samples" projectFiles="true">
+        <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+          <itemPath>../samples/hardware/led.c</itemPath>
+          <itemPath>../samples/hardware/i2c.c</itemPath>
+        </logicalFolder>
+        <itemPath>../samples/led_blink.c</itemPath>
+        <itemPath>../samples/bmp180.c</itemPath>
       </logicalFolder>
       <itemPath>../samples.c</itemPath>
       <itemPath>../main.c</itemPath>
@@ -95,8 +69,6 @@
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
-      <itemPath>../test/sendCrcError.scl</itemPath>
-      <itemPath>../test/correctRead.scl</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -146,116 +118,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="../hardware/an_integrator.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/counter.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/i2c.c" ex="false" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/max232_sw.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/bmp180.c" ex="false" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/dht11.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/digio.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/displaySink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/flowCounter.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/halfduplex.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/integratorSink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>
@@ -265,7 +127,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic"/>
+                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -344,6 +206,8 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
@@ -386,6 +250,8 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
@@ -485,76 +351,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="../sinks/bmp180.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/dht11.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/digio.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/displaySink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/flowCounter.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/halfduplex.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/integratorSink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>
@@ -564,7 +360,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN;MPLAB_SIM"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic"/>
+                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -1686,116 +1482,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="../hardware/an_integrator.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/counter.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/i2c.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/max232_sw.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/bmp180.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/dht11.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/digio.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/displaySink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/flowCounter.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/halfduplex.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../sinks/integratorSink.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>
@@ -1805,7 +1491,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic"/>
+                  value="..\..\..\src\nodes\include;..\..\..\src\nodes\include\net\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>

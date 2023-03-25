@@ -6,30 +6,7 @@
 // disabled.
 static volatile uint8_t s_ticksH = 0;
 
-/*****************************************************************************
-  Function:
-	void timers_init(void)
-
-  Summary:
-	Initializes the Tick manager module.
-
-  Description:
-	Configures the Tick module and any necessary hardware resources.
-
-  Precondition:
-	None
-
-  Parameters:
-	None
-
-  Returns:
-  	None
-
-  Remarks:
-	This function is called only one during lifetime of the application.
-  ***************************************************************************/
-void timers_init(void)
-{
+void timers_init() {
 	// Use Timer0 (that prescales to 1:256)
     // Initialize the time
     TICK_TMR = 0;
@@ -45,37 +22,14 @@ void timers_init(void)
 }
 
 
-/*****************************************************************************
-  Function:
-	WORD TickGet(void)
-
-  Summary:
-	Obtains the current Tick value.
-
-  Description:
-	This function retrieves the current Tick value, allowing timing and
-	measurement code to be written in a non-blocking fashion.  This function
-	retrieves the least significant 16 bits of the internal tick counter
-
-  Precondition:
-	None
-
-  Parameters:
-	None
-
-  Returns:
-  	Lower 16 bits of the current Tick value.
-  ***************************************************************************/
-uint16_t timers_get()
-{
+uint16_t timers_get() {
     CLRWDT();
     // 2-byte value to store Ticks.  
     uint16_t vTickReading;
 
 	// Perform an Interrupt safe and synchronized read of the 48-bit
 	// tick value
-	do
-	{
+	do {
 		TICK_INTCON_IE = 1;		// Enable interrupt
 		NOP();                  // Manage TMR interrupts, if IF = 1
 		TICK_INTCON_IE = 0;		// Disable interrupt
@@ -86,26 +40,8 @@ uint16_t timers_get()
 	return vTickReading;
 }
 
-/*****************************************************************************
-  Function:
-	void timers_poll(void)
-
-  Description:
-	Updates the tick value when an interrupt occurs.
-
-  Precondition:
-	None
-
-  Parameters:
-	None
-
-  Returns:
-     The LSB of tick
-  ***************************************************************************/
-void timers_poll(void)
-{
-    if (TICK_INTCON_IF)
-    {
+void timers_isr() {
+    if (TICK_INTCON_IF) {
         // Increment internal high tick counter
         s_ticksH++;
         // Reset interrupt flag

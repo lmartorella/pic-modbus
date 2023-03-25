@@ -19,15 +19,12 @@
 #pragma config BORV = LO        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), low trip point selected.)
 #pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
  
-void sys_enableInterrupts() {
-    // Disable low/high interrupt mode
-    INTCONbits.GIE = 1;
-    INTCONbits.PEIE = 1;
-}
-
 // Get a copy version of STATUS
 extern __bank0 unsigned char __resetbits;
 #define nTObit 0x10
+
+// Non-volatile to resets
+__persistent SYS_RESET_REASON sys_resetReason;
 
 void sys_init() {
     // Set 16MHz oscillator

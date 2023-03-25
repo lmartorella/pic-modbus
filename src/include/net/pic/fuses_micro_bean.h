@@ -1,21 +1,12 @@
 #ifndef FUSES_MICRO_BEAN_H
 #define	FUSES_MICRO_BEAN_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <xc.h>
-#include "../guid.h"
-
 #define SYSTEM_CLOCK 16000000ul
-#define _XTAL_FREQ SYSTEM_CLOCK
 
 // Internal core clock drives timer with 1:256 prescaler
 typedef uint16_t TICK_TYPE; 
-#define TICKS_PER_SECOND		(TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
-#define TICKS_PER_MILLISECOND		(TICK_TYPE)(TICKS_PER_SECOND / 1000)
-
-#define PRIO_TYPE
-#define EEPROM_MODIFIER __eeprom
+#define TICKS_PER_SECOND  (TICK_TYPE)((TICK_CLOCK_BASE + (TICK_PRESCALER / 2ull)) / TICK_PRESCALER)	
+#define TICKS_PER_MILLISECOND  (TICK_TYPE)(TICKS_PER_SECOND / 1000)
 
 // *****
 // Tick timer source. Uses TMR0 (8-bit prescales to 1:256), that resolve from 0.25ms to 16.7secs
@@ -33,20 +24,13 @@ typedef uint16_t TICK_TYPE;
 #define TICK_CLOCK_BASE (SYSTEM_CLOCK / 4)
 #define TICK_PRESCALER 256
 
-#define HAS_LED
 #define LED_PORTBIT PORTAbits.RA7
 #define LED_TRISBIT TRISAbits.TRISA7
-
-#undef HAS_SAMPLE_LED_BLINK
-
-#define HARDCODED_STATION_ADDRESS 1
-// To save EEPROM cycles during debug
-#define DISABLE_PERSISTENCE
 
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
 // ******
-#define RS485_BUF_SIZE 16
+#define RS485_BUF_SIZE 32
 #define RS485_RCSTA RCSTAbits
 #define RS485_TXSTA TXSTAbits
 #define RS485_TXREG TXREG
@@ -74,7 +58,7 @@ typedef RCSTAbits_t UART_ERR_BITS;
 //TXCKSEL:1  TX/CK function is on RB5
 
 // Reset the device with sys (non-hw) error
-#define fatal(code) { sys_resetReason = code; asm("reset"); }
+#define RESET() asm("reset")
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

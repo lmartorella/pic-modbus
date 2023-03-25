@@ -1,105 +1,148 @@
 #include <net/net.h>
-#include "./samples.h"
+#include "samples.h"
 
-static void noop() { }
-
-// REGISTER SINKS
-// Static allocation of sinks
-const uint8_t bus_cl_functionCount = 6;
-const ReadHandler bus_cl_functionReadHandlers[6] = {
-    (ReadHandler)autoconf_readNodeStatus,
-    (ReadHandler)autoconf_readSinkIds,
-    (ReadHandler)autoconf_readNodeGuid,
+/**
+ * Holding registers [0-2]
+ */
+typedef struct {
+    /**
+     * See SYS_RESET_REASON
+     */
+    uint8_t resetReason;
+    uint8_t _filler1;
     
-    (ReadHandler)bmp180_read_reg1,
-    (ReadHandler)bmp180_read_reg2,
-    (ReadHandler)bmp180_read_reg3,
-};
-const WriteHandler bus_cl_functionWriteHandlers[6] = {
-    (ReadHandler)autoconf_writeNodeStatus,
-    noop,
-    (WriteHandler)autoconf_writeNodeGuid,
-    
-    (ReadHandler)bmp180_write_reg1,
-    noop,
-    noop,
-};
+    /**
+     * Count of CRC errors in the reading period
+     */
+    uint8_t crcErrors;
+    uint8_t _filler2;
+} SYS_REGISTERS;
 
-const uint8_t autoconf_appFunctionCount = 1;
-const FOURCC autoconf_appFunctionIds[1] = { SINK_BMP180_ID };
+#define SYS_REGS_ADDRESS (0)
+#define SYS_REGS_ADDRESS_BE (LE_TO_BE_16(SYS_REGS_ADDRESS))
+#define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
 
-#ifdef HAS_SAMPLE_LED_BLINK
-
-static TICK_TYPE test_timer;
-static _Bool test_led;
-
-static void test_timer_init() {
-    test_timer = timers_get();
-    test_led = false;
-}
-
-static void test_timer_poll() {
-    TICK_TYPE elapsed = timers_get() - test_timer;
-    if (elapsed > TICKS_PER_SECOND) {
-        test_timer = timers_get();
-        test_led = !test_led;
-        if (test_led) {
-            led_off();
-        } else {
-            led_on();
-        }
-    }
-}
-
+void samples_init() {
+#ifdef HAS_LED_BLINK
+    blinker_init();
 #endif
-
-void sinks_init() {
-#ifdef HAS_SAMPLE_LED_BLINK
-    test_timer_init();
-#endif
-#ifdef HAS_MAX232_SOFTWARE
-    max232_init();
-#endif
-
 #ifdef HAS_I2C
     i2c_init();
 #endif
-        
-#if defined(HAS_DIGIO_IN) || defined(HAS_DIGIO_OUT)
-    digio_init();
-#endif
-
-#ifdef HAS_DIGITAL_COUNTER
-    dcnt_init();
-#endif
-
 #ifdef HAS_BMP180
     bmp180_init();
 #endif
-#ifdef HAS_DHT11
-    dht11_init();
-#endif
-#ifdef HAS_ANALOG_INTEGRATOR
-    anint_init();
-#endif   
 }
 
-void sinks_poll() {
+void samples_poll() {
+#ifdef HAS_LED_BLINK
+    blinker_poll();
+#endif
+#ifdef HAS_I2C
+    i2c_poll();
+#endif
 #ifdef HAS_BMP180
     bmp180_poll();
 #endif
-#ifdef HAS_SAMPLE_LED_BLINK
-    test_timer_poll();
-#endif
-#ifdef HAS_DIGITAL_COUNTER
-    if (prot_slowTimer) {
-        dcnt_poll();
+}
+
+static uint16_t addressBe;
+
+_Bool regs_validateAddr() {
+    uint8_t count = bus_cl_header.address.countL;
+    addressBe = bus_cl_header.address.registerAddressBe;
+    
+    // Exposes the system registers in the rane 0-2
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
+        if (count != SYS_REGS_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+            return false;
+        }
+        return true;
+    }
+    
+#ifdef HAS_LED_BLINK
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
+        if (count != LEDBLINK_REGS_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        return true;
     }
 #endif
-#ifdef HAS_DIGIO_IN
-    digio_in_poll();
+    
+#ifdef HAS_BMP180
+    if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
+        if (count != BMP180_REGS_CALIB_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+            return false;
+        }
+        return true;
+    }
+    if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
+        if (count != BMP180_REGS_DATA_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+            return false;
+        }
+        return true;
+    }
 #endif
-#ifdef HAS_ANALOG_INTEGRATOR
-    anint_poll();
-#endif   
+    
+    bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+    return false;
 }
+
+_Bool regs_onReceive() {
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
+        // Ignore data, reset flags and counters
+        sys_resetReason = RESET_NONE;
+        bus_cl_crcErrors = 0;
+        return true;
+    }
+#ifdef HAS_LED_BLINK
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
+        memcpy(&blinker_regs, rs485_buffer, sizeof(LedBlinkRegsiters));
+        return blinker_conf();
+    }
+#endif
+    return false;
+}
+
+void regs_onSend() {
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
+        ((SYS_REGISTERS*)rs485_buffer)->crcErrors = bus_cl_crcErrors;
+        ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
+        return;
+    }
+    
+#ifdef HAS_LED_BLINK
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
+        memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
+        return;
+    }
+#endif
+    
+#ifdef HAS_BMP180
+    if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
+        bmp180_readCalibrationData();
+        return;
+    }
+    if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
+        bmp180_readRawData();
+        return;
+    }
+#endif
+}
+
