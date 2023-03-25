@@ -56,6 +56,10 @@ void i2c_init() {
     I2C_TRIS_SDA = 0;
     I2C_PORT_SCL = 1;
     I2C_TRIS_SCL = 0;
+    
+    // Disable analog functions on i2c pins
+    ANSELBbits.ANSB1 = 0;
+    ANSELBbits.ANSB4 = 0;
 
     __delay_ms(2);
 
@@ -91,10 +95,10 @@ void i2c_init() {
     I2C_SSPADD = 62; // FOsc = 25Mkz -> 100kHz
     
     // Setup I2C
-    I2C_SSPSTAT_SMP = 0;
-    I2C_SSPSTAT_CKE = 0;
-    I2C_SSPCON1_SSPM = 8; // I2C master
-    I2C_SSPCON1_SSPEN = 1;  
+    I2C_SSPSTAT_SMP = 0; // Slew rate control enabled for high speed mode (400 kHz)
+    I2C_SSPSTAT_CKE = 0; // Disable SM bus? specific inputs
+    I2C_SSPCON1_SSPM = 8; // I2C Master mode, clock = FOSC / (4 * (I2C_SSPADD + 1))
+    I2C_SSPCON1_SSPEN = 1;  // Enables the serial port and configures the SDAx and SCLx pins as the source of the serial port pins
 
     __delay_ms(2);
     
