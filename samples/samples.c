@@ -26,11 +26,23 @@ void samples_init() {
 #ifdef HAS_LED_BLINK
     blinker_init();
 #endif
+#ifdef HAS_I2C
+    i2c_init();
+#endif
+#ifdef HAS_BMP180
+    bmp180_init();
+#endif
 }
 
 void samples_poll() {
 #ifdef HAS_LED_BLINK
     blinker_poll();
+#endif
+#ifdef HAS_I2C
+    i2c_poll();
+#endif
+#ifdef HAS_BMP180
+    bmp180_poll();
 #endif
 }
 
@@ -57,6 +69,31 @@ _Bool regs_validateAddr() {
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         if (count != LEDBLINK_REGS_COUNT) {
             bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        return true;
+    }
+#endif
+    
+#ifdef HAS_BMP180
+    if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
+        if (count != BMP180_REGS_CALIB_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+            return false;
+        }
+        return true;
+    }
+    if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
+        if (count != BMP180_REGS_DATA_COUNT) {
+            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            return false;
+        }
+        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
             return false;
         }
         return true;
@@ -93,6 +130,17 @@ void regs_onSend() {
 #ifdef HAS_LED_BLINK
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
+        return;
+    }
+#endif
+    
+#ifdef HAS_BMP180
+    if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
+        bmp180_readCalibrationData();
+        return;
+    }
+    if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
+        bmp180_readRawData();
         return;
     }
 #endif

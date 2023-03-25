@@ -1,6 +1,8 @@
 #include <net/net.h>
 #include "i2c.h"
 
+#ifdef HAS_I2C
+
 #define I2C_PORT_SDA PORTBbits.RB1
 #define I2C_TRIS_SDA TRISBbits.TRISB1
 #define I2C_PORT_SCL PORTBbits.RB4
@@ -102,7 +104,7 @@ void i2c_init() {
 void i2c_sendReceive7(uint8_t addr, uint8_t size, uint8_t* buf) {
     // Check if MSSP module is in use
     if ((I2C_SSPCON2 & I2C_SSPCON2_BUSY_MASK) || s_istate != STATE_IDLE) {
-        fatal(ERR_DEVICE_HW_FAIL);
+        sys_fatal(ERR_DEVICE_HW_FAIL);
     }
     I2C_PIR_SSP1IF = 0;
 
@@ -131,10 +133,10 @@ loop:
     I2C_PIR_SSP1IF = 0;
     // Write collision
     if (I2C_SSPCON1_WCOL) {
-        fatal(ERR_DEVICE_HW_FAIL);
+        sys_fatal(ERR_DEVICE_HW_FAIL);
     }
     if (I2C_SSPCON1_SSPOV) {
-        fatal(ERR_DEVICE_READ_OVERRUN);
+        sys_fatal(ERR_DEVICE_READ_OVERRUN);
     }
     
     switch (s_istate) {
@@ -146,7 +148,7 @@ loop:
         case STATE_ADDR:
             if (I2C_SSPCON2_ACKSTAT) {
                 // ACK not received. Err.
-                fatal(ERR_DEVICE_HW_FAIL);
+                sys_fatal(ERR_DEVICE_HW_FAIL);
             }
             
             // Start send/receive
@@ -161,7 +163,7 @@ loop:
             break;
         case STATE_RXDATA:
             if (!I2C_SSPSTAT_BF) {
-                fatal(ERR_DEVICE_READ_OVERRUN);
+                sys_fatal(ERR_DEVICE_READ_OVERRUN);
             }
             *s_buf = I2C_SSPBUF;
             s_buf++;
@@ -179,7 +181,7 @@ loop:
         case STATE_TXDATA:
             if (I2C_SSPCON2_ACKSTAT) {
                 // ACK not received? Err. (even the last byte, see BPM180 specs)
-                fatal(ERR_DEVICE_HW_NOT_ACK);
+                sys_fatal(ERR_DEVICE_HW_NOT_ACK);
             }
             if (s_buf >= s_dest) {
                 // Send STOP
@@ -208,3 +210,5 @@ loop:
     // It is possible that the IF flag is ready right now
     goto loop;
 }
+
+#endif
