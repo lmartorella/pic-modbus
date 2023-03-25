@@ -4,6 +4,7 @@
 #include "sample_config.h"
 #include "samples/led_blink.h"
 
+#define LE_TO_BE_16(v) (((v & 0xff) << 8) + (v >> 8))
 
 /**
  * Init samples

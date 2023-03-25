@@ -19,6 +19,7 @@ typedef struct {
 } SYS_REGISTERS;
 
 #define SYS_REGS_ADDRESS (0)
+#define SYS_REGS_ADDRESS_BE (LE_TO_BE_16(SYS_REGS_ADDRESS))
 #define SYS_REGS_COUNT (sizeof(SYS_REGISTERS) / 2)
 
 void samples_init() {
@@ -33,19 +34,14 @@ void samples_poll() {
 #endif
 }
 
-static uint16_t address;
-
-static void be16toh(const uint16_t* dest, const uint16_t* src) {
-    ((uint8_t*)dest)[1] = ((const uint8_t*)src)[0];
-    ((uint8_t*)dest)[0] = ((const uint8_t*)src)[1];
-}
+static uint16_t addressBe;
 
 _Bool regs_validateAddr() {
     uint8_t count = bus_cl_header.address.countL;
-    be16toh(&address, &bus_cl_header.address.registerAddressBe);
+    addressBe = bus_cl_header.address.registerAddressBe;
     
     // Exposes the system registers in the rane 0-2
-    if (address == SYS_REGS_ADDRESS) {
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
         if (count != SYS_REGS_COUNT) {
             bus_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
@@ -58,7 +54,7 @@ _Bool regs_validateAddr() {
     }
     
 #ifdef HAS_LED_BLINK
-    if (address == LEDBLINK_REGS_ADDRESS) {
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         if (count != LEDBLINK_REGS_COUNT) {
             bus_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
@@ -72,14 +68,14 @@ _Bool regs_validateAddr() {
 }
 
 _Bool regs_onReceive() {
-    if (address == SYS_REGS_ADDRESS) {
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
         // Ignore data, reset flags and counters
         sys_resetReason = RESET_NONE;
         bus_cl_crcErrors = 0;
         return true;
     }
 #ifdef HAS_LED_BLINK
-    if (address == LEDBLINK_REGS_ADDRESS) {
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         memcpy(&blinker_regs, rs485_buffer, sizeof(LedBlinkRegsiters));
         return blinker_conf();
     }
@@ -88,14 +84,14 @@ _Bool regs_onReceive() {
 }
 
 void regs_onSend() {
-    if (address == SYS_REGS_ADDRESS) {
+    if (addressBe == SYS_REGS_ADDRESS_BE) {
         ((SYS_REGISTERS*)rs485_buffer)->crcErrors = bus_cl_crcErrors;
         ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
         return;
     }
     
 #ifdef HAS_LED_BLINK
-    if (address == LEDBLINK_REGS_ADDRESS) {
+    if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
         return;
     }

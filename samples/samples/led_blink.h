@@ -16,6 +16,7 @@ typedef struct {
 extern LedBlinkRegsiters blinker_regs;
 
 #define LEDBLINK_REGS_ADDRESS (1000)
+#define LEDBLINK_REGS_ADDRESS_BE (LE_TO_BE_16(LEDBLINK_REGS_ADDRESS))
 #define LEDBLINK_REGS_COUNT (sizeof(LedBlinkRegsiters) / 2)
 
 #ifdef	__cplusplus
