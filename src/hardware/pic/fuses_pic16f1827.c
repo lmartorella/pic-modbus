@@ -1,4 +1,4 @@
-#include "net/net.h"
+#include "pic-modbus/net.h"
 
 // CONFIG1
 #pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)

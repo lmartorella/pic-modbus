@@ -1,4 +1,4 @@
-#include "net/crc.h"
+#include "pic-modbus/crc.h"
 
 uint16_t crc16;
 

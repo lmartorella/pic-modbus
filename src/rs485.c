@@ -1,8 +1,8 @@
-#include "net/crc.h"
-#include "net/rs485.h"
-#include "net/sys.h"
-#include "net/timers.h"
-#include "net/uart.h"
+#include "pic-modbus/crc.h"
+#include "pic-modbus/rs485.h"
+#include "pic-modbus/sys.h"
+#include "pic-modbus/timers.h"
+#include "pic-modbus/uart.h"
 
 RS485_LINE_STATE rs485_state;
 uint8_t rs485_buffer[RS485_BUF_SIZE];

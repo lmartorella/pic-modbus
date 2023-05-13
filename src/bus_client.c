@@ -1,6 +1,6 @@
-#include "net/bus_client.h"
-#include "net/crc.h"
-#include "net/rs485.h"
+#include "pic-modbus/bus_client.h"
+#include "pic-modbus/crc.h"
+#include "pic-modbus/rs485.h"
 
 /**
  * Specific module for client Modbus RTU nodes (RS485), optimized

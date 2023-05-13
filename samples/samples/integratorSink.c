@@ -1,4 +1,4 @@
-#include <net/net.h>
+#include <pic-modbus/net.h>
 #include "integratorSink.h"
 #include "../hardware/an_integrator.h"
 

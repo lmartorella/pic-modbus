@@ -1,4 +1,4 @@
-#include <net/net.h>
+#include <pic-modbus/net.h>
 #include "an_integrator.h"
 
 // 1A = 1mA, on 39ohm = 39mV, sampled against 1.024V/1024 = 1/39 of the scale

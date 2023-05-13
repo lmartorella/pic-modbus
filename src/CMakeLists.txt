@@ -18,8 +18,8 @@ file(GLOB RASPBERRY_SRC "./hardware/posix/raspberry/*.c")
 add_library(net SHARED ${POSIX_SRC} ${COMMON_SRC} ${RASPBERRY_SRC})
 
 target_compile_options(net PRIVATE -Wno-switch -Wno-duplicate-decl-specifier -Wno-main-return-type)
-target_include_directories(net PRIVATE include include/net/posix)
-file(GLOB PUBLIC_H "include/net/*.h")
+target_include_directories(net PRIVATE include include/pic-modbus/posix)
+file(GLOB PUBLIC_H "include/pic-modbus/*.h")
 set_target_properties(net PROPERTIES PUBLIC_HEADER "${PUBLIC_H}")
 
 install(TARGETS net

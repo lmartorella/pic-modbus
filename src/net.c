@@ -1,4 +1,4 @@
-#include "net/net.h"
+#include "pic-modbus/net.h"
 
 void net_init() {
     timers_init();

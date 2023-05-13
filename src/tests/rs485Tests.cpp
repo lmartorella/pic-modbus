@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include <queue>
 
-#include "net/crc.h"
-#include "net/uart.h"
-#include "net/rs485.h"
+#include "pic-modbus/crc.h"
+#include "pic-modbus/uart.h"
+#include "pic-modbus/rs485.h"
 
 using namespace std::string_literals;
 

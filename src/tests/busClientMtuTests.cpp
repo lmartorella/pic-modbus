@@ -3,9 +3,9 @@
 #include <string.h>
 #include <queue>
 
-#include "net/bus_client.h"
-#include "net/crc.h"
-#include "net/rs485.h"
+#include "pic-modbus/bus_client.h"
+#include "pic-modbus/crc.h"
+#include "pic-modbus/rs485.h"
 
 using namespace std::string_literals;
 

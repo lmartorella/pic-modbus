@@ -1,4 +1,4 @@
-#include <net/net.h>
+#include <pic-modbus/net.h>
 #include "i2c.h"
 
 #ifdef HAS_I2C

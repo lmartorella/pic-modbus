@@ -1,4 +1,4 @@
-#include "net/net.h"
+#include "pic-modbus/net.h"
     
 // ==== ETH CARD based on 18f87j60
 
