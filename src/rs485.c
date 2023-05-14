@@ -151,15 +151,6 @@ void rs485_write(uint8_t size) {
     s_writeDataSize = size;
 }
 
-void rs485_read() {
-    if (rs485_state == RS485_LINE_TX || rs485_state == RS485_LINE_WAIT_FOR_START_TRANSMIT) {
-        // Break all
-        rs485_state = RS485_LINE_TX_DISENGAGE;
-        s_lastTick = timers_get();
-        crc_reset();
-    }
-}
-
 void rs485_discard(uint8_t count) {
     if (count != s_bufferPtr || rs485_state != RS485_LINE_RX) {
         sys_fatal(EXC_CODE_RS485_DISCARD_MISMATCH);

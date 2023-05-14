@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "../hardware/counter.h"
 #include "./flowCounter.h"
 

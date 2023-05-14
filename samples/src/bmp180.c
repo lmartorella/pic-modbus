@@ -1,10 +1,10 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "./bmp180.h"
 #include "./hardware/i2c.h"
 
 #ifdef HAS_BMP180
 
-// BPM180 I2C module to read barometric data (air pressure)
+// BMP180 I2C module to read barometric data (air pressure)
 
 #define REG_READ 0xef
 #define REG_WRITE 0xee
@@ -23,7 +23,7 @@
 #define ADDR_LSB 0xf7
 #define ADDR_XLSB 0xf8
 
-// Shared BPM180 state machine (used by app and sink)
+// Shared BMP180 state machine (used by app and sink)
 static enum {
     STATE_IDLE,
     STATE_RESET,

@@ -5,6 +5,7 @@
 #include "pic-modbus/crc.h"
 #include "pic-modbus/uart.h"
 #include "pic-modbus/rs485.h"
+#include "pic-modbus/sys.h"
 
 using namespace std::string_literals;
 
@@ -51,6 +52,8 @@ static void advanceTime(TICK_TYPE delta) {
 extern "C" {
     // Internal
     extern _Bool rs485_frameError;
+    SYS_RESET_REASON sys_resetReason;
+    UART_LAST_CH uart_lastCh;
 
     void uart_init() {
         while(!rxQueue.empty()) rxQueue.pop();
@@ -66,17 +69,17 @@ extern "C" {
         mode = RECEIVE;
     }
 
-    void uart_read(uint8_t* byte, UART_RX_MD* md) {
+    void uart_read() {
         if (mode != RECEIVE) {
             throw std::runtime_error("Read called in transmit mode");
         }
         if (rxQueue.empty()) {
             throw std::runtime_error("No data to read");
         }
-        *byte = rxQueue.front();
+        uart_lastCh.data = rxQueue.front();
         rxQueue.pop();
-        md->frameErr = simulateHwRxFrameError;
-        md->overrunErr = simulateHwRxOverrun;
+        uart_lastCh.errs.FERR = simulateHwRxFrameError;
+        uart_lastCh.errs.OERR = simulateHwRxOverrun;
     }
 
     void uart_write(uint8_t byte) {
@@ -214,7 +217,7 @@ TEST_CASE("Max RX buffer") {
     for (int i = 0; i < RS485_BUF_SIZE + 1; i++) {
         simulateSend({ (uint8_t)i });
     }
-    CHECK_THROWS_WITH(rs485_poll(), "Fatal U.rov");
+    CHECK_THROWS_WITH(rs485_poll(), "Fatal EXC_CODE_RS485_READ_OVERRUN");
 }
 
 TEST_CASE("Max TX buffer") {
@@ -294,36 +297,6 @@ TEST_CASE("Coalesce write chunks if possible") {
     REQUIRE(rs485_state == RS485_LINE_RX);
 }
 
-TEST_CASE("Test read in the middle of transmission (abort)") {
-    initMock(1);
-    rs485_init();
-    REQUIRE(rs485_poll() == false);
-
-    for (int i = 0; i < 3; i++) {
-        rs485_buffer[i] = (uint8_t)(i + 0x10);
-    }
-
-    rs485_write(3);
-    REQUIRE(rs485_poll() == true);
-    advanceTime(START_TRANSMIT_TIMEOUT + 1);
-    // Only one byte written
-    REQUIRE(rs485_poll() == false);
-    auto rx = receiveAllData();
-    REQUIRE(rx.size() == 1);
-    REQUIRE(rx[0] == 0x10);
-
-    // Now start read: write will be aborted
-    rs485_read();
-
-    REQUIRE(rs485_state == RS485_LINE_TX_DISENGAGE);
-    
-    advanceTime(DISENGAGE_CHANNEL_TIMEOUT + 1);
-
-    REQUIRE(rs485_poll() == false);
-    REQUIRE(rs485_isMarkCondition);
-    REQUIRE(rs485_state == RS485_LINE_RX);
-}
-
 TEST_CASE("Test RX hardware overrun") {
     initMock(1);
     rs485_init();
@@ -332,7 +305,7 @@ TEST_CASE("Test RX hardware overrun") {
     simulateSend({ (uint8_t)0 });
     simulateHwRxOverrun = true;
 
-    CHECK_THROWS_WITH(rs485_poll(), "Fatal U.OER");;
+    CHECK_THROWS_WITH(rs485_poll(), "Fatal EXC_CODE_RS485_READ_UNDERRUN");;
 }
 
 TEST_CASE("Test RX hardware frame error") {

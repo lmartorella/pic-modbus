@@ -1,4 +1,4 @@
-#include "pic-modbus/net.h"
+#include "pic-modbus/modbus.h"
 
 // MAX485 line drive
 #define EN_TRANSMIT 1

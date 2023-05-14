@@ -1,7 +1,6 @@
-#ifndef _NET_H
-#define	_NET_H
+#ifndef _PIC_MODBUS_H
+#define	_PIC_MODBUS_H
 
-#include <xc.h>
 #define HAS_EEPROM
 
 #include <stdarg.h>
@@ -23,4 +22,4 @@ _Bool net_poll(void);
 #include "timers.h"
 #include "uart.h"
 
-#endif	/* _NET_H */
+#endif	/* _PIC_MODBUS_H */

@@ -13,7 +13,7 @@
             </logicalFolder>
             <itemPath>../../src/include/pic-modbus/bus_client.h</itemPath>
             <itemPath>../../src/include/pic-modbus/crc.h</itemPath>
-            <itemPath>../../src/include/pic-modbus/net.h</itemPath>
+            <itemPath>../../src/include/pic-modbus/modbus.h</itemPath>
             <itemPath>../../src/include/pic-modbus/rs485.h</itemPath>
             <itemPath>../../src/include/pic-modbus/timers.h</itemPath>
             <itemPath>../../src/include/pic-modbus/uart.h</itemPath>
@@ -21,13 +21,13 @@
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f2" displayName="samples" projectFiles="true">
+      <logicalFolder name="f2" displayName="src" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../samples/hardware/led.h</itemPath>
-          <itemPath>../samples/hardware/i2c.h</itemPath>
+          <itemPath>../src/hardware/led.h</itemPath>
+          <itemPath>../src/hardware/i2c.h</itemPath>
         </logicalFolder>
-        <itemPath>../samples/led_blink.h</itemPath>
-        <itemPath>../samples/bmp180.h</itemPath>
+        <itemPath>../src/led_blink.h</itemPath>
+        <itemPath>../src/bmp180.h</itemPath>
       </logicalFolder>
       <itemPath>../samples.h</itemPath>
       <itemPath>../sample_config.h</itemPath>
@@ -54,11 +54,11 @@
       </logicalFolder>
       <logicalFolder name="sinks" displayName="samples" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-          <itemPath>../samples/hardware/led.c</itemPath>
-          <itemPath>../samples/hardware/i2c.c</itemPath>
+          <itemPath>../src/hardware/led.c</itemPath>
+          <itemPath>../src/hardware/i2c.c</itemPath>
         </logicalFolder>
-        <itemPath>../samples/led_blink.c</itemPath>
-        <itemPath>../samples/bmp180.c</itemPath>
+        <itemPath>../src/led_blink.c</itemPath>
+        <itemPath>../src/bmp180.c</itemPath>
       </logicalFolder>
       <itemPath>../samples.c</itemPath>
       <itemPath>../main.c</itemPath>

@@ -59,7 +59,7 @@ __bit bus_cl_poll() {
 
         if (bus_cl_header.header.stationAddress == STATION_NODE) {
             if (bus_cl_header.header.function == READ_HOLDING_REGISTERS || bus_cl_header.header.function == WRITE_HOLDING_REGISTERS) {
-                if (!regs_validateAddr()) {
+                if (!regs_validateReg()) {
                     // Error was set, respond with error
                     bus_cl_rtu_state = BUS_CL_RTU_WAIT_FOR_RESPONSE;
                     return false;
@@ -91,6 +91,8 @@ __bit bus_cl_poll() {
             // Nothing to do, wait for more data
             return false;
         }
+        // Free the buffer
+        rs485_discard(1);
         if (rs485_buffer[0] != messageSize) {
             // Invalid size, return error
             bus_cl_exceptionCode = ERR_INVALID_SIZE;

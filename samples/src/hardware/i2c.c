@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "i2c.h"
 
 #ifdef HAS_I2C
@@ -184,7 +184,7 @@ loop:
             break;
         case STATE_TXDATA:
             if (I2C_SSPCON2_ACKSTAT) {
-                // ACK not received? Err. (even the last byte, see BPM180 specs)
+                // ACK not received? Err. (even the last byte, see BMP180 specs)
                 sys_fatal(ERR_DEVICE_HW_NOT_ACK);
             }
             if (s_buf >= s_dest) {

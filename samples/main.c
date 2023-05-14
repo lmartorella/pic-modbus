@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "./samples.h"
 
 void __interrupt() low_isr() {

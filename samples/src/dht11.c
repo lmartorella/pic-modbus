@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "./dht11.h"
 
 #define DHT11_PORT_PULLUPS_INIT() { /*OPTION_REGbits.nRBPU = 0;*/ }

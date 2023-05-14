@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "configuration.h"
+
 /**
  * Module that virtualize 8-bit UART support for bus wired communication from RS485 module.
  * Not using parity since PIC 16/18 doesn't have any hardware support, and having it in software

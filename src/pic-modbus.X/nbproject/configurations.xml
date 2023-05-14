@@ -7,11 +7,10 @@
       <logicalFolder name="f1" displayName="hardware" projectFiles="true">
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
           <itemPath>../include/pic-modbus/pic/configuration.h</itemPath>
-          <itemPath>../include/pic-modbus/pic/fuses_eth_card.h</itemPath>
           <itemPath>../include/pic-modbus/pic/fuses_micro_bean.h</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <itemPath>../include/pic-modbus/net.h</itemPath>
+      <itemPath>../include/pic-modbus/modbus.h</itemPath>
       <itemPath>../include/pic-modbus/rs485.h</itemPath>
       <itemPath>../include/pic-modbus/timers.h</itemPath>
       <itemPath>../include/pic-modbus/uart.h</itemPath>
@@ -26,11 +25,11 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="f1" displayName="hardware" projectFiles="true">
-        <itemPath>../hardware/pic/tick_pic18.c</itemPath>
-        <itemPath>../hardware/pic/fuses_pic16f1827.c</itemPath>
-        <itemPath>../hardware/pic/fuses_pic18f87j60.c</itemPath>
-        <itemPath>../hardware/pic/tick_pic16.c</itemPath>
-        <itemPath>../hardware/pic/uart.c</itemPath>
+        <logicalFolder name="f1" displayName="pic" projectFiles="true">
+          <itemPath>../hardware/pic/fuses_pic16f1827.c</itemPath>
+          <itemPath>../hardware/pic/tick_pic16.c</itemPath>
+          <itemPath>../hardware/pic/uart.c</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <itemPath>../rs485.c</itemPath>
       <itemPath>../net.c</itemPath>
@@ -89,26 +88,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="../hardware/pic/fuses_pic18f87j60.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="../hardware/pic/tick_pic18.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-CO>
-        </XC8-CO>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>

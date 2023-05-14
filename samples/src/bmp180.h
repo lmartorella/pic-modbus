@@ -1,5 +1,5 @@
-#ifndef _BPM180_H_SINK_
-#define	_BPM180_H_SINK_
+#ifndef _BMP180_H_SINK_
+#define	_BMP180_H_SINK_
 
 #include "./sample_config.h"
 
@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-// BPM180 I2C module to read barometric data (air pressure)
+// BMP180 I2C module to read barometric data (air pressure)
 
 #define BMP180_REGS_CALIB_ADDRESS (1024)
 #define BMP180_REGS_CALIB_COUNT (11)

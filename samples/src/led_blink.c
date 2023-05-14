@@ -1,6 +1,6 @@
-#include "pic-modbus/net.h"
-#include "samples.h"
-#include "samples/hardware/led.h"
+#include <pic-modbus/modbus.h>
+#include "../samples.h"
+#include "./hardware/led.h"
 
 #ifdef HAS_LED_BLINK
 

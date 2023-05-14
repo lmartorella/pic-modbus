@@ -1,4 +1,4 @@
-#include "pic-modbus/net.h"
+#include "pic-modbus/modbus.h"
 
 // Internal counter to store Ticks.  This variable is incremented in an ISR and
 // therefore must be marked volatile to prevent the compiler optimizer from

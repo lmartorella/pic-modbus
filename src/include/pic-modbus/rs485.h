@@ -47,11 +47,6 @@ extern uint8_t rs485_buffer[RS485_BUF_SIZE];
 void rs485_write(uint8_t size);
 
 /**
- * Start reading stream to the `rs485_buffer`.
- */
-void rs485_read();
-
-/**
  * Discard `count` bytes from the read buffer
  */
 void rs485_discard(uint8_t count);

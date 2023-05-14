@@ -111,9 +111,10 @@ typedef struct {
 extern ModbusRtuHoldingRegisterRequest bus_cl_header;
 
 /**
- * Validate request of read/write a register range. Header to check: bus_cl_header
+ * Validate request of read/write a register range. Must validate address and size.
+ * Header to check: `bus_cl_header`. Errors must be set to `bus_cl_exceptionCode`
  */
-_Bool regs_validateAddr();
+_Bool regs_validateReg();
 
 /**
  * Called when the registers (sys or app) are about to be read (sent out).

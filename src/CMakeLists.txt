@@ -1,40 +1,19 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(net LANGUAGES C CXX)
+project(pic-modbus-tests LANGUAGES C CXX)
 include(CTest)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 14)
 
-add_definitions(-D_CONF_POSIX)
-
-file(GLOB COMMON_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.c client/mtu/*.c)
-# Not ready yet
-list(REMOVE_ITEM COMMON_SRC "bus_primary.c")
-list(REMOVE_ITEM COMMON_SRC "ip_client.c")
-list(REMOVE_ITEM COMMON_SRC "protocol.c")
-list(REMOVE_ITEM COMMON_SRC "sinks.c")
-file(GLOB POSIX_SRC "./hardware/posix/*.c")
-file(GLOB RASPBERRY_SRC "./hardware/posix/raspberry/*.c")
-add_library(net SHARED ${POSIX_SRC} ${COMMON_SRC} ${RASPBERRY_SRC})
-
-target_compile_options(net PRIVATE -Wno-switch -Wno-duplicate-decl-specifier -Wno-main-return-type)
-target_include_directories(net PRIVATE include include/pic-modbus/posix)
-file(GLOB PUBLIC_H "include/pic-modbus/*.h")
-set_target_properties(net PROPERTIES PUBLIC_HEADER "${PUBLIC_H}")
-
-install(TARGETS net
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/net)
-
 # The tests
-add_executable(rs485Tests tests/rs485Tests.cpp rs485.c crc.c)
+add_executable(rs485Tests tests/rs485Tests.cpp tests/sys.cpp rs485.c crc.c)
 target_include_directories(rs485Tests PRIVATE tests include)
 target_link_libraries(rs485Tests PRIVATE Catch2WithMain)
 
-add_executable(busClientMtuTests tests/busClientMtuTests.cpp tests/crc16.cpp client/mtu/bus_client_mtu.c crc.c)
-target_include_directories(busClientMtuTests PRIVATE tests include)
-target_link_libraries(busClientMtuTests PRIVATE Catch2WithMain)
+add_executable(busClientTests tests/busClientTests.cpp tests/crc16.cpp bus_client.c crc.c)
+target_include_directories(busClientTests PRIVATE tests include)
+target_link_libraries(busClientTests PRIVATE Catch2WithMain)
 
 enable_testing()
 add_test(NAME rs485Tests COMMAND $<TARGET_FILE:rs485Tests>)
-add_test(NAME busClientMtuTests COMMAND $<TARGET_FILE:busClientMtuTests>)
+add_test(NAME busClientTests COMMAND $<TARGET_FILE:busClientTests>)

@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "./counter.h"
 
 static DCNT_DATA s_data;

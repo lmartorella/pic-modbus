@@ -1,4 +1,4 @@
-#include <pic-modbus/net.h>
+#include <pic-modbus/modbus.h>
 #include "samples.h"
 
 /**
@@ -48,7 +48,7 @@ void samples_poll() {
 
 static uint16_t addressBe;
 
-_Bool regs_validateAddr() {
+_Bool regs_validateReg() {
     uint8_t count = bus_cl_header.address.countL;
     addressBe = bus_cl_header.address.registerAddressBe;
     
