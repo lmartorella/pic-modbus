@@ -1,6 +1,6 @@
 # Testing dongle for RS485 RTU
 
-Use PL2303 USB to Serial adapter, with a RS485 level adapter built-in.
+Use `PL2303` USB to Serial adapter, with a RS485 level adapter built-in.
 
 ```sh
 dmesg | grep tty
@@ -10,7 +10,7 @@ dmesg | grep tty
 
 > The original dongle uses an automatic timered switch between RX and TX. The PL2303 however exposes the RTS line at the pin 3 (negated), and it can be used to drive both the `DE` and `/RE` MAX485 lines. This means that an "unasserted" RTS drives the transmit line, and a "asserted" (up) RTS will enable the receive line. This mode is called `MODBUS_RTU_RTS_DOWN` in the `libmodbus` API.
 
-> The `libmodbus` tries to use the `TIOCGRS485` if the backend mode is set to `RTU`. This is not supported by PL2303.
+> The `libmodbus` tries to use the `TIOCGRS485` if the backend mode is set to `RTU`. This is not supported by `PL2303`.
 
 # mbpoll
 
