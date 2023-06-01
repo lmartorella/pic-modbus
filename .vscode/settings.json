@@ -64,5 +64,9 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
+    },
+    "robot.python.env": {
+        "AT_SSID": "test_ssid",
+        "AT_PWD": "0102030405060708"
     }
 }
