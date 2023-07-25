@@ -161,7 +161,7 @@ void bmp180_poll() {
 
 void bmp180_readRawData() {    
     if (s_state != STATE_IDLE) {
-        bus_cl_exceptionCode = ERR_DEVICE_BUSY;
+        rtu_cl_exceptionCode = ERR_DEVICE_BUSY;
         return;
     }
     memcpy(rs485_buffer, (uint8_t*)&rawData, sizeof(rawData));
@@ -169,7 +169,7 @@ void bmp180_readRawData() {
 
 void bmp180_readCalibrationData() {    
     if (s_state != STATE_IDLE) {
-        bus_cl_exceptionCode = ERR_DEVICE_BUSY;
+        rtu_cl_exceptionCode = ERR_DEVICE_BUSY;
         return;
     }
     memcpy(rs485_buffer, (uint8_t*)&calibrationData, sizeof(calibrationData));

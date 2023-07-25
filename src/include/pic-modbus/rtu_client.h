@@ -1,5 +1,5 @@
-#ifndef _MODBUS_CLIENT_H
-#define	_MODBUS_CLIENT_H
+#ifndef _MODBUS_RTU_CLIENT_H
+#define	_MODBUS_RTU_CLIENT_H
 
 #include "configuration.h"
 
@@ -16,17 +16,17 @@ extern "C" {
  */
 
 /**
- * Initialize the client node
+ * Initialize the modbus RTU client node
  */
-void bus_cl_init();
+void rtu_cl_init();
 
 /**
- * Poll for bus client activities.
+ * Poll for RTU client activities.
  * Returns true if the node is currently active and requires short polling.
  * Returns false if the node is not currently active and it can be polled with larger period,
  * depending on the medium implementation (e.g. 1ms)
  */
-__bit bus_cl_poll();
+__bit rtu_cl_poll();
 
 /***
  ***
@@ -36,28 +36,28 @@ __bit bus_cl_poll();
 
 typedef enum {
     // The client bus is idle, waiting for a complete frame header
-    BUS_CL_RTU_IDLE,
+    RTU_CL_RTU_IDLE,
     // Read mode: skipping input data and waiting for the next idle state.
-    BUS_CL_RTU_WAIT_FOR_IDLE,
+    RTU_CL_RTU_WAIT_FOR_IDLE,
     // Wait the checksum to validate the message
-    BUS_CL_RTU_CHECK_REQUEST_CRC,
+    RTU_CL_RTU_CHECK_REQUEST_CRC,
     // Wait the end of the packet and then start response
-    BUS_CL_RTU_WAIT_FOR_RESPONSE,
+    RTU_CL_RTU_WAIT_FOR_RESPONSE,
     // Transmit response
-    BUS_CL_RTU_RESPONSE,
+    RTU_CL_RTU_RESPONSE,
     // Wait for the byte of data size
-    BUS_CL_RTU_RECEIVE_DATA_SIZE,
+    RTU_CL_RTU_RECEIVE_DATA_SIZE,
     // Wait for the data to be received 
-    BUS_CL_RTU_RECEIVE_DATA,
+    RTU_CL_RTU_RECEIVE_DATA,
     // The function write function is piped to the "Read Register" function response
-    BUS_CL_RTU_SEND_DATA,
+    RTU_CL_RTU_SEND_DATA,
     // When the response is completed and the response CRC should be written
-    BUS_CL_RTU_WRITE_RESPONSE_CRC,
+    RTU_CL_RTU_WRITE_RESPONSE_CRC,
     // Wait for the RS485 module to end the transmission
-    BUS_CL_RTU_WAIT_FOR_FLUSH
-} BUS_CL_RTU_STATE;
-extern BUS_CL_RTU_STATE bus_cl_rtu_state;
-extern uint8_t bus_cl_crcErrors;
+    RTU_CL_RTU_WAIT_FOR_FLUSH
+} RTU_CL_RTU_STATE;
+extern RTU_CL_RTU_STATE bus_rtu_rtu_state;
+extern uint8_t rtu_cl_crcErrors;
 
 typedef enum {
     NO_ERROR = 0,
@@ -74,7 +74,7 @@ typedef enum {
 #define WRITE_HOLDING_REGISTERS (16)
 
 // If != NO_ERR, write an error
-extern uint8_t bus_cl_exceptionCode;
+extern uint8_t rtu_cl_exceptionCode;
 
 // The very header of every Modbus message
 typedef struct {
@@ -108,11 +108,11 @@ typedef struct {
 /**
  * Header of the last request received
  */
-extern ModbusRtuHoldingRegisterRequest bus_cl_header;
+extern ModbusRtuHoldingRegisterRequest rtu_cl_header;
 
 /**
  * Validate request of read/write a register range. Must validate address and size.
- * Header to check: `bus_cl_header`. Errors must be set to `bus_cl_exceptionCode`
+ * Header to check: `rtu_cl_header`. Errors must be set to `rtu_cl_exceptionCode`
  */
 _Bool regs_validateReg();
 

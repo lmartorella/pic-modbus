@@ -14,8 +14,8 @@
       <itemPath>../include/pic-modbus/rs485.h</itemPath>
       <itemPath>../include/pic-modbus/timers.h</itemPath>
       <itemPath>../include/pic-modbus/uart.h</itemPath>
-      <itemPath>../include/pic-modbus/bus_client.h</itemPath>
       <itemPath>../include/pic-modbus/crc.h</itemPath>
+      <itemPath>../include/pic-modbus/rtu_client.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -32,9 +32,9 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>../rs485.c</itemPath>
-      <itemPath>../net.c</itemPath>
       <itemPath>../crc.c</itemPath>
-      <itemPath>../bus_client.c</itemPath>
+      <itemPath>../rtu_client.c</itemPath>
+      <itemPath>../modbus.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

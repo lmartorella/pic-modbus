@@ -49,17 +49,17 @@ void samples_poll() {
 static uint16_t addressBe;
 
 _Bool regs_validateReg() {
-    uint8_t count = bus_cl_header.address.countL;
-    addressBe = bus_cl_header.address.registerAddressBe;
+    uint8_t count = rtu_cl_header.address.countL;
+    addressBe = rtu_cl_header.address.registerAddressBe;
     
     // Exposes the system registers in the rane 0-2
     if (addressBe == SYS_REGS_ADDRESS_BE) {
         if (count != SYS_REGS_COUNT) {
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
         }
-        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
-            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+        if (rtu_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            rtu_cl_exceptionCode = ERR_INVALID_FUNCTION;
             return false;
         }
         return true;
@@ -68,7 +68,7 @@ _Bool regs_validateReg() {
 #ifdef HAS_LED_BLINK
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         if (count != LEDBLINK_REGS_COUNT) {
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
         }
         return true;
@@ -78,29 +78,29 @@ _Bool regs_validateReg() {
 #ifdef HAS_BMP180
     if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
         if (count != BMP180_REGS_CALIB_COUNT) {
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
         }
-        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
-            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+        if (rtu_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            rtu_cl_exceptionCode = ERR_INVALID_FUNCTION;
             return false;
         }
         return true;
     }
     if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
         if (count != BMP180_REGS_DATA_COUNT) {
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
         }
-        if (bus_cl_header.header.function != READ_HOLDING_REGISTERS) {
-            bus_cl_exceptionCode = ERR_INVALID_FUNCTION;
+        if (rtu_cl_header.header.function != READ_HOLDING_REGISTERS) {
+            rtu_cl_exceptionCode = ERR_INVALID_FUNCTION;
             return false;
         }
         return true;
     }
 #endif
     
-    bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+    rtu_cl_exceptionCode = ERR_INVALID_ADDRESS;
     return false;
 }
 
@@ -108,7 +108,7 @@ _Bool regs_onReceive() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
         // Ignore data, reset flags and counters
         sys_resetReason = RESET_NONE;
-        bus_cl_crcErrors = 0;
+        rtu_cl_crcErrors = 0;
         return true;
     }
 #ifdef HAS_LED_BLINK
@@ -122,7 +122,7 @@ _Bool regs_onReceive() {
 
 void regs_onSend() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
-        ((SYS_REGISTERS*)rs485_buffer)->crcErrors = bus_cl_crcErrors;
+        ((SYS_REGISTERS*)rs485_buffer)->crcErrors = rtu_cl_crcErrors;
         ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
         return;
     }

@@ -11,13 +11,13 @@
               <itemPath>../../src/include/pic-modbus/pic/configuration.h</itemPath>
               <itemPath>../../src/include/pic-modbus/pic/fuses_micro_bean.h</itemPath>
             </logicalFolder>
-            <itemPath>../../src/include/pic-modbus/bus_client.h</itemPath>
             <itemPath>../../src/include/pic-modbus/crc.h</itemPath>
             <itemPath>../../src/include/pic-modbus/modbus.h</itemPath>
             <itemPath>../../src/include/pic-modbus/rs485.h</itemPath>
             <itemPath>../../src/include/pic-modbus/timers.h</itemPath>
             <itemPath>../../src/include/pic-modbus/uart.h</itemPath>
             <itemPath>../../src/include/pic-modbus/sys.h</itemPath>
+            <itemPath>../../src/include/pic-modbus/rtu_client.h</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -47,10 +47,10 @@
             <itemPath>../../src/hardware/pic/uart.c</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <itemPath>../../src/bus_client.c</itemPath>
         <itemPath>../../src/crc.c</itemPath>
-        <itemPath>../../src/net.c</itemPath>
         <itemPath>../../src/rs485.c</itemPath>
+        <itemPath>../../src/rtu_client.c</itemPath>
+        <itemPath>../../src/modbus.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="samples" projectFiles="true">
         <logicalFolder name="f1" displayName="hardware" projectFiles="true">
