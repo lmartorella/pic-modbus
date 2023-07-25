@@ -18,15 +18,19 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>release</name>
+                    <name>release_rs485</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>Debug_Sim</name>
+                    <name>debug_rs485</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>Debug</name>
+                    <name>release_lt8900</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>debug_lt8900</name>
                     <type>2</type>
                 </confElem>
             </confList>

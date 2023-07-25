@@ -11,11 +11,13 @@ typedef struct {
     uint8_t resetReason;
     uint8_t _filler1;
     
+#ifdef _CONF_RS485
     /**
      * Count of CRC errors in the reading period
      */
     uint8_t crcErrors;
     uint8_t _filler2;
+#endif
 } SYS_REGISTERS;
 
 #define SYS_REGS_ADDRESS (0)
@@ -108,7 +110,9 @@ _Bool regs_onReceive() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
         // Ignore data, reset flags and counters
         sys_resetReason = RESET_NONE;
+#ifdef _CONF_RS485
         rtu_cl_crcErrors = 0;
+#endif
         return true;
     }
 #ifdef HAS_LED_BLINK
@@ -122,7 +126,9 @@ _Bool regs_onReceive() {
 
 void regs_onSend() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
+#ifdef _CONF_RS485
         ((SYS_REGISTERS*)rs485_buffer)->crcErrors = rtu_cl_crcErrors;
+#endif
         ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
         return;
     }

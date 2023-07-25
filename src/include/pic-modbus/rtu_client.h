@@ -36,28 +36,35 @@ __bit rtu_cl_poll();
 
 typedef enum {
     // The client bus is idle, waiting for a complete frame header
-    RTU_CL_RTU_IDLE,
+    RTU_CL_IDLE,
     // Read mode: skipping input data and waiting for the next idle state.
-    RTU_CL_RTU_WAIT_FOR_IDLE,
+    RTU_CL_WAIT_FOR_IDLE,
+#ifdef _CONF_RS485
     // Wait the checksum to validate the message
-    RTU_CL_RTU_CHECK_REQUEST_CRC,
+    RTU_CL_CHECK_REQUEST_CRC,
+#endif
     // Wait the end of the packet and then start response
-    RTU_CL_RTU_WAIT_FOR_RESPONSE,
+    RTU_CL_WAIT_FOR_RESPONSE,
     // Transmit response
-    RTU_CL_RTU_RESPONSE,
+    RTU_CL_RESPONSE,
     // Wait for the byte of data size
-    RTU_CL_RTU_RECEIVE_DATA_SIZE,
+    RTU_CL_RECEIVE_DATA_SIZE,
     // Wait for the data to be received 
-    RTU_CL_RTU_RECEIVE_DATA,
+    RTU_CL_RECEIVE_DATA,
     // The function write function is piped to the "Read Register" function response
-    RTU_CL_RTU_SEND_DATA,
+    RTU_CL_SEND_DATA,
+#ifdef _CONF_RS485
     // When the response is completed and the response CRC should be written
-    RTU_CL_RTU_WRITE_RESPONSE_CRC,
+    RTU_CL_WRITE_RESPONSE_CRC,
+#endif
     // Wait for the RS485 module to end the transmission
-    RTU_CL_RTU_WAIT_FOR_FLUSH
-} RTU_CL_RTU_STATE;
-extern RTU_CL_RTU_STATE bus_rtu_rtu_state;
+    RTU_CL_WAIT_FOR_FLUSH
+} RTU_CL_STATE;
+extern RTU_CL_STATE bus_rtu_rtu_state;
+
+#ifdef _CONF_RS485
 extern uint8_t rtu_cl_crcErrors;
+#endif
 
 typedef enum {
     NO_ERROR = 0,

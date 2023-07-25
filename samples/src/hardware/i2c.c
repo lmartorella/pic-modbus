@@ -210,6 +210,9 @@ loop:
         case STATE_STOP:
             s_istate = STATE_IDLE;
             break;
+        case STATE_IDLE:
+        default:
+            break;
     }
     // It is possible that the IF flag is ready right now
     goto loop;

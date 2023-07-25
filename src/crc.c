@@ -1,5 +1,9 @@
 #include "pic-modbus/crc.h"
 
+#ifdef _CONF_RS485
+
+// Only RS485 has CRC
+
 uint16_t crc16;
 
 void crc_reset() {
@@ -18,3 +22,4 @@ void crc_update(uint8_t ch) {
     }
 }
 
+#endif

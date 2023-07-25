@@ -17,7 +17,11 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>micro_bean</name>
+                    <name>microbean_rs485</name>
+                    <type>3</type>
+                </confElem>
+                <confElem>
+                    <name>microbean_lt8900</name>
                     <type>3</type>
                 </confElem>
             </confList>

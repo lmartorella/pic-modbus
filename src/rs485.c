@@ -4,6 +4,8 @@
 #include "pic-modbus/timers.h"
 #include "pic-modbus/uart.h"
 
+#ifdef _CONF_RS485
+
 RS485_LINE_STATE rs485_state;
 uint8_t rs485_buffer[RS485_BUF_SIZE];
 
@@ -12,8 +14,7 @@ static uint8_t s_bufferPtr;
 // Size of the valid to-be-written data in the buffer
 static uint8_t s_writeDataSize;
 // Once this is set, it skip reading in the buffer until mark condition is detected.
-// @internal
-_Bool rs485_frameError;
+static _Bool rs485_frameError;
 _Bool rs485_isMarkCondition;
 
 // Set at the beginning of states RS485_LINE_TX_DISENGAGE, RS485_LINE_WAIT_FOR_START_TRANSMIT
@@ -160,3 +161,5 @@ void rs485_discard(uint8_t count) {
     }
     s_bufferPtr = 0;
 }
+
+#endif
