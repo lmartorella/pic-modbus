@@ -1,3 +1,4 @@
+#include "configuration.h"
 #include "pic-modbus/crc.h"
 
 #ifdef _CONF_RS485

@@ -60,7 +60,7 @@ typedef enum {
     // Wait for the RS485 module to end the transmission
     RTU_CL_WAIT_FOR_FLUSH
 } RTU_CL_STATE;
-extern RTU_CL_STATE bus_rtu_rtu_state;
+extern RTU_CL_STATE rtu_cl_state;
 
 #ifdef _CONF_RS485
 extern uint8_t rtu_cl_crcErrors;

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <queue>
 
-#include "pic-modbus/bus_client.h"
+#include "pic-modbus/rtu_client.h"
 #include "pic-modbus/crc.h"
 #include "pic-modbus/rs485.h"
 
@@ -211,17 +211,17 @@ public:
 
     bool validateReg(int address, int size, int function) {
         if (size <= 0) {
-            bus_cl_exceptionCode = ERR_INVALID_SIZE;
+            rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             return false;
         }
         if (function == READ_HOLDING_REGISTERS) {
             if ((address + size) > this->address + readSize) {
-                bus_cl_exceptionCode = ERR_INVALID_SIZE;
+                rtu_cl_exceptionCode = ERR_INVALID_SIZE;
                 return false;
             }
         } else {
             if ((address + size) > this->address + writeSize) {
-                bus_cl_exceptionCode = ERR_INVALID_SIZE;
+                rtu_cl_exceptionCode = ERR_INVALID_SIZE;
                 return false;
             }
         }
@@ -242,18 +242,18 @@ public:
     }
 
     bool validateReg() {
-        int address = be16toh(bus_cl_header.address.registerAddressBe);
+        int address = be16toh(rtu_cl_header.address.registerAddressBe);
         for (auto it = ranges.begin(); it != ranges.end(); ++it) {
             if (it->addressMatch(address)) {
-                return it->validateReg(address, be16toh(bus_cl_header.address.countBe), bus_cl_header.header.function);
+                return it->validateReg(address, be16toh(rtu_cl_header.address.countBe), rtu_cl_header.header.function);
             }
         }
-        bus_cl_exceptionCode = ERR_INVALID_ADDRESS;
+        rtu_cl_exceptionCode = ERR_INVALID_ADDRESS;
         return false;
     }
 
     bool onReceive() {
-        int address = be16toh(bus_cl_header.address.registerAddressBe);
+        int address = be16toh(rtu_cl_header.address.registerAddressBe);
         for (auto it = ranges.begin(); it != ranges.end(); ++it) {
             if (it->addressMatch(address)) {
                 return it->onReceive();
@@ -263,7 +263,7 @@ public:
     }
 
     void onSend() {
-        int address = be16toh(bus_cl_header.address.registerAddressBe);
+        int address = be16toh(rtu_cl_header.address.registerAddressBe);
         for (auto it = ranges.begin(); it != ranges.end(); ++it) {
             if (it->addressMatch(address)) {
                 return it->onSend();
@@ -324,121 +324,121 @@ static std::vector<uint8_t> padWithCrc(const std::vector<uint8_t>& data) {
 
 TEST_CASE("No addressing, skip packet") {
     initRs485();
-    bus_cl_init();
+    rtu_cl_init();
 
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Not addressed
     rs485mock.simulateData({ 0x1 });      // Address station 1, I'm 2
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     rs485mock.simulateData({ 0x2 });      // Function 2, wrong function
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     // After 2 bytes read, the client still search for a whole holding register read/write header
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     rs485mock.simulateData({ 0x3, 0x5 }); 
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     // After 2 bytes read, the client still search for a whole holding register read/write header
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     rs485mock.simulateData({ 0x3, 0x5 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     // Now that the header is decoded, it is discarded due wrong addressing
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_IDLE);
 
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 TEST_CASE("Addressed but truncated packet") {
     initRs485();
-    bus_cl_init();
+    rtu_cl_init();
 
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Addressed and correct function
     rs485mock.simulateData({ 0x2, 0x10 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     // After 2 bytes read, the client will wants data
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     rs485mock.simulateData({ 0x3 });
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Mark condition, reset state
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     REQUIRE(rs485mock.getDataWritten() == std::vector<uint8_t>({ }));
 }
 
 TEST_CASE("Wrong function") {
     initRs485();
-    bus_cl_init();
+    rtu_cl_init();
 
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Addressed and incorrect function
     rs485mock.simulateData({ 0x2, 0x11 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     // After 2 bytes read, the client will start skipping data
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Complete a holding register header. Now it start skipping data
     rs485mock.simulateData({ 0x3, 0x4, 0x5, 0x6 });
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     // Mark condition, now the station will respond
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x91, 0x1 }));
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE); 
 }
 
 static void testWrongAddress(int address) {
     initRs485();
-    bus_cl_init();
+    rtu_cl_init();
 
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Addressed and correct function
     rs485mock.simulateData({ 0x2, 0x3 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
     rs485mock.simulateData({ BigEndian::fromH(address), BigEndian::fromH(1) });
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     // Mark condition, now the station will respond
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Function error
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x83, ERR_INVALID_ADDRESS }));
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE); 
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE); 
 }
 
 TEST_CASE("Wrong address, 0") {
@@ -450,54 +450,54 @@ TEST_CASE("Wrong address, 1026") {
 
 static void testSizeSetup(int address, int size, uint8_t function) {
     initRs485();
-    bus_cl_init();
+    rtu_cl_init();
 
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 
     // Addressed and correct function
     rs485mock.simulateData({ 0x2, function });
     rs485mock.simulateData({ BigEndian::fromH(address), BigEndian::fromH(size) });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 }
 
 static void testWrongSizeRead(int address, int size) {
     testSizeSetup(address, size, 0x03);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     // Mark condition, now the station will respond
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Function size error
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x83, ERR_INVALID_SIZE }));
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 static void testWrongSizeWrite(int address, int size) {
     testSizeSetup(address, size, 0x10);
     rs485mock.simulateData({ (uint8_t)(size * 2) });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     // Mark condition, now the station will respond
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Function size error
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x90, 0x3 }));
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 TEST_CASE("Wrong function size read: 0 is considered an error") {
@@ -536,68 +536,68 @@ TEST_CASE("Wrong function size write: reg 2048 can't write") {
 TEST_CASE("Wrong CRC in read") {
     testSizeSetup(1024, 2, 0x3);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    REQUIRE(rtu_cl_state == RTU_CL_CHECK_REQUEST_CRC);
     rs485mock.simulateData({ 0xde, 0xad });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_IDLE);
     // Mark condition, now the station will NOT respond due to CRC error
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 TEST_CASE("Wrong byte size in write") {
     testSizeSetup(1024, 2, 0x10);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA_SIZE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_RECEIVE_DATA_SIZE);
 
     rs485mock.simulateData({ 5 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     // Mark condition, now the station will respond
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Function size error
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x90, ERR_INVALID_SIZE }));
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 TEST_CASE("Wrong CRC in write") {
     testSizeSetup(1024, 2, 0x10);
     rs485mock.simulateData({ 4 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA);
+    REQUIRE(rtu_cl_state == RTU_CL_RECEIVE_DATA);
     rs485mock.simulateData({ 0xf1, 0xf2, 0xf3, 0xf4 });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
     registersMock.ranges[0].checkDataReceived({ 0xf1, 0xf2, 0xf3, 0xf4 });
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    REQUIRE(rtu_cl_state == RTU_CL_CHECK_REQUEST_CRC);
     rs485mock.simulateData({ 0xde, 0xad });
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_IDLE);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_IDLE);
     // Mark condition, now the station will NOT respond due to CRC error
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 static void testCorrectRead(RegisterRange& range) {
     testSizeSetup(range.address, range.readSize, 0x3);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    REQUIRE(rtu_cl_state == RTU_CL_CHECK_REQUEST_CRC);
 
     rs485mock.simulateData(crcOf(rs485mock.packetData));
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     rs485mock.simulateMark();
 
@@ -608,29 +608,29 @@ static void testCorrectRead(RegisterRange& range) {
     range.prepareDataToSend(dataToSend);
 
     // Since TX buffer is infinite, the whole message will be pushed out
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Read response
     std::vector<uint8_t> expectedMessageHeader({ 0x2, 0x3, (uint8_t)(range.readSize * 2) });
     REQUIRE(rs485mock.getDataWritten() == expectedMessageHeader + dataToSend + crcOf(expectedMessageHeader, dataToSend));
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 static void testCorrectWrite(RegisterRange& range) {
     testSizeSetup(range.address, range.writeSize, 0x10);
     // Still missing the content size
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA_SIZE);
+    REQUIRE(rtu_cl_state == RTU_CL_RECEIVE_DATA_SIZE);
     // Write sizeL * 2 bytes
     rs485mock.simulateData({ (uint8_t)(range.writeSize * 2) });
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA);
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_RECEIVE_DATA);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_RECEIVE_DATA);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_RECEIVE_DATA);
 
     // Push stream data to keep CRC correct
     std::vector<uint8_t> dataToSend;
@@ -638,30 +638,30 @@ static void testCorrectWrite(RegisterRange& range) {
         dataToSend.push_back((uint8_t)i);
     }
     rs485mock.simulateData(dataToSend);
-    REQUIRE(bus_cl_poll() == false);
+    REQUIRE(rtu_cl_poll() == false);
 
     range.checkDataReceived(dataToSend);
     
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_CHECK_REQUEST_CRC);
+    REQUIRE(rtu_cl_state == RTU_CL_CHECK_REQUEST_CRC);
 
     rs485mock.simulateData(crcOf(rs485mock.packetData));
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_RESPONSE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_RESPONSE);
 
     rs485mock.simulateMark();
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     // Read empty response
     auto address = BigEndian::fromH(range.address);
     auto size = BigEndian::fromH(range.writeSize);
     REQUIRE(rs485mock.getDataWritten() == padWithCrc({ 0x2, 0x10, address.b0, address.b1, size.b0, size.b1 }));
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_WAIT_FOR_FLUSH);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH);
 
     rs485_state = RS485_LINE_RX;
-    REQUIRE(bus_cl_poll() == false);
-    REQUIRE(bus_cl_rtu_state == BUS_CL_RTU_IDLE);
+    REQUIRE(rtu_cl_poll() == false);
+    REQUIRE(rtu_cl_state == RTU_CL_IDLE);
 }
 
 TEST_CASE("Correct size, register 1024, read") {

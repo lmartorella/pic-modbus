@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define _CONF_RS485
+
 typedef _Bool __bit;
 typedef uint32_t TICK_TYPE;
 #define __persistent
