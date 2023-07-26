@@ -84,7 +84,7 @@ _Bool rs485_writeInProgress();
 // The mark condition that separates messages in Modbus is actually 3.5 characters
 // However to implement such restricted timing and to guarantee the correct overlap
 // between master drive and slave line drive (to avoid glitches) the mark condition is set 
-// to slighly more than 1 character to allow the correct handshake. The master uses 2
+// to slightly more than 1 character to allow the correct handshake. The master uses 2
 // character as DISENGAGE_CHANNEL_TIMEOUT
 #define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 1.5)
 

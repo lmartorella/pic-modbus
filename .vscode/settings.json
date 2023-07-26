@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/src",
+    "cmake.sourceDirectory": "${workspaceFolder}/tests/lt8920",
     "files.associations": {
         "exception": "cpp",
         "array": "cpp",
