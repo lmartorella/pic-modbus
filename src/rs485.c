@@ -6,7 +6,21 @@
 
 #ifdef _CONF_RS485
 
-RS485_LINE_STATE rs485_state;
+/**
+ * State of the RS485 line
+ */
+typedef enum {
+    // Receiving, all OK
+    RS485_LINE_RX,
+    // End of transmitting, in disengage line period
+    RS485_LINE_TX_DISENGAGE,
+    // Transmitting, data
+    RS485_LINE_TX,
+    // After TX engaged, wait before transmitting
+    RS485_LINE_WAIT_FOR_START_TRANSMIT
+} RS485_LINE_STATE;
+static RS485_LINE_STATE rs485_state;
+
 uint8_t rs485_buffer[RS485_BUF_SIZE];
 
 // Pointer of the read/writing head
@@ -161,6 +175,10 @@ void rs485_discard(uint8_t count) {
         crc_update(rs485_buffer[i]);
     }
     s_bufferPtr = 0;
+}
+
+_Bool rs485_inReceiveMode() {
+    return rs485_state == RS485_LINE_RX;
 }
 
 #endif

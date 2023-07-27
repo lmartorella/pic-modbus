@@ -235,7 +235,7 @@ __bit rtu_cl_poll() {
 #endif
     
     if (rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH) {
-        if (rs485_state == RS485_LINE_RX) {
+        if (rs485_inReceiveMode()) {
             rtu_cl_state = RTU_CL_IDLE;
         }
     }

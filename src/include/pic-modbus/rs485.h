@@ -61,6 +61,11 @@ uint8_t rs485_readAvail();
  */
 _Bool rs485_writeInProgress();
 
+/**
+ * In receive mode?
+ */
+_Bool rs485_inReceiveMode();
+
 // The following timings are required to avoid the two-wire RS485 line to remain floating, potentially
 // triggering frame errors. The line will be driven low by two stations at the same time.
 // The total time should be however less than 3.5 characters to avoid triggering timeout errors.
@@ -87,22 +92,6 @@ _Bool rs485_writeInProgress();
 // to slightly more than 1 character to allow the correct handshake. The master uses 2
 // character as DISENGAGE_CHANNEL_TIMEOUT
 #define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 1.5)
-
-/**
- * State of the RS485 line
- * @internal
- */
-typedef enum {
-    // Receiving, all OK
-    RS485_LINE_RX,
-    // End of transmitting, in disengage line period
-    RS485_LINE_TX_DISENGAGE,
-    // Transmitting, data
-    RS485_LINE_TX,
-    // After TX engaged, wait before transmitting
-    RS485_LINE_WAIT_FOR_START_TRANSMIT
-} RS485_LINE_STATE;
-extern RS485_LINE_STATE rs485_state;
 
 #ifdef __cplusplus
 }
