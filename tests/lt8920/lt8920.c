@@ -31,6 +31,8 @@ typedef union {
 } REG_7;
 #define REG_7_MASK ((uint16_t)~0x01ff)
 
+#define R_FIFO (50) 
+
 #define R_FIFO_CONTROL (52)
 typedef union {
     struct {
@@ -45,8 +47,8 @@ typedef union {
 } REG_FIFO_CONTROL;
 #define REG_FIFO_CONTROL_MASK ((uint16_t)~0xbfbf)
 
-#define set_reg spi_set_reg
-#define get_reg spi_get_reg
+#define set_reg spi_set_reg_msb_first
+#define get_reg spi_get_reg_msb_first
 
 /**
  * Init a LT8920 register, using the passed `val` but using the unmasked bits (reserved) from the 
@@ -133,17 +135,12 @@ static void lt8920_startRead() {
     };
     reg_fifo_ctrl.b.CLR_R_PTR = 1;
     reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+
     reg7.b.rx_en = 1;
     set_reg(7, reg7.v);
 
-    sleep(10);
     lt8290_state = LT8290_LINE_RX;
 }
-
-/**
- * Set to true when the line is not active from more than 3.5 characters (ModBus mark condition)
- */
-_Bool lt8920_isMarkCondition;
 
 /**
  * The whole buffer. `LT8920_BUF_SIZE` should be at least 16 bytes.
@@ -155,8 +152,39 @@ uint8_t lt8920_buffer[LT8920_BUF_SIZE];
  * Start writing the data in the `lt8920_buffer`.
  * `size` is the number of bytes valid in the buffer to write.
  */ 
-void lt8920_write(uint8_t size) {
+void lt8920_write_packet(uint8_t size) {
+    // turn off rx/tx
+    REG_7 reg7 = { 
+        .b = {
+            .channel = LT8920_CHANNEL,
+            .rx_en = 0,
+            .tx_en = 0
+        }
+    };
+    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
+    sleep(3);
 
+    // flush tx
+    REG_FIFO_CONTROL reg_fifo_ctrl = {
+        .v = 0
+    };
+    reg_fifo_ctrl.b.CLR_W_PTR = 1;
+    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+
+    uint8_t pos = 0;
+    set_reg(R_FIFO, (size << 8) | lt8920_buffer[pos++]);
+    while (pos < size) {
+        uint8_t msb = lt8920_buffer[pos++];
+        // Last one can contains garbage
+        uint8_t lsb = lt8920_buffer[pos++];
+        set_reg(R_FIFO, (msb << 8) | lsb);
+    }
+
+    // Enable TX
+    reg7.b.tx_en = 1;
+    set_reg(7, reg7.v);
+
+    lt8290_state = LT8290_LINE_TX;
 }
 
 /**

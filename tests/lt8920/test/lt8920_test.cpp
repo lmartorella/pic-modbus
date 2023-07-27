@@ -13,11 +13,11 @@ extern "C" {
 
     }
 
-    void spi_set_reg(uint8_t reg, uint16_t val) {
+    void spi_set_reg_msb_first(uint8_t reg, uint16_t val) {
 
     }
 
-    uint16_t spi_get_reg(uint8_t reg) {
+    uint16_t spi_get_reg_msb_first(uint8_t reg) {
         return -1;
     }
 }

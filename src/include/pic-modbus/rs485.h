@@ -41,7 +41,7 @@ extern _Bool rs485_isMarkCondition;
 extern uint8_t rs485_buffer[RS485_BUF_SIZE];
 
 /**
- * Start writing the data in the `rs485_buffer`.
+ * Start writing the data in the `rs485_buffer`. The packet can be partial.
  * `size` is the number of bytes valid in the buffer to write.
  */ 
 void rs485_write(uint8_t size);

@@ -6,9 +6,8 @@
 #include "lt8920.h"
 
 static void transmit() {
-    // Wait for MODBUS mark condition
-    while (!lt8920_isMarkCondition) {
-        lt8920_poll();
+    // Wait for IDLE
+    while (lt8920_poll()) {
         sleep(1);
     }
 
@@ -19,7 +18,7 @@ static void transmit() {
     str << std::put_time(&lTime, "%H:%M:%S");
     auto text = str.str();
     std::strcpy(reinterpret_cast<char*>(lt8920_buffer), text.c_str());
-    lt8920_write(text.size());
+    lt8920_write_packet(text.size());
     while (lt8920_writeInProgress()) {
         lt8920_poll();
         sleep(1);
@@ -30,24 +29,17 @@ static void transmit() {
 }
 
 static void receive() {
-    // Wait for MODBUS mark condition
-    while (!lt8920_isMarkCondition) {
-        lt8920_poll();
+    // Wait for IDLE
+    while (lt8920_poll()) {
         sleep(1);
     }
 
     int l = lt8920_readAvail();
     lt8920_discard(l);
 
-    // Now wait for data
-    while (lt8920_readAvail() <= 0) {
-        lt8920_poll();
-        sleep(1);
-    }
-
-    // Wait for MODBUS mark condition
-    while (!lt8920_isMarkCondition) {
-        lt8920_poll();
+    // Now wait for data available and no more active
+    bool active;
+    while ((active = lt8920_poll()), active || lt8920_readAvail() <= 0) {
         sleep(1);
     }
 
