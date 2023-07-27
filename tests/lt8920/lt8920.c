@@ -1,8 +1,23 @@
 #include <stdint.h>
 #include "hw.h"
 
+/**
+ * State of the LT8290 line
+ */
+typedef enum {
+    // Receiving, all OK
+    LT8290_LINE_RX,
+    // Transmitting, data
+    LT8290_LINE_TX
+} LT8290_LINE_STATE;
+static LT8290_LINE_STATE lt8290_state;
+
 static void reset() {
-    gpio_reset();
+    gpio_reset(true);
+    sleep(5);
+    gpio_reset(false);
+    // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
+    sleep(5);
 }
 
 typedef union {
@@ -16,6 +31,20 @@ typedef union {
 } REG_7;
 #define REG_7_MASK ((uint16_t)~0x01ff)
 
+#define R_FIFO_CONTROL (52)
+typedef union {
+    struct {
+        unsigned FIFO_RD_PTR: 5;
+        unsigned res1: 1;
+        unsigned CLR_R_PTR: 1;
+        unsigned FIFO_WR_PTR: 5;
+        unsigned res2: 1;
+        unsigned CLR_W_PTR: 1;
+    } b;
+    uint16_t v;
+} REG_FIFO_CONTROL;
+#define REG_FIFO_CONTROL_MASK ((uint16_t)~0xbfbf)
+
 #define set_reg spi_set_reg
 #define get_reg spi_get_reg
 
@@ -23,12 +52,14 @@ typedef union {
  * Init a LT8920 register, using the passed `val` but using the unmasked bits (reserved) from the 
  * current value, using a `get_reg`
  */
-static void init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
+static uint16_t init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
 #ifdef UNIT_TEST
     check_init_reg(reg, val, mask);
 #endif
     uint16_t cur_val = get_reg(reg);
-    set_reg(reg, (cur_val & mask) | val);
+    uint16_t new_val = (cur_val & mask) | val;
+    set_reg(reg, new_val);
+    return new_val;
 }
 
 static void init_registers() {
@@ -73,8 +104,6 @@ static void init_registers() {
  */
 void lt8920_init() {
     reset();
-    // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
-    sleep(5);
     init_registers();
     // Now in read mode
 }
@@ -84,6 +113,31 @@ void lt8920_init() {
  */
 _Bool lt8920_poll() {
     return false;
+}
+
+static void lt8920_startRead() {
+    // turn off rx/tx
+    REG_7 reg7 = { 
+        .b = {
+            .channel = LT8920_CHANNEL,
+            .rx_en = 0,
+            .tx_en = 0
+        }
+    };
+    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
+    sleep(3);
+
+    // flush rx
+    REG_FIFO_CONTROL reg_fifo_ctrl = {
+        .v = 0
+    };
+    reg_fifo_ctrl.b.CLR_R_PTR = 1;
+    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+    reg7.b.rx_en = 1;
+    set_reg(7, reg7.v);
+
+    sleep(10);
+    lt8290_state = LT8290_LINE_RX;
 }
 
 /**
@@ -125,19 +179,4 @@ uint8_t lt8920_readAvail() {
 _Bool lt8920_writeInProgress() {
     return false;
 }
-
-/**
- * State of the LT8290 line
- */
-typedef enum {
-    // Receiving, all OK
-    LT8290_LINE_RX,
-    // End of transmitting, in disengage line period
-    LT8290_LINE_TX_DISENGAGE,
-    // Transmitting, data
-    LT8290_LINE_TX,
-    // After TX engaged, wait before transmitting
-    LT8290_LINE_WAIT_FOR_START_TRANSMIT
-} LT8290_LINE_STATE;
-LT8290_LINE_STATE lt8290_state;
 

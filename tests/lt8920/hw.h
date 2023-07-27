@@ -10,7 +10,7 @@ extern "C" {
 /**
  * Assert the reset pin for the required time
  */
-void gpio_reset();
+void gpio_reset(_Bool asserted);
 
 /**
  * Set register value through SPI

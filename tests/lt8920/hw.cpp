@@ -24,14 +24,16 @@ void hw_init() {
     //     printf("can't send data");
 }
 
-void gpio_reset() {
-    
-}
+extern "C" {
+    void gpio_reset(_Bool asserted) {
+        
+    }
 
-void spi_set_reg(uint8_t reg, uint16_t val) {
+    void spi_set_reg(uint8_t reg, uint16_t val) {
 
-}
+    }
 
-uint16_t spi_get_reg(uint8_t reg) {
-    return -1;
+    uint16_t spi_get_reg(uint8_t reg) {
+        return -1;
+    }
 }

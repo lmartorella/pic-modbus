@@ -9,7 +9,7 @@ static void check_init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
 #include "../lt8920.c"
 
 extern "C" {
-    void gpio_reset() {
+    void gpio_reset(_Bool asserted) {
 
     }
 
