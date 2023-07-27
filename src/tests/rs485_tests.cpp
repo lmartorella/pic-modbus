@@ -7,6 +7,8 @@
 #include "pic-modbus/rs485.h"
 #include "pic-modbus/sys.h"
 
+#include "../rs485.c"
+
 using namespace std::string_literals;
 
 enum { TRANSMIT, RECEIVE } mode;

@@ -15,7 +15,7 @@ static uint8_t s_bufferPtr;
 static uint8_t s_writeDataSize;
 // Once this is set, it skip reading in the buffer until mark condition is detected.
 // extern for UTs
-_Bool rs485_frameError;
+static _Bool rs485_frameError;
 _Bool rs485_isMarkCondition;
 
 // Set at the beginning of states RS485_LINE_TX_DISENGAGE, RS485_LINE_WAIT_FOR_START_TRANSMIT
