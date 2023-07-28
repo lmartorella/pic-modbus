@@ -1,8 +1,11 @@
 #include <fcntl.h>
+#include <memory.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 #include <iostream>
+
 #include "hw.h"
+#include "gpio.h"
 
 /**
  * Uses linux dev
@@ -15,7 +18,7 @@ static void err(const char* err) {
     exit(1);
 }
 
-void hw_init() {
+static void spi_init() {
     SPI_FD = open("/dev/spidev0.0", O_RDWR);
     if (SPI_FD < 0) {
         err("Can't open");
@@ -42,9 +45,17 @@ void hw_init() {
     }
 }
 
+static OutputPin* reset;
+
+void hw_init() {
+    spi_init();
+
+    reset = new OutputPin(24);
+}
+
 extern "C" {
     void gpio_reset(_Bool asserted) {
-        
+        *reset = !asserted;
     }
 
     void spi_set_reg_msb_first(uint8_t reg, uint16_t val) {
@@ -54,15 +65,15 @@ extern "C" {
         txBuf[1] = val >> 8;
         txBuf[2] = val & 0xff;
 
-        struct spi_ioc_transfer tr = {
-            .tx_buf = (unsigned long long)txBuf,
-            .rx_buf = (unsigned long long)rxBuf,
-            .len = 3,
-            .delay_usecs = 0,
-            .speed_hz = 500000,
-            .bits_per_word = 8,
-        };
+        struct spi_ioc_transfer tr;
+        memset(&tr, 0, sizeof(tr));
+        tr.tx_buf = (unsigned long long)txBuf;
+        tr.rx_buf = (unsigned long long)rxBuf;
+        tr.len = 3;
+        tr.speed_hz = 500000;
+        tr.bits_per_word = 8;
         int status = ioctl(SPI_FD, SPI_IOC_MESSAGE(1), &tr);
+
         if (status < 0) {
             err("can't receive register");
         }
@@ -73,15 +84,15 @@ extern "C" {
         uint8_t rxBuf[3];
         txBuf[0] = reg | 0x80;
 
-        struct spi_ioc_transfer tr = {
-            .tx_buf = (unsigned long long)txBuf,
-            .rx_buf = (unsigned long long)rxBuf,
-            .len = 3,
-            .delay_usecs = 0,
-            .speed_hz = 500000,
-            .bits_per_word = 8,
-        };
+        struct spi_ioc_transfer tr;
+        memset(&tr, 0, sizeof(tr));
+        tr.tx_buf = (unsigned long long)txBuf;
+        tr.rx_buf = (unsigned long long)rxBuf;
+        tr.len = 3;
+        tr.speed_hz = 500000;
+        tr.bits_per_word = 8;
         int status = ioctl(SPI_FD, SPI_IOC_MESSAGE(1), &tr);
+
         if (status < 0) {
             err("can't receive register");
         }

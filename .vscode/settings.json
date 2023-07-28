@@ -64,6 +64,7 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "crc.h": "c"
+        "crc.h": "c",
+        "codecvt": "cpp"
     }
 }
