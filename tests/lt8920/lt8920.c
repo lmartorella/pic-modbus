@@ -15,10 +15,10 @@ static LT8290_LINE_STATE lt8290_state;
 
 static void reset() {
     gpio_reset(true);
-    sleep(5);
+    usleep(5000);
     gpio_reset(false);
     // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
-    sleep(5);
+    usleep(5000);
 }
 
 typedef union {
@@ -62,19 +62,19 @@ static uint16_t init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
     uint16_t cur_val = get_reg(reg);
     uint16_t new_val = (cur_val & mask) | val;
     set_reg(reg, new_val);
+    _debug_print_init_reg(reg, cur_val, new_val);
     return new_val;
 }
 
+static REG_7 reg7;
+static REG_FIFO_CONTROL reg_fifo_ctrl;
+
 static void init_registers() {
     // Stop TX/RX packets. Select the channel
-    REG_7 reg7 = { 
-        .b = {
-            .channel = LT8920_CHANNEL,
-            .rx_en = 0,
-            .tx_en = 0
-        }
-    };
-    init_reg(7, reg7.v, REG_7_MASK);
+    reg7.b.channel = LT8920_CHANNEL;
+    reg7.b.rx_en = 0;
+    reg7.b.tx_en = 0;
+    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
 
     // From LT8920 spreadsheet, with slight modifications to something likely to be issues
     init_reg(9, 0x4000, (uint16_t)~0xf780); // (set power to maximum) Sets Tx power level
@@ -100,6 +100,10 @@ static void init_registers() {
     init_reg(43, 0x000f, (uint16_t)~0xffff); // SCAN_RSSI_EN = 0, SCAN_STRT_CH_OFFST[6:0] = 0, WAIT_RSSI_SCAN_TIM[7:0] = 15us
     init_reg(44, 0x1000, (uint16_t)~0xff00); // DATARATE[7:0] = 0x10 = 62.5Kbps
     init_reg(45, 0x0552, (uint16_t)~0xffff); // OPTION: 0080h for 1Mbps, 0552h for /others
+
+    reg_fifo_ctrl.v;
+    reg_fifo_ctrl.b.CLR_R_PTR = 1;
+    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
 }
 
 /**
@@ -120,22 +124,15 @@ _Bool lt8920_poll() {
 
 static void lt8920_startRead() {
     // turn off rx/tx
-    REG_7 reg7 = { 
-        .b = {
-            .channel = LT8920_CHANNEL,
-            .rx_en = 0,
-            .tx_en = 0
-        }
-    };
-    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
-    sleep(3);
+    reg7.b.rx_en = 0;
+    reg7.b.tx_en = 0;
+    set_reg(7, reg7.v);
+    usleep(3000);
 
     // flush rx
-    REG_FIFO_CONTROL reg_fifo_ctrl = {
-        .v = 0
-    };
     reg_fifo_ctrl.b.CLR_R_PTR = 1;
-    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+    set_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v);
+    reg_fifo_ctrl.b.CLR_R_PTR = 0;
 
     reg7.b.rx_en = 1;
     set_reg(7, reg7.v);
@@ -155,22 +152,15 @@ uint8_t lt8920_buffer[LT8920_BUF_SIZE];
  */ 
 void lt8920_write_packet(uint8_t size) {
     // turn off rx/tx
-    REG_7 reg7 = { 
-        .b = {
-            .channel = LT8920_CHANNEL,
-            .rx_en = 0,
-            .tx_en = 0
-        }
-    };
-    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
-    sleep(3);
+    reg7.b.rx_en = 0;
+    reg7.b.tx_en = 0;
+    set_reg(7, reg7.v);
+    usleep(3000);
 
     // flush tx
-    REG_FIFO_CONTROL reg_fifo_ctrl = {
-        .v = 0
-    };
     reg_fifo_ctrl.b.CLR_W_PTR = 1;
-    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+    set_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v);
+    reg_fifo_ctrl.b.CLR_W_PTR = 0;
 
     uint8_t pos = 0;
     set_reg(R_FIFO, (size << 8) | lt8920_buffer[pos++]);

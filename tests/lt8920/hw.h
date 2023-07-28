@@ -7,6 +7,8 @@ extern "C" {
 
 #include "configuration.h"
 
+void hw_init();
+
 /**
  * Assert the reset pin for the required time
  */

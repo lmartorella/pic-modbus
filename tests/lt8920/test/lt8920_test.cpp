@@ -9,6 +9,10 @@ static void check_init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
 #include "../lt8920.c"
 
 extern "C" {
+    void debug_print_init_reg(uint8_t reg, uint16_t init_val, uint16_t set_val) {
+
+    }
+
     void gpio_reset(_Bool asserted) {
 
     }

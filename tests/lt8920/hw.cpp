@@ -45,17 +45,15 @@ static void spi_init() {
     }
 }
 
-static OutputPin* reset;
+static OutputPin reset(24);
 
 void hw_init() {
     spi_init();
-
-    reset = new OutputPin(24);
 }
 
 extern "C" {
     void gpio_reset(_Bool asserted) {
-        *reset = !asserted;
+        reset = !asserted;
     }
 
     void spi_set_reg_msb_first(uint8_t reg, uint16_t val) {

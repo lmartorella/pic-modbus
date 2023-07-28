@@ -29,7 +29,7 @@ GpioDigitalPin::GpioDigitalPin(int gpio, const std::string& direction)
     }
 
     // WTF
-    sleep(100);
+    usleep(100 * 1000);
 
     // Configure direction
     {
