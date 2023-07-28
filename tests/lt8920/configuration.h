@@ -16,11 +16,10 @@ typedef _Bool __bit;
 #define LT8920_CHANNEL (30)
 // Choose unique sync words for each over-the-air network.
 // Similar to a MAC address.
-#define LT8920_SYNC_WORD_0 (0x0000)
-#define LT8920_SYNC_WORD_1 (0x0000)
-#define LT8920_SYNC_WORD_2 (0x0000)
-#define LT8920_SYNC_WORD_3 (0x0000)
-
+#define LT8920_SYNC_WORD_0 (0x3f12)
+#define LT8920_SYNC_WORD_1 (0x8631)
+#define LT8920_SYNC_WORD_2 (0xf17e)
+#define LT8920_SYNC_WORD_3 (0x930f)
 #define _debug_print_init_reg(a,b,c)    debug_print_init_reg(a, b, c)
 extern void debug_print_init_reg(uint8_t reg, uint16_t init_val, uint16_t set_val);
 
