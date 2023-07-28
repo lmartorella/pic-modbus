@@ -15,6 +15,11 @@ void hw_init();
 void gpio_reset(_Bool asserted);
 
 /**
+ * Get 8bit register value through SPI
+ */
+uint8_t spi_get_reg8(uint8_t reg);
+
+/**
  * Set 8bit register value through SPI
  */
 void spi_set_reg8(uint8_t reg, uint8_t val);

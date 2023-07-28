@@ -47,24 +47,16 @@ static void transmit() {
 }
 
 static void receive() {
-    // Wait for IDLE
-    while (lt8920_poll()) {
-        usleep(500);
-    }
-
-    int l = lt8920_readAvail();
-    lt8920_discard(l);
-    lt8920_buffer[0] = 0;
-
-    // Now wait for data available and no more active
+    // Wait for data available and no more active
     bool active;
-    while ((active = lt8920_poll()), active || lt8920_readAvail() <= 0) {
+    int l;
+    do {
         usleep(500);
-    }
+        active = lt8920_poll();
+        l = lt8920_readAvail();
+    } while (active || l <= 0);
 
-    l = lt8920_readAvail();
     std::string text(reinterpret_cast<const char*>(lt8920_buffer), l);
-    lt8920_discard(l);
 
     std::cout << "Received: " << text << "\n";
 

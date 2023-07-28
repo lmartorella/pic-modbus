@@ -3,15 +3,15 @@
 #include "hw.h"
 
 /**
- * State of the LT8290 line
+ * State of the LT8920 line
  */
 typedef enum {
     // Receiving, all OK
-    LT8290_LINE_RX,
+    LT8920_LINE_RX,
     // Transmitting, data
-    LT8290_LINE_TX
-} LT8290_LINE_STATE;
-static LT8290_LINE_STATE lt8290_state;
+    LT8920_LINE_TX
+} LT8920_LINE_STATE;
+static LT8920_LINE_STATE lt8920_state;
 
 static void reset() {
     gpio_reset(true);
@@ -62,9 +62,10 @@ typedef union {
 } REG_FIFO_CONTROL;
 #define REG_FIFO_CONTROL_MASK ((uint16_t)~0xbfbf)
 
+#define get_reg_8 spi_get_reg8
 #define set_reg_8 spi_set_reg8
-#define set_reg spi_set_reg16_msb_first
 #define get_reg spi_get_reg16_msb_first
+#define set_reg spi_set_reg16_msb_first
 
 /**
  * Init a LT8920 register, using the passed `val` but using the unmasked bits (reserved) from the 
@@ -83,6 +84,7 @@ static uint16_t init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
 
 static REG_7 reg7;
 static REG_FIFO_CONTROL reg_fifo_ctrl;
+static int readAvail;
 
 static void init_registers() {
     // Stop TX/RX packets. Select the channel
@@ -121,22 +123,6 @@ static void init_registers() {
     reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
 }
 
-/**
- * Setup connection
- */
-void lt8920_init() {
-    reset();
-    init_registers();
-    // Now in read mode
-}
-
-/**
- * Returns `true` if the bus is active (so fast poll is required).
- */
-_Bool lt8920_poll() {
-    return false;
-}
-
 static void lt8920_startRead() {
     // turn off rx/tx
     reg7.b.rx_en = 0;
@@ -152,7 +138,60 @@ static void lt8920_startRead() {
     reg7.b.rx_en = 1;
     set_reg(7, reg7.v);
 
-    lt8290_state = LT8290_LINE_RX;
+    lt8920_state = LT8920_LINE_RX;
+    readAvail = 0;
+
+    REG_STATUS status;
+    status.v = get_reg(R_STATUS);
+}
+
+/**
+ * Setup connection
+ */
+void lt8920_init() {
+    reset();
+    init_registers();
+
+    lt8920_startRead();
+}
+
+static void lt8920_read_packet() {
+    readAvail = get_reg_8(R_FIFO);
+    uint8_t pos = 0;
+    while (pos < readAvail) {
+        lt8920_buffer[pos++] = get_reg_8(R_FIFO);
+    }
+}
+
+static void lt8920_discard() {
+    get_reg_8(R_FIFO);
+}
+
+/**
+ * Returns `true` if the bus is active (so fast poll is required).
+ */
+_Bool lt8920_poll() {
+    REG_STATUS status;
+    status.v = get_reg(R_STATUS);
+    if (lt8920_state == LT8920_LINE_TX) {
+        if (status.b.PKT_FLAG && !status.b.FIFO_FLAG) {
+            // Go back in receive mode, TX frame sent
+            lt8920_startRead();
+        } else {
+            // Poll fast
+            return true;
+        }
+    } else {
+        if (status.b.PKT_FLAG) {
+            if (status.b.CRC_ERROR || status.b.FEC23_ERROR) {
+                lt8920_discard();
+            } else {
+                // Data arrived, read data
+                lt8920_read_packet();
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -187,34 +226,21 @@ void lt8920_write_packet(uint8_t size) {
     reg7.b.tx_en = 1;
     set_reg(7, reg7.v);
 
-    lt8290_state = LT8290_LINE_TX;
-}
-
-/**
- * Discard `count` bytes from the read buffer
- */
-void lt8920_discard(uint8_t count) {
-
+    lt8920_state = LT8920_LINE_TX;
 }
 
 /**
  * Get count of available bytes in the read `lt8920_buffer`
  */
 uint8_t lt8920_readAvail() {
-    return -1;
+    return readAvail;
 }
 
 /**
  * Check if the buffer contains data still to be sent
  */
 _Bool lt8920_writeInProgress() {
-    if (lt8290_state == LT8290_LINE_TX) {
-        REG_STATUS status;
-        status.v = get_reg(R_STATUS);
-        return !status.b.PKT_FLAG || status.b.FIFO_FLAG;
-    } else {
-        return false;
-    }
+    return lt8920_state == LT8920_LINE_TX;
 }
 
 void lt8920_get_rev(LT8920_REVISION_INFO* info) {

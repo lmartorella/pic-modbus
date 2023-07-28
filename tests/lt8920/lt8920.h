@@ -36,11 +36,6 @@ extern uint8_t lt8920_buffer[LT8920_BUF_SIZE];
 extern void lt8920_write_packet(uint8_t size);
 
 /**
- * Discard `count` bytes from the read buffer
- */
-extern void lt8920_discard(uint8_t count);
-
-/**
  * Get count of available bytes in the read `lt8920_buffer`
  */
 extern uint8_t lt8920_readAvail();
