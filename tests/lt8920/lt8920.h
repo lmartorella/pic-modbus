@@ -50,6 +50,34 @@ extern uint8_t lt8920_readAvail();
  */
 extern _Bool lt8920_writeInProgress();
 
+typedef struct {
+    union {
+        struct {
+            unsigned MCU_VER_ID: 2;
+            unsigned _res1: 1;
+            unsigned RF_VER_ID: 4;
+        } b;
+        uint16_t v;
+    } reg29;
+
+    union {
+        struct {
+            unsigned ID_CODE_JEDEC_MCODE_L: 16;
+        } b;
+        uint16_t v;
+    } reg30;
+
+    union {
+        struct {
+            unsigned ID_CODE_JEDEC_MCODE_M: 12;
+            unsigned RF_CODE_ID: 4;
+        } b;
+        uint16_t v;
+    } reg31;
+} LT8920_REVISION_INFO;
+
+void lt8920_get_rev(LT8920_REVISION_INFO* info);
+
 #ifdef __cplusplus
 }
 #endif

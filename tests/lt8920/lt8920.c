@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "lt8920.h"
 #include "hw.h"
 
 /**
@@ -208,3 +209,8 @@ _Bool lt8920_writeInProgress() {
     return false;
 }
 
+void lt8920_get_rev(LT8920_REVISION_INFO* info) {
+    info->reg29.v = get_reg(29);
+    info->reg30.v = get_reg(30);
+    info->reg31.v = get_reg(31);
+}

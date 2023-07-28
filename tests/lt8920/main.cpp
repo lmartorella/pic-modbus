@@ -76,6 +76,12 @@ int main(int argc, const char** argv) {
 
     lt8920_init();
 
+    LT8920_REVISION_INFO rev;
+    lt8920_get_rev(&rev);
+    std::cout << "Lower bits of JEDEC JEP106K Manufacture’s ID code: " << (rev.reg31.b.ID_CODE_JEDEC_MCODE_M << 16) + rev.reg30.b.ID_CODE_JEDEC_MCODE_L;
+    std::cout << ", RF_CODE_ID: " << rev.reg31.b.RF_CODE_ID << ", RF_VER_ID: " << rev.reg29.b.RF_VER_ID;
+    std::cout << ", MCU_VER_ID: " << rev.reg29.b.MCU_VER_ID << std::endl;
+
     if (argv[1] == u8"primary") {
         primary();
     } else if (argv[1] == u8"secondary") {
