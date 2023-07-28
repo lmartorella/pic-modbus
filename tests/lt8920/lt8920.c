@@ -26,11 +26,25 @@ typedef union {
         unsigned channel: 7;
         unsigned rx_en: 1;
         unsigned tx_en: 1;
-        unsigned res: 7;
+        unsigned _res: 7;
     } b;
     uint16_t v;
 } REG_7;
 #define REG_7_MASK ((uint16_t)~0x01ff)
+
+#define R_STATUS (48)
+typedef union {
+    struct {
+        unsigned _res: 5;
+        unsigned FIFO_FLAG: 1;
+        unsigned PKT_FLAG: 1;
+        unsigned SYNCWORD_RECV: 1;
+        unsigned FRAMER_ST: 6;
+        unsigned FEC23_ERROR: 1;
+        unsigned CRC_ERROR: 1;
+    } b;
+    uint16_t v;
+} REG_STATUS;
 
 #define R_FIFO (50) 
 
@@ -38,18 +52,19 @@ typedef union {
 typedef union {
     struct {
         unsigned FIFO_RD_PTR: 5;
-        unsigned res1: 1;
+        unsigned _res1: 1;
         unsigned CLR_R_PTR: 1;
         unsigned FIFO_WR_PTR: 5;
-        unsigned res2: 1;
+        unsigned _res2: 1;
         unsigned CLR_W_PTR: 1;
     } b;
     uint16_t v;
 } REG_FIFO_CONTROL;
 #define REG_FIFO_CONTROL_MASK ((uint16_t)~0xbfbf)
 
-#define set_reg spi_set_reg_msb_first
-#define get_reg spi_get_reg_msb_first
+#define set_reg_8 spi_set_reg8
+#define set_reg spi_set_reg16_msb_first
+#define get_reg spi_get_reg16_msb_first
 
 /**
  * Init a LT8920 register, using the passed `val` but using the unmasked bits (reserved) from the 
@@ -162,13 +177,10 @@ void lt8920_write_packet(uint8_t size) {
     set_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v);
     reg_fifo_ctrl.b.CLR_W_PTR = 0;
 
+    set_reg_8(R_FIFO, size);
     uint8_t pos = 0;
-    set_reg(R_FIFO, (size << 8) | lt8920_buffer[pos++]);
     while (pos < size) {
-        uint8_t msb = lt8920_buffer[pos++];
-        // Last one can contains garbage
-        uint8_t lsb = lt8920_buffer[pos++];
-        set_reg(R_FIFO, (msb << 8) | lsb);
+        set_reg_8(R_FIFO, lt8920_buffer[pos++]);
     }
 
     // Enable TX
@@ -196,7 +208,13 @@ uint8_t lt8920_readAvail() {
  * Check if the buffer contains data still to be sent
  */
 _Bool lt8920_writeInProgress() {
-    return false;
+    if (lt8290_state == LT8290_LINE_TX) {
+        REG_STATUS status;
+        status.v = get_reg(R_STATUS);
+        return !status.b.PKT_FLAG || status.b.FIFO_FLAG;
+    } else {
+        return false;
+    }
 }
 
 void lt8920_get_rev(LT8920_REVISION_INFO* info) {
