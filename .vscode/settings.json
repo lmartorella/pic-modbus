@@ -2,7 +2,7 @@
     "cmake.sourceDirectory": "${workspaceFolder}/tests/lt8920",
     "cmake.debugConfig": {
         "args": [
-            "primary"
+            "secondary"
         ]
     },
     "files.associations": {

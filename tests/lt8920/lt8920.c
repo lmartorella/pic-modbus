@@ -54,7 +54,22 @@ static void lt8920_init_registers() {
     set_reg(39, LT8920_SYNC_WORD_3);
 
     init_reg(40, 0x2102, (uint16_t)~0xffff); // Configure FIFO flag, FIFO_EMPTY_THRESHOLD = 8, FIFO_FULL_THRESHOLD = 8, SYNCWORD_THRESHOLD = 2
-    init_reg(41, 0xb000, (uint16_t)~0xfcff); // CRC on. SCRAMBLE off. 1st byte is packet length, FW_TERM_TX = 0, AUTO_ACK = 0, PKT_FIFO_POLARITY = 0, CRC_INITIAL_DATA = 0
+
+    // 0xb000
+    REG_41 reg41 = {
+        .b = {
+            .CRC_INITIAL_DATA = 0,
+            .PKT_FIFO_POLARITY = 0,
+            .AUTO_ACK = 0,
+            .FW_TERM_TX = 0,
+            .PACK_LENGTH_EN = 0,
+            .SCRAMBLE_ON = 0,
+            .CRC_ON = 1
+        }
+    }; 
+    init_reg(41, reg41.v, REG_41_MASK);
+    // FW_TERM_TX = 0 and PACK_LENGTH_EN = 0: TX stops only when TX_EN is set to zero. No 1st byte of payload used for packet length.
+
     init_reg(42, 0xfcb0, (uint16_t)~0xfcff); // SCAN_RSSI_CH_NO = 63, Rx_ACK_TIME[7:0] = 176us
     init_reg(43, 0x000f, (uint16_t)~0xffff); // SCAN_RSSI_EN = 0, SCAN_STRT_CH_OFFST[6:0] = 0, WAIT_RSSI_SCAN_TIM[7:0] = 15us
     init_reg(44, 0x1000, (uint16_t)~0xff00); // DATARATE[7:0] = 0x10 = 62.5Kbps

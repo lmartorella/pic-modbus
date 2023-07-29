@@ -43,7 +43,7 @@ static void transmit() {
         usleep(500);
     }
 
-    std::cout << "Transmitted: " << text << "\n";
+    std::cout << "Transmitted: " << text << " (" << text.size() << " bytes)\n";
     // Now back to receive
 }
 

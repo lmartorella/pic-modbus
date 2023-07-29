@@ -18,6 +18,21 @@ typedef union {
 } REG_7;
 #define REG_7_MASK ((uint16_t)~0x01ff)
 
+typedef union {
+    struct {
+        unsigned CRC_INITIAL_DATA: 8;
+        unsigned _res: 2;
+        unsigned PKT_FIFO_POLARITY: 1;
+        unsigned AUTO_ACK: 1;
+        unsigned FW_TERM_TX: 1;
+        unsigned PACK_LENGTH_EN: 1;
+        unsigned SCRAMBLE_ON: 1;
+        unsigned CRC_ON: 1;
+    } b;
+    uint16_t v;
+} REG_41;
+#define REG_41_MASK ((uint16_t)~0xfcff)
+
 #define R_STATUS (48)
 typedef union {
     struct {

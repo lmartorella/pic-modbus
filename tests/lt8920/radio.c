@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "hw.h"
 #include "lt8920.h"
 #include "radio.h"
@@ -9,8 +10,10 @@
 typedef enum {
     // Receiving, all OK
     RADIO_LINE_RX,
-    // Transmitting, data
-    RADIO_LINE_TX
+    // Transmitting, data, FIFO is still opened
+    RADIO_LINE_TX,
+    // TX ending packet, FIFO is closed, waiting for PKT
+    RADIO_LINE_TX_WAITING_FOR_END
 } RADIO_LINE_STATE;
 static RADIO_LINE_STATE radio_state;
 
@@ -24,6 +27,8 @@ uint8_t radio_buffer[RADIO_BUF_SIZE];
 static void radio_start_read() {
     lt8920_disable_rx_tx();
     lt8920_flush_rx();
+    // This will reset PKT
+    lt8920_read_fifo();
     lt8920_enable_rx();
 
     radio_state = RADIO_LINE_RX;
@@ -39,15 +44,15 @@ void radio_init() {
 }
 
 static void radio_read_packet() {
-    readAvail = lt8920_read_fifo();
-    uint8_t pos = 0;
-    while (pos < readAvail) {
-        radio_buffer[pos++] = lt8920_read_fifo();
+    readAvail = 0;
+    while (lt8920_registers.status.b.FIFO_FLAG || readAvail < 8) {
+        radio_buffer[readAvail++] = lt8920_read_fifo();
+        lt8920_get_status();
     }
 }
 
 static void radio_discard() {
-    lt8920_read_fifo();
+    radio_start_read();
 }
 
 /**
@@ -55,17 +60,28 @@ static void radio_discard() {
  */
 _Bool radio_poll() {
     lt8920_get_status();
-    if (radio_state == RADIO_LINE_TX) {
-        if (lt8920_registers.status.b.PKT_FLAG && !lt8920_registers.status.b.FIFO_FLAG) {
+    if (radio_state == RADIO_LINE_TX_WAITING_FOR_END) {
+        if (lt8920_registers.status.b.PKT_FLAG) {
             // Go back in receive mode, TX frame sent
             radio_start_read();
         } else {
             // Poll fast
             return true;
         }
-    } else {
-        if (lt8920_registers.status.b.PKT_FLAG) {
+    } else if (radio_state == RADIO_LINE_RX) {
+        if (lt8920_registers.status.b.FIFO_FLAG) {
+            printf("FIFO flag set\n");
+        }
+        if (lt8920_registers.status.b.FRAMER_ST != 18 && lt8920_registers.status.b.FRAMER_ST != 0) {
+            printf("FRAMER_ST state set to %d\n", lt8920_registers.status.b.FRAMER_ST);
+        }
+        if (lt8920_registers.status.b.SYNCWORD_RECV) {
+            printf("SYNCWORD_RECV flag set\n");
+        }
+        // In RX mode, PKT_FLAG means that a packet arrived
+        if (lt8920_registers.status.b.PKT_FLAG || lt8920_registers.status.b.FRAMER_ST == 0) {
             if (lt8920_registers.status.b.CRC_ERROR || lt8920_registers.status.b.FEC23_ERROR) {
+                printf("CRC error\n");
                 radio_discard();
             } else {
                 // Data arrived, read data
@@ -84,15 +100,18 @@ void radio_write_packet(uint8_t size) {
     lt8920_disable_rx_tx();
     lt8920_flush_tx();
 
-    lt8920_write_fifo(size);
+    // FW_TERM_TX = 0 and PACK_LENGTH_EN = 0: TX stops only when TX_EN is set to zero. No 1st byte of payload used for packet length.
+    lt8920_enable_tx();
+    radio_state = RADIO_LINE_TX;
+
     uint8_t pos = 0;
     while (pos < size) {
         lt8920_write_fifo(radio_buffer[pos++]);
     }
 
-    lt8920_enable_tx();
-
-    radio_state = RADIO_LINE_TX;
+    lt8920_disable_rx_tx();
+    // Still in TX mode, waiting for packet to be completely sent
+    radio_state = RADIO_LINE_TX_WAITING_FOR_END;
 }
 
 /**
