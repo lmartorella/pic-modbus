@@ -3,9 +3,12 @@
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 #include <iostream>
+#include <string>
 
 #include "hw.h"
 #include "gpio.h"
+
+using namespace std::literals;
 
 /**
  * Uses linux dev
@@ -18,8 +21,8 @@ static void err(const char* err) {
     exit(1);
 }
 
-static void spi_init() {
-    SPI_FD = open("/dev/spidev0.0", O_RDWR);
+static void spi_init(int deviceIndex) {
+    SPI_FD = open(("/dev/spidev0."s + std::to_string(deviceIndex)).c_str(), O_RDWR);
     if (SPI_FD < 0) {
         err("Can't open");
     }
@@ -45,15 +48,22 @@ static void spi_init() {
     }
 }
 
-static OutputPin reset(24);
+static OutputPin reset_0(24);
+static OutputPin reset_1(23);
+static int _deviceIndex;
 
-void hw_init() {
-    spi_init();
+void hw_init(int deviceIndex) {
+    _deviceIndex = deviceIndex;
+    spi_init(deviceIndex);
 }
 
 extern "C" {
     void gpio_reset(_Bool asserted) {
-        reset = !asserted;
+        if (_deviceIndex == 0) {
+            reset_0 = !asserted;
+        } else {
+            reset_1 = !asserted;
+        }
     }
 
     uint8_t spi_get_reg8(uint8_t reg) {

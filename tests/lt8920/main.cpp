@@ -86,7 +86,17 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    hw_init();
+    int deviceIndex;
+    if (argv[1] == "primary"s) {
+        deviceIndex = 0;
+    } else if (argv[1] == "secondary"s) {
+        deviceIndex = 1;
+    } else {
+        std::cerr << "You need to specify 'primary' or 'secondary' as argument\n";
+        return 1;
+    }
+
+    hw_init(deviceIndex);
     radio_init();
 
     LT8920_REVISION_INFO rev;
@@ -95,13 +105,10 @@ int main(int argc, const char** argv) {
     std::cout << ", RF_CODE_ID: 0x" << rev.reg31.b.RF_CODE_ID << ", RF_VER_ID: 0x" << rev.reg29.b.RF_VER_ID;
     std::cout << ", MCU_VER_ID: 0x" << rev.reg29.b.MCU_VER_ID << std::dec << std::endl;
 
-    if (argv[1] == "primary"s) {
+    if (deviceIndex == 0) {
         primary();
-    } else if (argv[1] == "secondary"s) {
-        secondary();
     } else {
-        std::cerr << "You need to specify 'primary' or 'secondary' as argument\n";
-        return 1;
+        secondary();
     }
     return 0;
 }
