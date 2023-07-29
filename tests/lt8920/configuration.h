@@ -14,14 +14,14 @@ typedef _Bool __bit;
 /**
  * Radio module setup
  */
-#define RADIO_BUF_SIZE (16)
+#define RADIO_BUF_SIZE (256)
 
 /**
  * LT8920 module setup
  */
 
 // from 0 to 127
-#define LT8920_CHANNEL (30)
+#define LT8920_CHANNEL (23)
 
 // Choose unique sync words for each over-the-air network.
 // Similar to a MAC address.

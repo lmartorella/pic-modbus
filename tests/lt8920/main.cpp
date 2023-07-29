@@ -56,6 +56,11 @@ static void receive() {
     } while (!radio_packet_ready());
 
     int l = radio_read_avail();
+    for (int i = 0; i < l; i++) {
+        if (radio_buffer[i] < 32 || radio_buffer[i] > 127) {
+            radio_buffer[i] = '?';
+        }
+    }
     std::string text(reinterpret_cast<const char*>(radio_buffer), l);
 
     std::cout << "Received: " << text << " (" << l << " bytes)\n";

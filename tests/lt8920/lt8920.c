@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "lt8920.h"
+#include "configuration.h"
 #include "hw.h"
 
 #define get_reg_8 spi_get_reg8
@@ -106,18 +107,14 @@ void lt8920_disable_rx_tx() {
     usleep(3000);
 }
 
-void lt8920_flush_rx() {
-    // flush rx
+void lt8920_flush_rx_tx() {
+    // flush both tx and rx
     lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 1;
-    set_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v);
-    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 0;
-}
-
-void lt8920_flush_tx() {
-    // flush rx
     lt8920_registers.fifo_ctrl.b.CLR_W_PTR = 1;
     set_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v);
+    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 0;
     lt8920_registers.fifo_ctrl.b.CLR_W_PTR = 0;
+    set_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v);
 }
 
 void lt8920_enable_rx() {
@@ -134,6 +131,10 @@ void lt8920_enable_tx() {
 
 uint8_t lt8920_read_fifo() {
     return get_reg_8(R_FIFO);
+}
+
+void lt8920_read_fifo_ctrl() {
+    lt8920_registers.fifo_ctrl.v = get_reg(R_FIFO_CONTROL);
 }
 
 void lt8920_write_fifo(uint8_t data) {

@@ -92,8 +92,7 @@ typedef struct {
 void lt8920_reset();
 
 void lt8920_disable_rx_tx();
-void lt8920_flush_rx();
-void lt8920_flush_tx();
+void lt8920_flush_rx_tx();
 void lt8920_enable_rx();
 void lt8920_enable_tx();
 
@@ -101,6 +100,7 @@ void lt8920_get_status();
 
 uint8_t lt8920_read_fifo();
 void lt8920_write_fifo(uint8_t data);
+void lt8920_read_fifo_ctrl();
 
 void lt8920_get_rev(LT8920_REVISION_INFO* info);
 
