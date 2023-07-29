@@ -22,7 +22,10 @@ static void err(const char* err) {
 }
 
 static void spi_init(int deviceIndex) {
-    SPI_FD = open(("/dev/spidev0."s + std::to_string(deviceIndex)).c_str(), O_RDWR);
+    auto deviceName = "/dev/spidev0."s + std::to_string(deviceIndex);
+    std::cout << "Opening " << deviceName << std::endl;
+
+    SPI_FD = open(deviceName.c_str(), O_RDWR);
     if (SPI_FD < 0) {
         err("Can't open");
     }
@@ -48,8 +51,8 @@ static void spi_init(int deviceIndex) {
     }
 }
 
-static OutputPin reset_0(24);
-static OutputPin reset_1(23);
+static OutputPin reset_0(24, false);
+static OutputPin reset_1(23, false);
 static int _deviceIndex;
 
 void hw_init(int deviceIndex) {

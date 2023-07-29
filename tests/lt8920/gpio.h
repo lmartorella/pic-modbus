@@ -45,6 +45,6 @@ public:
 
 class OutputPin : protected GpioDigitalPin { 
 public:
-    OutputPin(int gpio);
+    OutputPin(int gpio, bool initialValue);
     OutputPin& operator= (bool value);
 };

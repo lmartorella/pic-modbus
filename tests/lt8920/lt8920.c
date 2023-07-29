@@ -32,7 +32,11 @@ static void lt8920_init_registers() {
     lt8920_registers.reg7.v = init_reg(7, lt8920_registers.reg7.v, REG_7_MASK);
 
     // From LT8920 spreadsheet, with slight modifications to something likely to be issues
+#ifdef LT8920_MAX_TX_POWER
     init_reg(9, 0x4000, (uint16_t)~0xf780); // (set power to maximum) Sets Tx power level
+    // Otherwise leave default setup (undocumented)
+#endif
+
     init_reg(10, 0x0001, (uint16_t)~0x0001); // Crystal osc. enabled.
     init_reg(11, 0x0000, (uint16_t)~0x0100); // RSSI enabled.
     init_reg(23, 0x0004, (uint16_t)~0x0004); // Calibrate VCO before each and every Tx/Rx.

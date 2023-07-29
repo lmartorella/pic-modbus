@@ -57,8 +57,8 @@ GpioDigitalPin::~GpioDigitalPin() {
     }
 }
 
-OutputPin::OutputPin(int gpio)
-    :GpioDigitalPin(gpio, "out") 
+OutputPin::OutputPin(int gpio, bool initialValue)
+    :GpioDigitalPin(gpio, initialValue ? "high" : "low")  // Avoid glitch in setting out and an initial value
 { }
 
 OutputPin& OutputPin::operator= (bool value) {

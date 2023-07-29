@@ -11,16 +11,27 @@ extern "C" {
 
 typedef _Bool __bit;
 
+/**
+ * Radio module setup
+ */
 #define RADIO_BUF_SIZE (16)
+
+/**
+ * LT8920 module setup
+ */
 
 // from 0 to 127
 #define LT8920_CHANNEL (30)
+
 // Choose unique sync words for each over-the-air network.
 // Similar to a MAC address.
 #define LT8920_SYNC_WORD_0 (0x3f12)
 #define LT8920_SYNC_WORD_1 (0x8631)
 #define LT8920_SYNC_WORD_2 (0xf17e)
 #define LT8920_SYNC_WORD_3 (0x930f)
+
+#undef LT8920_MAX_TX_POWER
+
 #define _debug_print_init_reg(a,b,c)    debug_print_init_reg(a, b, c)
 extern void debug_print_init_reg(uint8_t reg, uint16_t init_val, uint16_t set_val);
 
