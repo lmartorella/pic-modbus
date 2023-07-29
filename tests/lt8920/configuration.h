@@ -32,6 +32,9 @@ typedef _Bool __bit;
 
 #undef LT8920_MAX_TX_POWER
 
+// If true, use the PACK_LENGTH_EN feature to transmit the packet size in advance
+#define LT8920_FIRST_BYTE_AS_LENGTH
+
 #define _debug_print_init_reg(a,b,c)    debug_print_init_reg(a, b, c)
 extern void debug_print_init_reg(uint8_t reg, uint16_t init_val, uint16_t set_val);
 

@@ -38,7 +38,7 @@ static void transmit() {
     auto text = str.str();
     std::strcpy(reinterpret_cast<char*>(radio_buffer), text.c_str());
     radio_write_packet(text.size());
-    while (radio_writeInProgress()) {
+    while (radio_write_in_progress()) {
         radio_poll();
         usleep(500);
     }
@@ -50,24 +50,22 @@ static void transmit() {
 static void receive() {
     // Wait for data available and no more active
     bool active;
-    int l;
     do {
         usleep(500);
-        active = radio_poll();
-        l = radio_readAvail();
-    } while (active || l <= 0);
+        radio_poll();
+    } while (!radio_packet_ready());
 
+    int l = radio_read_avail();
     std::string text(reinterpret_cast<const char*>(radio_buffer), l);
 
-    std::cout << "Received: " << text << "\n";
-
-    sleep(1);
+    std::cout << "Received: " << text << " (" << l << " bytes)\n";
 }
 
 static void primary() {
     // Start with transmitting
     while (true) {
         transmit();
+        exit(0);
         receive();
     }
 }
@@ -76,6 +74,7 @@ static void secondary() {
     // Start with receiving
     while (true) {
         receive();
+        exit(0);
         transmit();
     }
 }

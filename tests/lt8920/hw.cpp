@@ -51,22 +51,22 @@ static void spi_init(int deviceIndex) {
     }
 }
 
-static OutputPin reset_0(24, false);
-static OutputPin reset_1(23, false);
+static OutputPin* reset;
 static int _deviceIndex;
 
 void hw_init(int deviceIndex) {
     _deviceIndex = deviceIndex;
     spi_init(deviceIndex);
+    if (_deviceIndex == 0) {
+        reset = new OutputPin(24, false);
+    } else {
+        reset = new OutputPin(23, false);
+    }
 }
 
 extern "C" {
     void gpio_reset(_Bool asserted) {
-        if (_deviceIndex == 0) {
-            reset_0 = !asserted;
-        } else {
-            reset_1 = !asserted;
-        }
+        *reset = !asserted;
     }
 
     uint8_t spi_get_reg8(uint8_t reg) {

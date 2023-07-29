@@ -36,14 +36,19 @@ extern uint8_t radio_buffer[RADIO_BUF_SIZE];
 extern void radio_write_packet(uint8_t size);
 
 /**
+ * Is packet ready (even if empty)
+ */
+extern _Bool radio_packet_ready();
+
+/**
  * Get count of available bytes in the read `radio_buffer`
  */
-extern uint8_t radio_readAvail();
+extern uint8_t radio_read_avail();
 
 /**
  * Check if the buffer contains data still to be sent
  */
-extern _Bool radio_writeInProgress();
+extern _Bool radio_write_in_progress();
 
 #ifdef __cplusplus
 }

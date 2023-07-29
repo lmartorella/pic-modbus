@@ -61,8 +61,13 @@ static void lt8920_init_registers() {
             .CRC_INITIAL_DATA = 0,
             .PKT_FIFO_POLARITY = 0,
             .AUTO_ACK = 0,
+#ifdef LT8920_FIRST_BYTE_AS_LENGTH
+            .FW_TERM_TX = 1,
+            .PACK_LENGTH_EN = 0,
+#else
             .FW_TERM_TX = 0,
             .PACK_LENGTH_EN = 0,
+#endif
             .SCRAMBLE_ON = 0,
             .CRC_ON = 1
         }
