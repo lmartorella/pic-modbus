@@ -25,10 +25,7 @@ typedef _Bool __bit;
 
 // Choose unique sync words for each over-the-air network.
 // Similar to a MAC address.
-#define LT8920_SYNC_WORD_0 (0x3f12)
-#define LT8920_SYNC_WORD_1 (0x8631)
-#define LT8920_SYNC_WORD_2 (0xf17e)
-#define LT8920_SYNC_WORD_3 (0x930f)
+#define LT8920_SYNC_WORD_32 (0x3e128631)
 
 #undef LT8920_MAX_TX_POWER
 

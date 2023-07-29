@@ -46,30 +46,35 @@ void radio_init() {
     radio_start_read();
 }
 
-static void radio_read_packet() {
+static void _debug_fifo(const char* msg) {
     lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
+    lt8920_get_status();
+    printf("FIFO ptr: W: %d, R: %d, FIFO_FLAG: %d (%s)\n",
+        lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR,
+        lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR,
+        lt8920_registers.status.b.FIFO_FLAG,
+        msg);
+}
 
+static void radio_read_packet() {
+    _debug_fifo("begin");
 #ifdef LT8920_FIRST_BYTE_AS_LENGTH
     // 1st byte of payload used for packet length, for the LT8920 framer
     readAvail = lt8920_read_fifo();
-    lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d (after 1 byte read)\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
+    _debug_fifo("after 1 byte read");
 
     uint8_t pos = 0;
     while (pos < readAvail) {
         radio_buffer[pos++] = lt8920_read_fifo();
     }
+    _debug_fifo("end");
 #else
     readAvail = 0;
-    while (lt8920_registers.status.b.FIFO_FLAG) {
+    while (lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR > lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR) {
         radio_buffer[readAvail++] = lt8920_read_fifo();
-        lt8920_get_status();
+        _debug_fifo("looping");
     }
 #endif
-
-    lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d (after packet read)\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
 
     packetReady = true;
 }
@@ -128,30 +133,32 @@ void radio_write_packet(uint8_t size) {
     lt8920_disable_rx_tx();
     lt8920_flush_rx_tx();
 
-    lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
+    _debug_fifo("begin");
 
 #ifdef LT8920_FIRST_BYTE_AS_LENGTH
     // 1st byte of payload used for packet length, for the LT8920 framer
     lt8920_write_fifo(size);
-    lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d (after 1 byte write)\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
+    _debug_fifo("after 1 byte write");
 #endif
     uint8_t pos = 0;
     while (pos < size) {
         lt8920_write_fifo(radio_buffer[pos++]);
     }
 
-    lt8920_read_fifo_ctrl();
-    printf("FIFO ptr: W: %d, R: %d (end)\n", lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR, lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR);
-
     lt8920_enable_tx();
     radio_state = RADIO_LINE_TX;
 
 #ifndef LT8920_FIRST_BYTE_AS_LENGTH
     // FW_TERM_TX = 0 and PACK_LENGTH_EN = 0: TX stops only when TX_EN is set to zero. No 1st byte of payload used for packet length.
+    do {
+        _debug_fifo("looping");
+    } while (lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR < lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR);
+
     lt8920_disable_rx_tx();
+#else
+    _debug_fifo("end");
 #endif
+
     // Still in TX mode, waiting for packet to be completely sent
     radio_state = RADIO_LINE_TX_WAITING_FOR_END;
 }

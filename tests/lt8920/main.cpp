@@ -56,13 +56,25 @@ static void receive() {
     } while (!radio_packet_ready());
 
     int l = radio_read_avail();
+
+    // save default formatting
+    std::ios init(NULL);
+    init.copyfmt(std::cout);
+
+    std::cout << "Received:";
+    std::cout << std::setfill('0') << std::setw(2) << std::right << std::hex;
     for (int i = 0; i < l; i++) {
+        std::cout << " 0x" << ((int)radio_buffer[i]);
         if (radio_buffer[i] < 32 || radio_buffer[i] > 127) {
             radio_buffer[i] = '?';
         }
     }
-    std::string text(reinterpret_cast<const char*>(radio_buffer), l);
+    std::cout << std::endl;
 
+    // restore default formatting
+    std::cout.copyfmt(init);
+
+    std::string text(reinterpret_cast<const char*>(radio_buffer), l);
     std::cout << "Received: " << text << " (" << l << " bytes)\n";
 }
 
