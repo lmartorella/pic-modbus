@@ -3,8 +3,9 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "lt8920.h"
+#include "radio.h"
 #include "hw.h"
+#include "lt8920.h"
 
 using namespace std::literals;
 
@@ -25,7 +26,7 @@ extern "C" {
 
 static void transmit() {
     // Wait for IDLE
-    while (lt8920_poll()) {
+    while (radio_poll()) {
         usleep(500);
     }
 
@@ -35,10 +36,10 @@ static void transmit() {
     std::stringstream str;
     str << std::put_time(&lTime, "%H:%M:%S");
     auto text = str.str();
-    std::strcpy(reinterpret_cast<char*>(lt8920_buffer), text.c_str());
-    lt8920_write_packet(text.size());
-    while (lt8920_writeInProgress()) {
-        lt8920_poll();
+    std::strcpy(reinterpret_cast<char*>(radio_buffer), text.c_str());
+    radio_write_packet(text.size());
+    while (radio_writeInProgress()) {
+        radio_poll();
         usleep(500);
     }
 
@@ -52,11 +53,11 @@ static void receive() {
     int l;
     do {
         usleep(500);
-        active = lt8920_poll();
-        l = lt8920_readAvail();
+        active = radio_poll();
+        l = radio_readAvail();
     } while (active || l <= 0);
 
-    std::string text(reinterpret_cast<const char*>(lt8920_buffer), l);
+    std::string text(reinterpret_cast<const char*>(radio_buffer), l);
 
     std::cout << "Received: " << text << "\n";
 
@@ -86,7 +87,7 @@ int main(int argc, const char** argv) {
     }
 
     hw_init();
-    lt8920_init();
+    radio_init();
 
     LT8920_REVISION_INFO rev;
     lt8920_get_rev(&rev);

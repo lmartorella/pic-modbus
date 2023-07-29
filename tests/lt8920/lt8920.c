@@ -2,70 +2,12 @@
 #include "lt8920.h"
 #include "hw.h"
 
-/**
- * State of the LT8920 line
- */
-typedef enum {
-    // Receiving, all OK
-    LT8920_LINE_RX,
-    // Transmitting, data
-    LT8920_LINE_TX
-} LT8920_LINE_STATE;
-static LT8920_LINE_STATE lt8920_state;
-
-static void reset() {
-    gpio_reset(true);
-    usleep(5000);
-    gpio_reset(false);
-    // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
-    usleep(5000);
-}
-
-typedef union {
-    struct {
-        unsigned channel: 7;
-        unsigned rx_en: 1;
-        unsigned tx_en: 1;
-        unsigned _res: 7;
-    } b;
-    uint16_t v;
-} REG_7;
-#define REG_7_MASK ((uint16_t)~0x01ff)
-
-#define R_STATUS (48)
-typedef union {
-    struct {
-        unsigned _res: 5;
-        unsigned FIFO_FLAG: 1;
-        unsigned PKT_FLAG: 1;
-        unsigned SYNCWORD_RECV: 1;
-        unsigned FRAMER_ST: 6;
-        unsigned FEC23_ERROR: 1;
-        unsigned CRC_ERROR: 1;
-    } b;
-    uint16_t v;
-} REG_STATUS;
-
-#define R_FIFO (50) 
-
-#define R_FIFO_CONTROL (52)
-typedef union {
-    struct {
-        unsigned FIFO_RD_PTR: 5;
-        unsigned _res1: 1;
-        unsigned CLR_R_PTR: 1;
-        unsigned FIFO_WR_PTR: 5;
-        unsigned _res2: 1;
-        unsigned CLR_W_PTR: 1;
-    } b;
-    uint16_t v;
-} REG_FIFO_CONTROL;
-#define REG_FIFO_CONTROL_MASK ((uint16_t)~0xbfbf)
-
 #define get_reg_8 spi_get_reg8
 #define set_reg_8 spi_set_reg8
 #define get_reg spi_get_reg16_msb_first
 #define set_reg spi_set_reg16_msb_first
+
+LT8920_REGISTER_CACHE lt8920_registers;
 
 /**
  * Init a LT8920 register, using the passed `val` but using the unmasked bits (reserved) from the 
@@ -82,16 +24,12 @@ static uint16_t init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
     return new_val;
 }
 
-static REG_7 reg7;
-static REG_FIFO_CONTROL reg_fifo_ctrl;
-static int readAvail;
-
-static void init_registers() {
+static void lt8920_init_registers() {
     // Stop TX/RX packets. Select the channel
-    reg7.b.channel = LT8920_CHANNEL;
-    reg7.b.rx_en = 0;
-    reg7.b.tx_en = 0;
-    reg7.v = init_reg(7, reg7.v, REG_7_MASK);
+    lt8920_registers.reg7.b.channel = LT8920_CHANNEL;
+    lt8920_registers.reg7.b.rx_en = 0;
+    lt8920_registers.reg7.b.tx_en = 0;
+    lt8920_registers.reg7.v = init_reg(7, lt8920_registers.reg7.v, REG_7_MASK);
 
     // From LT8920 spreadsheet, with slight modifications to something likely to be issues
     init_reg(9, 0x4000, (uint16_t)~0xf780); // (set power to maximum) Sets Tx power level
@@ -118,129 +56,68 @@ static void init_registers() {
     init_reg(44, 0x1000, (uint16_t)~0xff00); // DATARATE[7:0] = 0x10 = 62.5Kbps
     init_reg(45, 0x0552, (uint16_t)~0xffff); // OPTION: 0080h for 1Mbps, 0552h for /others
 
-    reg_fifo_ctrl.v;
-    reg_fifo_ctrl.b.CLR_R_PTR = 1;
-    reg_fifo_ctrl.v = init_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+    lt8920_registers.fifo_ctrl.v;
+    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 1;
+    lt8920_registers.fifo_ctrl.v = init_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
 }
 
-static void lt8920_startRead() {
-    // turn off rx/tx
-    reg7.b.rx_en = 0;
-    reg7.b.tx_en = 0;
-    set_reg(7, reg7.v);
-    usleep(3000);
+void lt8920_reset() {
+    gpio_reset(true);
+    usleep(5000);
+    gpio_reset(false);
+    // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
+    usleep(5000);
+    // Init regs
+    lt8920_init_registers();
+}
 
+/**
+ * Disable RX/TX
+*/
+void lt8920_disable_rx_tx() {
+    // turn off rx/tx
+    lt8920_registers.reg7.b.rx_en = 0;
+    lt8920_registers.reg7.b.tx_en = 0;
+    set_reg(7, lt8920_registers.reg7.v);
+    usleep(3000);
+}
+
+void lt8920_flush_rx() {
     // flush rx
-    reg_fifo_ctrl.b.CLR_R_PTR = 1;
-    set_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v);
-    reg_fifo_ctrl.b.CLR_R_PTR = 0;
-
-    reg7.b.rx_en = 1;
-    set_reg(7, reg7.v);
-
-    lt8920_state = LT8920_LINE_RX;
-    readAvail = 0;
-
-    REG_STATUS status;
-    status.v = get_reg(R_STATUS);
+    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 1;
+    set_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v);
+    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 0;
 }
 
-/**
- * Setup connection
- */
-void lt8920_init() {
-    reset();
-    init_registers();
-
-    lt8920_startRead();
+void lt8920_flush_tx() {
+    // flush rx
+    lt8920_registers.fifo_ctrl.b.CLR_W_PTR = 1;
+    set_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v);
+    lt8920_registers.fifo_ctrl.b.CLR_W_PTR = 0;
 }
 
-static void lt8920_read_packet() {
-    readAvail = get_reg_8(R_FIFO);
-    uint8_t pos = 0;
-    while (pos < readAvail) {
-        lt8920_buffer[pos++] = get_reg_8(R_FIFO);
-    }
+void lt8920_enable_rx() {
+    // Start read
+    lt8920_registers.reg7.b.rx_en = 1;
+    set_reg(7, lt8920_registers.reg7.v);
 }
 
-static void lt8920_discard() {
-    get_reg_8(R_FIFO);
+void lt8920_enable_tx() {
+    // Start write
+    lt8920_registers.reg7.b.tx_en = 1;
+    set_reg(7, lt8920_registers.reg7.v);
 }
 
-/**
- * Returns `true` if the bus is active (so fast poll is required).
- */
-_Bool lt8920_poll() {
-    REG_STATUS status;
-    status.v = get_reg(R_STATUS);
-    if (lt8920_state == LT8920_LINE_TX) {
-        if (status.b.PKT_FLAG && !status.b.FIFO_FLAG) {
-            // Go back in receive mode, TX frame sent
-            lt8920_startRead();
-        } else {
-            // Poll fast
-            return true;
-        }
-    } else {
-        if (status.b.PKT_FLAG) {
-            if (status.b.CRC_ERROR || status.b.FEC23_ERROR) {
-                lt8920_discard();
-            } else {
-                // Data arrived, read data
-                lt8920_read_packet();
-            }
-        }
-    }
-    return false;
+uint8_t lt8920_read_fifo() {
+    return get_reg_8(R_FIFO);
 }
 
-/**
- * The whole buffer. `LT8920_BUF_SIZE` should be at least 16 bytes.
- * The buffer data should not be accessed until operation is completed.
- */
-uint8_t lt8920_buffer[LT8920_BUF_SIZE];
-
-/**
- * Start writing the data in the `lt8920_buffer`.
- * `size` is the number of bytes valid in the buffer to write.
- */ 
-void lt8920_write_packet(uint8_t size) {
-    // turn off rx/tx
-    reg7.b.rx_en = 0;
-    reg7.b.tx_en = 0;
-    set_reg(7, reg7.v);
-    usleep(3000);
-
-    // flush tx
-    reg_fifo_ctrl.b.CLR_W_PTR = 1;
-    set_reg(R_FIFO_CONTROL, reg_fifo_ctrl.v);
-    reg_fifo_ctrl.b.CLR_W_PTR = 0;
-
-    set_reg_8(R_FIFO, size);
-    uint8_t pos = 0;
-    while (pos < size) {
-        set_reg_8(R_FIFO, lt8920_buffer[pos++]);
-    }
-
-    // Enable TX
-    reg7.b.tx_en = 1;
-    set_reg(7, reg7.v);
-
-    lt8920_state = LT8920_LINE_TX;
+void lt8920_write_fifo(uint8_t data) {
+    set_reg_8(R_FIFO, data);
 }
 
-/**
- * Get count of available bytes in the read `lt8920_buffer`
- */
-uint8_t lt8920_readAvail() {
-    return readAvail;
-}
-
-/**
- * Check if the buffer contains data still to be sent
- */
-_Bool lt8920_writeInProgress() {
-    return lt8920_state == LT8920_LINE_TX;
+void lt8920_get_status() {
+    lt8920_registers.status.v = get_reg(R_STATUS);
 }
 
 void lt8920_get_rev(LT8920_REVISION_INFO* info) {

@@ -35,6 +35,6 @@ extern "C" {
 }
 
 TEST_CASE("Check init_registers correctly uses mask") {
-    init_registers();
+    lt8920_init_registers();
 }
 

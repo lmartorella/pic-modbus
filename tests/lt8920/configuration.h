@@ -11,7 +11,8 @@ extern "C" {
 
 typedef _Bool __bit;
 
-#define LT8920_BUF_SIZE (16)
+#define RADIO_BUF_SIZE (16)
+
 // from 0 to 127
 #define LT8920_CHANNEL (30)
 // Choose unique sync words for each over-the-air network.
