@@ -3,13 +3,15 @@
 
 #if defined _CONF_RS485
 #include "pic-modbus/rs485.h"
-#elif defined _CONF_RADIO
+#elif defined _CONF_PACKET_RADIO
 #include "pic-modbus/radio.h"
 #else
-#error You should define _CONF_RS485 or _CONF_RADIO to select the channel medium
+#error You should define _CONF_RS485 or _CONF_PACKET_RADIO to select the channel medium
 #endif
 
 #ifdef _CONF_RS485
+// On the RS485 RTU, the CRC is part of the protocol. Packet radio instead
+// is supposed to have his own CRC
 #define USE_CRC
 #endif
 

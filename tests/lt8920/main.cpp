@@ -3,9 +3,9 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "radio.h"
+#include "pic-modbus/radio.h"
+#include "pic-modbus/hw/lt8920.h"
 #include "hw.h"
-#include "lt8920.h"
 
 using namespace std::literals;
 
@@ -112,7 +112,7 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    hw_init(deviceIndex);
+    linux_hw_init(deviceIndex);
     radio_init();
 
     LT8920_REVISION_INFO rev;

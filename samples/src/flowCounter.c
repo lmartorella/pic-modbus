@@ -1,5 +1,5 @@
 #include <pic-modbus/modbus.h>
-#include "../hardware/counter.h"
+#include "../hw/counter.h"
 #include "./flowCounter.h"
 
 __bit flow_write() {

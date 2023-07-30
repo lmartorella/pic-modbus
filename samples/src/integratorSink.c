@@ -1,6 +1,6 @@
 #include <pic-modbus/modbus.h>
 #include "integratorSink.h"
-#include "../hardware/an_integrator.h"
+#include "../hw/an_integrator.h"
 
 // Uses RB1, range from 0V to 1.024V
 #define INIT_ANALOG_INTEGRATOR() \

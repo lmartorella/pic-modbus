@@ -1,7 +1,8 @@
 #include <stdint.h>
-#include "lt8920.h"
+#include "pic-modbus/hw/lt8920.h"
+#include "pic-modbus/hw/spi.h"
+#include "pic-modbus/hw/gpio.h"
 #include "configuration.h"
-#include "hw.h"
 
 LT8920_REGISTER_CACHE lt8920_registers;
 
@@ -80,6 +81,11 @@ static void lt8920_init_registers() {
     lt8920_registers.fifo_ctrl.v;
     lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 1;
     lt8920_registers.fifo_ctrl.v = init_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
+}
+
+void lt8920_init() {
+    spi_init();
+    gpio_init();
 }
 
 void lt8920_reset() {

@@ -5,10 +5,12 @@ include(CTest)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(lt8920 lt8920.c main.cpp hw.cpp gpio.cpp radio.c)
+add_executable(lt8920 ../src/hw/lt8920.c main.cpp hw.cpp gpio.cpp ../src/radio.c)
+target_include_directories(lt8920 PRIVATE . ../../src/include)
 
 # The tests
 add_executable(lt8920Tests test/lt8920_test.cpp)
+target_include_directories(lt8920Tests PRIVATE . ../../src/include)
 target_link_libraries(lt8920Tests PRIVATE Catch2WithMain)
 
 enable_testing()

@@ -5,7 +5,8 @@
 #include <iostream>
 #include <string>
 
-#include "hw.h"
+#include "pic-modbus/hw/gpio.h"
+#include "pic-modbus/hw/spi.h"
 #include "gpio.h"
 
 using namespace std::literals;
@@ -54,7 +55,7 @@ static void spi_init(int deviceIndex) {
 static OutputPin* reset;
 static int _deviceIndex;
 
-void hw_init(int deviceIndex) {
+void linux_hw_init(int deviceIndex) {
     _deviceIndex = deviceIndex;
     spi_init(deviceIndex);
     if (_deviceIndex == 0) {
@@ -65,6 +66,14 @@ void hw_init(int deviceIndex) {
 }
 
 extern "C" {
+    void gpio_init() {
+        // Already done via hw_init
+    }
+
+    void spi_init() {
+        // Already done via hw_init
+    }
+
     void gpio_reset(_Bool asserted) {
         *reset = !asserted;
     }

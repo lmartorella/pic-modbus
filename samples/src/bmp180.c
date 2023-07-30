@@ -1,6 +1,6 @@
 #include <pic-modbus/modbus.h>
 #include "./bmp180.h"
-#include "./hardware/i2c.h"
+#include "./hw/i2c.h"
 
 #ifdef HAS_BMP180
 

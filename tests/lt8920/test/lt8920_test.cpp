@@ -6,10 +6,18 @@ static void check_init_reg(uint8_t reg, uint16_t val, uint16_t mask) {
     REQUIRE((val & mask) == 0);
 }
 
-#include "../lt8920.c"
+#include "../../src/hw/lt8920.c"
 
 extern "C" {
     void debug_print_init_reg(uint8_t reg, uint16_t init_val, uint16_t set_val) {
+
+    }
+
+    void spi_init() {
+
+    }
+
+    void gpio_init() {
 
     }
 

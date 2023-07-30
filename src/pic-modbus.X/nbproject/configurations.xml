@@ -4,7 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+      <logicalFolder name="f1" displayName="hw" projectFiles="true">
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
           <itemPath>../include/pic-modbus/pic/configuration.h</itemPath>
           <itemPath>../include/pic-modbus/pic/fuses_micro_bean.h</itemPath>
@@ -25,11 +25,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="hardware" projectFiles="true">
+      <logicalFolder name="f1" displayName="hw" projectFiles="true">
         <logicalFolder name="f1" displayName="pic" projectFiles="true">
-          <itemPath>../hardware/pic/fuses_pic16f1827.c</itemPath>
-          <itemPath>../hardware/pic/tick_pic16.c</itemPath>
-          <itemPath>../hardware/pic/uart.c</itemPath>
+          <itemPath>../hw/pic/fuses_pic16f1827.c</itemPath>
+          <itemPath>../hw/pic/tick_pic16.c</itemPath>
+          <itemPath>../hw/pic/uart.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../rs485.c</itemPath>
@@ -241,7 +241,7 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_RADIO"/>
+        <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_PACKET_RADIO"/>
         <property key="disable-optimizations" value="true"/>
         <property key="extra-include-directories"
                   value="..\include;..\include\pic-modbus\pic"/>

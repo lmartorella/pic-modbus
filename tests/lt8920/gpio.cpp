@@ -8,6 +8,10 @@
 
 #include "./gpio.h"
 
+/**
+ * I/O digital pins, via Linux sysfs
+ */
+
 using namespace std::chrono;
 using namespace std::string_literals;
 

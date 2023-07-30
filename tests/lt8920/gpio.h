@@ -1,14 +1,10 @@
-/**
- * From preamp
- */
-
 #pragma once
 
 #include <chrono>
 #include <string>
 
 /**
- * A I/O digital pin, sysfs
+ * A I/O digital pin, via Linux sysfs
  */
 class GpioDigitalPin {
     bool exported;

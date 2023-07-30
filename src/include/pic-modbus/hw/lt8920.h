@@ -89,6 +89,7 @@ typedef struct {
     } reg31;
 } LT8920_REVISION_INFO;
 
+void lt8920_init();
 void lt8920_reset();
 
 void lt8920_disable_rx_tx();
