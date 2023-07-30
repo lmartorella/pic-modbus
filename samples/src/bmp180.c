@@ -104,7 +104,7 @@ void bmp180_poll() {
             
         case STATE_ASK_CALIB_TABLE:
             // Start read table
-            i2c_sendReceive7(REG_READ, 22, &calibrationData);
+            i2c_sendReceive7(REG_READ, 22, (uint8_t*)&calibrationData);
             s_state = STATE_WAIT_DATA;
             break;
 
@@ -118,7 +118,7 @@ void bmp180_poll() {
             break;
         case STATE_ASK_TEMP_2:
             // Read results
-            i2c_sendReceive7(REG_READ, 2, &rawData.temperature);
+            i2c_sendReceive7(REG_READ, 2, (uint8_t*)&rawData.temperature);
             s_state = STATE_WAIT_TEMP;
             break;
         case STATE_WAIT_TEMP:
@@ -140,7 +140,7 @@ void bmp180_poll() {
             break;
         case STATE_ASK_PRESS_2:
             // Read results
-            i2c_sendReceive7(REG_READ, 3, &rawData.pressure);
+            i2c_sendReceive7(REG_READ, 3, (uint8_t*)&rawData.pressure);
             s_state = STATE_WAIT_DATA;
             break;
 
@@ -164,7 +164,7 @@ void bmp180_readRawData() {
         rtu_cl_exceptionCode = ERR_DEVICE_BUSY;
         return;
     }
-    memcpy(rs485_buffer, (uint8_t*)&rawData, sizeof(rawData));
+    memcpy(pkt_buffer, (uint8_t*)&rawData, sizeof(rawData));
 }
 
 void bmp180_readCalibrationData() {    
@@ -172,7 +172,7 @@ void bmp180_readCalibrationData() {
         rtu_cl_exceptionCode = ERR_DEVICE_BUSY;
         return;
     }
-    memcpy(rs485_buffer, (uint8_t*)&calibrationData, sizeof(calibrationData));
+    memcpy(pkt_buffer, (uint8_t*)&calibrationData, sizeof(calibrationData));
 }
 
 #endif

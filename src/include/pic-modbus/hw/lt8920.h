@@ -75,14 +75,16 @@ typedef struct {
 
     union {
         struct {
-            unsigned ID_CODE_JEDEC_MCODE_L: 16;
+            unsigned ID_CODE_JEDEC_MCODE_B1: 8;
+            unsigned ID_CODE_JEDEC_MCODE_B2: 8;
         } b;
         uint16_t v;
     } reg30;
 
     union {
         struct {
-            unsigned ID_CODE_JEDEC_MCODE_M: 12;
+            unsigned ID_CODE_JEDEC_MCODE_B3: 8;
+            unsigned ID_CODE_JEDEC_MCODE_B4: 4;
             unsigned RF_CODE_ID: 4;
         } b;
         uint16_t v;

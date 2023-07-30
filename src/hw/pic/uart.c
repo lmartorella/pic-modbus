@@ -1,4 +1,7 @@
+#ifdef _CONF_RS485
+
 #include "pic-modbus/modbus.h"
+#include "pic-modbus/hw/uart.h"
 
 // MAX485 line drive
 #define EN_TRANSMIT 1
@@ -72,3 +75,4 @@ _Bool uart_rx_fifo_empty() {
     return !RS485_PIR_RCIF;
 }
 
+#endif

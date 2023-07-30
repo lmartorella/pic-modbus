@@ -30,10 +30,12 @@ _Bool radio_poll();
 extern uint8_t radio_buffer[RADIO_BUF_SIZE];
 
 /**
- * Write a complete packet, found in the `radio_buffer`.
+ * Start/continue writing a packet, data found in the `radio_buffer[0]`.
  * `size` is the number of bytes valid in the buffer to write.
  */ 
-extern void radio_write_packet(uint8_t size);
+extern void radio_write(uint8_t size);
+
+extern void radio_write_end();
 
 /**
  * Is packet ready (even if empty)
@@ -49,6 +51,15 @@ extern uint8_t radio_read_avail();
  * Check if the buffer contains data still to be sent
  */
 extern _Bool radio_write_in_progress();
+
+extern _Bool radio_in_receive_state();
+
+/**
+ * TODO: remove
+ */
+extern void radio_discard(uint8_t count);
+
+extern _Bool radio_packet_end;
 
 #ifdef __cplusplus
 }

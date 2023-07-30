@@ -4,20 +4,26 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="net" projectFiles="true">
+      <logicalFolder name="f1" displayName="pic-modbus" projectFiles="true">
         <logicalFolder name="include" displayName="include" projectFiles="true">
-          <logicalFolder name="net" displayName="net" projectFiles="true">
-            <logicalFolder name="pic" displayName="pic" projectFiles="true">
-              <itemPath>../../src/include/pic-modbus/pic/configuration.h</itemPath>
-              <itemPath>../../src/include/pic-modbus/pic/fuses_micro_bean.h</itemPath>
+          <logicalFolder name="net" displayName="pic-modbus" projectFiles="true">
+            <logicalFolder name="f1" displayName="hw" projectFiles="true">
+              <logicalFolder name="f1" displayName="pic" projectFiles="true">
+                <itemPath>../../src/include/pic-modbus/hw/pic/configuration.h</itemPath>
+                <itemPath>../../src/include/pic-modbus/hw/pic/fuses_micro_bean.h</itemPath>
+              </logicalFolder>
+              <itemPath>../../src/include/pic-modbus/hw/uart.h</itemPath>
+              <itemPath>../../src/include/pic-modbus/hw/gpio.h</itemPath>
+              <itemPath>../../src/include/pic-modbus/hw/lt8920.h</itemPath>
+              <itemPath>../../src/include/pic-modbus/hw/spi.h</itemPath>
             </logicalFolder>
             <itemPath>../../src/include/pic-modbus/crc.h</itemPath>
             <itemPath>../../src/include/pic-modbus/modbus.h</itemPath>
             <itemPath>../../src/include/pic-modbus/rs485.h</itemPath>
             <itemPath>../../src/include/pic-modbus/timers.h</itemPath>
-            <itemPath>../../src/include/pic-modbus/uart.h</itemPath>
             <itemPath>../../src/include/pic-modbus/sys.h</itemPath>
             <itemPath>../../src/include/pic-modbus/rtu_client.h</itemPath>
+            <itemPath>../../src/include/pic-modbus/radio.h</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -45,7 +51,9 @@
             <itemPath>../../src/hw/pic/fuses_pic16f1827.c</itemPath>
             <itemPath>../../src/hw/pic/tick_pic16.c</itemPath>
             <itemPath>../../src/hw/pic/uart.c</itemPath>
+            <itemPath>../../src/hw/pic/spi.c</itemPath>
           </logicalFolder>
+          <itemPath>../../src/hw/lt8920.c</itemPath>
         </logicalFolder>
         <itemPath>../../src/crc.c</itemPath>
         <itemPath>../../src/rs485.c</itemPath>
@@ -126,7 +134,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_RS485"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\src\include;..\..\src\include\pic-modbus\pic;..\"/>
+                  value="..\..\src\include;..\..\src\include\pic-modbus\hw\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -359,7 +367,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_RS485"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\src\include;..\..\src\include\pic-modbus\pic;..\"/>
+                  value="..\..\src\include;..\..\src\include\pic-modbus\hw\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -591,7 +599,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_PACKET_RADIO"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\src\include;..\..\src\include\pic-modbus\pic;..\"/>
+                  value="..\..\src\include;..\..\src\include\pic-modbus\hw\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
@@ -824,7 +832,7 @@
         <property key="define-macros" value="_CONF_MICRO_BEAN;_CONF_PACKET_RADIO"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..\..\src\include;..\..\src\include\pic-modbus\pic;..\"/>
+                  value="..\..\src\include;..\..\src\include\pic-modbus\hw\pic;..\"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>

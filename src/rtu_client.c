@@ -2,9 +2,33 @@
 #include "pic-modbus/crc.h"
 
 #if defined _CONF_RS485
+
 #include "pic-modbus/rs485.h"
+#define pkt_read_avail rs485_read_avail
+#define pkt_buffer rs485_buffer
+#define pkt_write rs485_write
+#define pkt_write_in_progress rs485_write_in_progress
+#define pkt_write_end()
+#define pkt_discard rs485_discard
+#define pkt_packet_end rs485_packet_end
+#define pkt_in_receive_state rs485_in_receive_state
+#define pkt_init rs485_init
+#define pkt_poll rs485_poll
+
 #elif defined _CONF_PACKET_RADIO
+
 #include "pic-modbus/radio.h"
+#define pkt_read_avail radio_read_avail
+#define pkt_buffer radio_buffer
+#define pkt_write radio_write
+#define pkt_write_in_progress radio_write_in_progress
+#define pkt_write_end radio_write_end
+#define pkt_discard radio_discard
+#define pkt_packet_end radio_packet_end
+#define pkt_in_receive_state radio_in_receive_state
+#define pkt_init radio_init
+#define pkt_poll radio_poll
+
 #else
 #error You should define _CONF_RS485 or _CONF_PACKET_RADIO to select the channel medium
 #endif
@@ -51,15 +75,17 @@ void rtu_cl_init() {
 #ifdef USE_CRC
     rtu_cl_crcErrors = 0;
 #endif
+    pkt_init();
 }
 
 // Called often
-__bit rtu_cl_poll() {
-    if (rs485_isMarkCondition && rtu_cl_state != RTU_CL_IDLE) {
+_Bool rtu_cl_poll() {
+    _Bool active = pkt_poll();
+    if (pkt_packet_end && rtu_cl_state != RTU_CL_IDLE) {
         if (rtu_cl_state != RTU_CL_WAIT_FOR_RESPONSE) {
             // Abort reading, go idle
             rtu_cl_state = RTU_CL_IDLE;
-            return false;
+            return active;
         } else {
             rtu_cl_state = RTU_CL_RESPONSE;
         }
@@ -67,20 +93,20 @@ __bit rtu_cl_poll() {
 
     if (rtu_cl_state == RTU_CL_IDLE) {
         // Wait for at least a read message request size
-        if (rs485_readAvail() < sizeof(ModbusRtuHoldingRegisterRequest)) {
+        if (pkt_read_avail() < sizeof(ModbusRtuHoldingRegisterRequest)) {
             // Nothing to do, wait for more data
-            return false;
+            return active;
         }
         // Read and free the buffer
-        rtu_cl_header = *((const ModbusRtuHoldingRegisterRequest*)rs485_buffer);
-        rs485_discard(sizeof(ModbusRtuHoldingRegisterRequest));
+        rtu_cl_header = *((const ModbusRtuHoldingRegisterRequest*)pkt_buffer);
+        pkt_discard(sizeof(ModbusRtuHoldingRegisterRequest));
 
         if (rtu_cl_header.header.stationAddress == STATION_NODE) {
             if (rtu_cl_header.header.function == READ_HOLDING_REGISTERS || rtu_cl_header.header.function == WRITE_HOLDING_REGISTERS) {
                 if (!regs_validateReg()) {
                     // Error was set, respond with error
                     rtu_cl_state = RTU_CL_WAIT_FOR_RESPONSE;
-                    return false;
+                    return active;
                 }
                 // Count(16) is always < 128
                 messageSize = ((uint8_t)rtu_cl_header.address.countL) * 2;
@@ -100,7 +126,7 @@ __bit rtu_cl_poll() {
                 // Invalid function, return error
                 rtu_cl_exceptionCode = ERR_INVALID_FUNCTION;
                 rtu_cl_state = RTU_CL_WAIT_FOR_RESPONSE;
-                return false;
+                return active;
             }
         } else {
             // No this station, wait for idle
@@ -109,17 +135,17 @@ __bit rtu_cl_poll() {
     }
     
     if (rtu_cl_state == RTU_CL_RECEIVE_DATA_SIZE) {
-        if (rs485_readAvail() < 1) {
+        if (pkt_read_avail() < 1) {
             // Nothing to do, wait for more data
-            return false;
+            return active;
         }
         // Free the buffer
-        rs485_discard(1);
-        if (rs485_buffer[0] != messageSize) {
+        pkt_discard(1);
+        if (pkt_buffer[0] != messageSize) {
             // Invalid size, return error
             rtu_cl_exceptionCode = ERR_INVALID_SIZE;
             rtu_cl_state = RTU_CL_WAIT_FOR_RESPONSE;
-            return false;
+            return active;
         } else {
             rtu_cl_state = RTU_CL_RECEIVE_DATA;
         }
@@ -127,16 +153,16 @@ __bit rtu_cl_poll() {
 
     if (rtu_cl_state == RTU_CL_RECEIVE_DATA) {
         // Wait for register data + count byte
-        if (rs485_readAvail() < messageSize) {
+        if (pkt_read_avail() < messageSize) {
             // Nothing to do, wait for more data
-            return false;
+            return active;
         }
         // Free the buffer
-        rs485_discard(messageSize);
+        pkt_discard(messageSize);
         if (!regs_onReceive()) {
             // Data/custom error, error is set
             rtu_cl_state = RTU_CL_WAIT_FOR_RESPONSE;
-            return false;
+            return active;
         } else {
             // Next state
 #ifdef USE_CRC
@@ -152,15 +178,15 @@ __bit rtu_cl_poll() {
         // CRC is LSB first
         uint16_t expectedCrc = le16toh(crc16);
 
-        if (rs485_readAvail() < sizeof(uint16_t)) {
+        if (pkt_read_avail() < sizeof(uint16_t)) {
             // Nothing to do, wait for more data
-            return false;
+            return active;
         }
         // Free the buffer
-        rs485_discard(sizeof(uint16_t));
+        pkt_discard(sizeof(uint16_t));
 
         rtu_cl_state = RTU_CL_WAIT_FOR_RESPONSE;
-        if (expectedCrc != *((const uint16_t*)rs485_buffer)) {
+        if (expectedCrc != *((const uint16_t*)pkt_buffer)) {
             // Invalid CRC, skip data.
             // TODO: However the function data was already sent to registers!
             rtu_cl_crcErrors++;
@@ -173,37 +199,39 @@ __bit rtu_cl_poll() {
 #endif
     
     if (rtu_cl_state == RTU_CL_WAIT_FOR_IDLE) {
-        rs485_discard(rs485_readAvail());
-        return false;
+        pkt_discard(pkt_read_avail());
+        return active;
     }
 
     if (rtu_cl_state == RTU_CL_RESPONSE) {
         // Copy whole header (and overwrite data in case of error)
         // Response of write registers always contains the address and register count
-        *((ModbusRtuHoldingRegisterRequest*)rs485_buffer) = rtu_cl_header;
+        *((ModbusRtuHoldingRegisterRequest*)pkt_buffer) = rtu_cl_header;
         if (rtu_cl_exceptionCode == NO_ERROR) {
             // Transmit packet data in one go
             if (rtu_cl_header.header.function == READ_HOLDING_REGISTERS) {
                 // Now, if write, open stream
-                ((ModbusRtuPacketReadResponse*)rs485_buffer)->size = messageSize;
-                rs485_write(sizeof(ModbusRtuPacketReadResponse));
+                ((ModbusRtuPacketReadResponse*)pkt_buffer)->size = messageSize;
+                pkt_write(sizeof(ModbusRtuPacketReadResponse));
                 rtu_cl_state = RTU_CL_SEND_DATA;
             } else {
-                rs485_write(sizeof(ModbusRtuPacketWriteResponse));
+                pkt_write(sizeof(ModbusRtuPacketWriteResponse));
 #ifdef USE_CRC
                 rtu_cl_state = RTU_CL_WRITE_RESPONSE_CRC;
 #else
+                pkt_write_end();
                 rtu_cl_state = RTU_CL_WAIT_FOR_FLUSH;
 #endif
             }
         } else {
             // Transmit error data in one go
-            ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function = ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function | 0x80;
-            ((ModbusRtuPacketErrorResponse*)rs485_buffer)->error = rtu_cl_exceptionCode;
-            rs485_write(sizeof(ModbusRtuPacketErrorResponse));
+            ((ModbusRtuPacketErrorResponse*)pkt_buffer)->header.function = ((ModbusRtuPacketErrorResponse*)pkt_buffer)->header.function | 0x80;
+            ((ModbusRtuPacketErrorResponse*)pkt_buffer)->error = rtu_cl_exceptionCode;
+            pkt_write(sizeof(ModbusRtuPacketErrorResponse));
 #ifdef USE_CRC
             rtu_cl_state = RTU_CL_WRITE_RESPONSE_CRC;
 #else
+            pkt_write_end();
             rtu_cl_state = RTU_CL_WAIT_FOR_FLUSH;
 #endif
         }
@@ -211,36 +239,38 @@ __bit rtu_cl_poll() {
 
     if (rtu_cl_state == RTU_CL_SEND_DATA) {
         // Wait for the bus to switch over
-        if (rs485_writeInProgress()) {
-            return false;
+        if (pkt_write_in_progress()) {
+            return active;
         }
         regs_onSend();
-        rs485_write(messageSize);
+        pkt_write(messageSize);
 #ifdef USE_CRC
         rtu_cl_state = RTU_CL_WRITE_RESPONSE_CRC;
 #else
+        pkt_write_end();
         rtu_cl_state = RTU_CL_WAIT_FOR_FLUSH;
 #endif
     }
 
 #ifdef USE_CRC
     if (rtu_cl_state == RTU_CL_WRITE_RESPONSE_CRC) {
-        if (rs485_writeInProgress()) {
-            return false;
+        if (pkt_write_in_progress()) {
+            return active;
         }
         // CRC is LSB first
-        *((uint16_t*)rs485_buffer) = htole16(crc16);
-        rs485_write(sizeof(uint16_t));
+        *((uint16_t*)pkt_buffer) = htole16(crc16);
+        pkt_write(sizeof(uint16_t));
+        pkt_write_end();
         rtu_cl_state = RTU_CL_WAIT_FOR_FLUSH;
-        return false;
+        return active;
     }
 #endif
     
     if (rtu_cl_state == RTU_CL_WAIT_FOR_FLUSH) {
-        if (rs485_inReceiveMode()) {
+        if (pkt_in_receive_state()) {
             rtu_cl_state = RTU_CL_IDLE;
         }
     }
 
-    return false;
+    return active;
 }

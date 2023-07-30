@@ -1,3 +1,5 @@
+#ifdef _CONF_PACKET_RADIO
+
 #include <stdint.h>
 #include "pic-modbus/hw/lt8920.h"
 #include "pic-modbus/hw/spi.h"
@@ -78,8 +80,7 @@ static void lt8920_init_registers() {
     init_reg(44, 0x1000, (uint16_t)~0xff00); // DATARATE[7:0] = 0x10 = 62.5Kbps
     init_reg(45, 0x0552, (uint16_t)~0xffff); // OPTION: 0080h for 1Mbps, 0552h for /others
 
-    lt8920_registers.fifo_ctrl.v;
-    lt8920_registers.fifo_ctrl.b.CLR_R_PTR = 1;
+    lt8920_registers.fifo_ctrl.v = 0;
     lt8920_registers.fifo_ctrl.v = init_reg(R_FIFO_CONTROL, lt8920_registers.fifo_ctrl.v, REG_FIFO_CONTROL_MASK);
 }
 
@@ -90,10 +91,10 @@ void lt8920_init() {
 
 void lt8920_reset() {
     gpio_reset(true);
-    usleep(5000);
+    __delay_ms(5);
     gpio_reset(false);
     // Wait T1 (1 to 5ms) for crystal oscillator to stabilize
-    usleep(5000);
+    __delay_ms(5);
     // Init regs
     lt8920_init_registers();
 }
@@ -106,7 +107,7 @@ void lt8920_disable_rx_tx() {
     lt8920_registers.reg7.b.rx_en = 0;
     lt8920_registers.reg7.b.tx_en = 0;
     spi_set_reg16_msb_first(7, lt8920_registers.reg7.v);
-    usleep(3000);
+    __delay_ms(3);
 }
 
 void lt8920_flush_rx_tx() {
@@ -152,3 +153,5 @@ void lt8920_get_rev(LT8920_REVISION_INFO* info) {
     info->reg30.v = spi_get_reg16_msb_first(30);
     info->reg31.v = spi_get_reg16_msb_first(31);
 }
+
+#endif

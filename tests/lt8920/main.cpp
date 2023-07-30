@@ -37,7 +37,10 @@ static void transmit() {
     str << std::put_time(&lTime, "%H:%M:%S");
     auto text = str.str();
     std::strcpy(reinterpret_cast<char*>(radio_buffer), text.c_str());
-    radio_write_packet(text.size());
+
+    radio_write(text.size());
+    radio_write_end();
+
     while (radio_write_in_progress()) {
         radio_poll();
         usleep(500);

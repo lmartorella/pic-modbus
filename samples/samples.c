@@ -117,7 +117,7 @@ _Bool regs_onReceive() {
     }
 #ifdef HAS_LED_BLINK
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
-        memcpy(&blinker_regs, rs485_buffer, sizeof(LedBlinkRegsiters));
+        memcpy(&blinker_regs, pkt_buffer, sizeof(LedBlinkRegsiters));
         return blinker_conf();
     }
 #endif
@@ -127,15 +127,15 @@ _Bool regs_onReceive() {
 void regs_onSend() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
 #ifdef _CONF_RS485
-        ((SYS_REGISTERS*)rs485_buffer)->crcErrors = rtu_cl_crcErrors;
+        ((SYS_REGISTERS*)pkt_buffer)->crcErrors = rtu_cl_crcErrors;
 #endif
-        ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
+        ((SYS_REGISTERS*)pkt_buffer)->resetReason = sys_resetReason;
         return;
     }
     
 #ifdef HAS_LED_BLINK
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
-        memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
+        memcpy(pkt_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
         return;
     }
 #endif

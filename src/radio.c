@@ -1,8 +1,11 @@
+#ifdef _CONF_PACKET_RADIO
+
 #include <stdint.h>
 #include <stdio.h>
 #include "configuration.h"
 #include "pic-modbus/hw/lt8920.h"
 #include "pic-modbus/radio.h"
+#include "pic-modbus/sys.h"
 
 /**
  * State of the LT8920 line
@@ -17,13 +20,14 @@ typedef enum {
 } RADIO_LINE_STATE;
 static RADIO_LINE_STATE radio_state;
 
-static int readAvail;
+static uint8_t readAvail;
 static _Bool packetReady;
 /**
  * The whole buffer. `RADIO_BUF_SIZE` should be at least 16 bytes.
  * The buffer data should not be accessed until operation is completed.
  */
 uint8_t radio_buffer[RADIO_BUF_SIZE];
+_Bool radio_packet_end = false;
 
 static void radio_start_read() {
     lt8920_disable_rx_tx();
@@ -46,6 +50,7 @@ void radio_init() {
     radio_start_read();
 }
 
+#ifdef _DEBUG
 static void _debug_fifo(const char* msg) {
     lt8920_read_fifo_ctrl();
     lt8920_get_status();
@@ -55,9 +60,13 @@ static void _debug_fifo(const char* msg) {
         lt8920_registers.status.b.FIFO_FLAG,
         msg);
 }
+#endif
 
 static void radio_read_packet() {
+#if _DEBUG
     _debug_fifo("begin");
+#endif
+    
 #ifdef LT8920_FIRST_BYTE_AS_LENGTH
     // 1st byte of payload used for packet length, for the LT8920 framer
     readAvail = lt8920_read_fifo();
@@ -72,15 +81,13 @@ static void radio_read_packet() {
     readAvail = 0;
     while (lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR > lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR) {
         radio_buffer[readAvail++] = lt8920_read_fifo();
+#if _DEBUG
         _debug_fifo("looping");
+#endif
     }
 #endif
 
     packetReady = true;
-}
-
-static void radio_discard() {
-    radio_start_read();
 }
 
 /**
@@ -97,25 +104,27 @@ _Bool radio_poll() {
             return true;
         }
     } else if (radio_state == RADIO_LINE_RX) {
+#ifdef _DEBUG
         if (lt8920_registers.status.b.FIFO_FLAG) {
             printf("FIFO flag set\n");
         }
-        // if (lt8920_registers.status.b.FRAMER_ST != 18 && lt8920_registers.status.b.FRAMER_ST != 0) {
-        //     printf("FRAMER_ST state set to %d\n", lt8920_registers.status.b.FRAMER_ST);
-        // }
         if (lt8920_registers.status.b.SYNCWORD_RECV) {
             printf("SYNCWORD_RECV flag set\n");
         }
+#endif
         // In RX mode, PKT_FLAG means that a packet arrived
         if (lt8920_registers.status.b.PKT_FLAG) {
+#ifdef _DEBUG
             if (lt8920_registers.status.b.PKT_FLAG) {
                 printf("PKT_FLAG set\n");
-            // } else {
-            //     printf("FRAMER_ST status IDLE\n");
             }
+#endif
             if (lt8920_registers.status.b.CRC_ERROR || lt8920_registers.status.b.FEC23_ERROR) {
+#ifdef _DEBUG
                 printf("CRC error\n");
-                radio_discard();
+#endif
+                // Discard the buffer
+                radio_start_read();
             } else {
                 // Data arrived, read data
                 radio_read_packet();
@@ -129,30 +138,33 @@ _Bool radio_poll() {
  * Start writing the data in the `radio_buffer`.
  * `size` is the number of bytes valid in the buffer to write.
  */ 
-void radio_write_packet(uint8_t size) {
-    lt8920_disable_rx_tx();
-    lt8920_flush_rx_tx();
-
-    _debug_fifo("begin");
+void radio_write(uint8_t size) {
+    if (radio_state != RADIO_LINE_TX) {
+        lt8920_disable_rx_tx();
+        lt8920_flush_rx_tx();
+#if _DEBUG
+        _debug_fifo("begin");
+#endif
+    }
 
 #ifdef LT8920_FIRST_BYTE_AS_LENGTH
-    // 1st byte of payload used for packet length, for the LT8920 framer
-    lt8920_write_fifo(size);
-    _debug_fifo("after 1 byte write");
+    #error Unsupported
 #endif
     uint8_t pos = 0;
     while (pos < size) {
         lt8920_write_fifo(radio_buffer[pos++]);
     }
+}
 
+void radio_write_end() {
     lt8920_enable_tx();
     radio_state = RADIO_LINE_TX;
 
 #ifndef LT8920_FIRST_BYTE_AS_LENGTH
     // FW_TERM_TX = 0 and PACK_LENGTH_EN = 0: TX stops only when TX_EN is set to zero. No 1st byte of payload used for packet length.
-    do {
-        _debug_fifo("looping");
-    } while (lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR < lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR);
+    // do {
+    //     _debug_fifo("looping");
+    // } while (lt8920_registers.fifo_ctrl.b.FIFO_RD_PTR < lt8920_registers.fifo_ctrl.b.FIFO_WR_PTR);
 
     lt8920_disable_rx_tx();
 #else
@@ -180,3 +192,22 @@ _Bool radio_packet_ready() {
 _Bool radio_write_in_progress() {
     return radio_state == RADIO_LINE_TX;
 }
+
+_Bool radio_in_receive_state() {
+    return radio_state == RADIO_LINE_RX;
+}
+
+
+/**
+ * TODO: remove
+ */
+void radio_discard(uint8_t count) {
+    if (count > readAvail || radio_state != RADIO_LINE_RX) {
+        sys_fatal(EXC_CODE_BUF_DISCARD_MISMATCH);
+    }
+    for (uint8_t i = 0; i < count; i++) {
+        radio_buffer[i] = radio_buffer[i + count];
+    }
+}
+
+#endif

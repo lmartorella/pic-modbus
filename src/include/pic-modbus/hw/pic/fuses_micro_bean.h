@@ -27,10 +27,12 @@ typedef uint16_t TICK_TYPE;
 #define LED_PORTBIT PORTAbits.RA7
 #define LED_TRISBIT TRISAbits.TRISA7
 
+#define RS485_BUF_SIZE 32
+#define RADIO_BUF_SIZE 32
+
 // ******
 // RS485: use USART1 on 16F628 (PORTB)
 // ******
-#define RS485_BUF_SIZE 32
 #define RS485_RCSTA RCSTAbits
 #define RS485_TXSTA TXSTAbits
 #define RS485_TXREG TXREG
@@ -57,8 +59,15 @@ typedef RCSTAbits_t UART_ERR_BITS;
 //RXDTSEL:1  RX/DT function is on RB2
 //TXCKSEL:1  TX/CK function is on RB5
 
+#define LT8920_CHANNEL (23)
+// Choose unique sync words for each over-the-air network.
+// Similar to a MAC address.
+#define LT8920_SYNC_WORD_32 (0x3e128631)
+
 // Reset the device with sys (non-hw) error
 #define RESET() asm("reset")
+
+#define _debug_print_init_reg(...)
 
 #endif	/* FUSES_MICRO_BEAN_H */
 

@@ -32,7 +32,7 @@ _Bool rs485_poll();
 /**
  * Set to true when the line is not active from more than 3.5 characters (ModBus mark condition)
  */
-extern _Bool rs485_isMarkCondition;
+extern _Bool rs485_packet_end;
 
 /**
  * The whole buffer. `RS485_BUF_SIZE` should be at least 16 bytes.
@@ -54,44 +54,17 @@ void rs485_discard(uint8_t count);
 /**
  * Get count of available bytes in the read `rs485_buffer`
  */
-uint8_t rs485_readAvail();
+uint8_t rs485_read_avail();
 
 /**
  * Check if the buffer contains data still to be sent
  */
-_Bool rs485_writeInProgress();
+_Bool rs485_write_in_progress();
 
 /**
- * In receive mode?
+ * In receive state?
  */
-_Bool rs485_inReceiveMode();
-
-// The following timings are required to avoid the two-wire RS485 line to remain floating, potentially
-// triggering frame errors. The line will be driven low by two stations at the same time.
-// The total time should be however less than 3.5 characters to avoid triggering timeout errors.
-
-// TICKS_PER_SECOND = 3906 on PIC16 @4MHz
-// TICKS_PER_SECOND = 24414 on PIC18 @25MHz
-// CHAR_PER_SECONDS = (BAUD / 11 (9+1+1)) = 1744 (round down) = 0.57ms
-#define CHAR_PER_SECONDS (uint32_t)((RS485_BAUD - 11) / 11)
-// 2 ticks per byte, but let's do 3 (round up) for PIC16 @4MHz
-// 14 ticks per byte (round up) on PIC18 @25MHz
-#define TICKS_PER_CHAR (TICK_TYPE)((TICKS_PER_SECOND + CHAR_PER_SECONDS) / CHAR_PER_SECONDS)
-
-// Time to wait before transmitting after channel switched from RX to TX.
-// So the total time between request and response is MARK_CONDITION_TIMEOUT + START_TRANSMIT_TIMEOUT = 3.5
-#define START_TRANSMIT_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 2)
-
-// Time to wait before releasing the channel from transmit to receive
-// but let's wait an additional full byte since UART is free when still transmitting the last byte.
-#define DISENGAGE_CHANNEL_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * (2 + 1))
-
-// The mark condition that separates messages in Modbus is actually 3.5 characters
-// However to implement such restricted timing and to guarantee the correct overlap
-// between master drive and slave line drive (to avoid glitches) the mark condition is set 
-// to slightly more than 1 character to allow the correct handshake. The master uses 2
-// character as DISENGAGE_CHANNEL_TIMEOUT
-#define MARK_CONDITION_TIMEOUT (TICK_TYPE)(TICKS_PER_CHAR * 1.5)
+_Bool rs485_in_receive_state();
 
 #ifdef __cplusplus
 }

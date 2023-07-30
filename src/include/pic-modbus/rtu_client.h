@@ -7,6 +7,20 @@
 extern "C" {
 #endif
 
+#if defined _CONF_RS485
+
+#include "pic-modbus/rs485.h"
+#define pkt_buffer rs485_buffer
+
+#elif defined _CONF_PACKET_RADIO
+
+#include "pic-modbus/radio.h"
+#define pkt_buffer radio_buffer
+
+#else
+#error You should define _CONF_RS485 or _CONF_PACKET_RADIO to select the channel medium
+#endif
+
 /**
  * Common interface for Modbus server (secondary) nodes.
  * It can be implemented, for instance, by RTU nodes (RS485 client), TCP clients or 
@@ -26,7 +40,7 @@ void rtu_cl_init();
  * Returns false if the node is not currently active and it can be polled with larger period,
  * depending on the medium implementation (e.g. 1ms)
  */
-__bit rtu_cl_poll();
+_Bool rtu_cl_poll();
 
 /***
  ***
@@ -125,13 +139,13 @@ _Bool regs_validateReg();
 
 /**
  * Called when the registers (sys or app) are about to be read (sent out).
- * The rs485_buffer contains the data.
+ * The pkt_buffer contains the data.
  */
 _Bool regs_onReceive();
 
 /**
  * Called when the registers (sys or app) was written
- * The rs485_buffer should be filled with the data.
+ * The pkt_buffer should be filled with the data.
  */
 void regs_onSend();
 

@@ -46,7 +46,7 @@ typedef enum {
 	 */
 	RESET_MCLR = 6,
 
-    // RS485 errors
+    // RS485/buffer errors
             
     /**
      * Data underrun in read from the serial line. OERR from hardware
@@ -61,7 +61,7 @@ typedef enum {
     /**
      * Mismatch between read data and processed data (discard)
      */
-    EXC_CODE_RS485_DISCARD_MISMATCH = 0x12,
+    EXC_CODE_BUF_DISCARD_MISMATCH = 0x12,
             
     // Generic applicative fatal errors
 

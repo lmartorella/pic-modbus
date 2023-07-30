@@ -17,9 +17,7 @@ _Bool modbus_poll(void);
  * API
  */
 #include "rtu_client.h"
-#include "rs485.h"
 #include "sys.h"
 #include "timers.h"
-#include "uart.h"
 
 #endif	/* _PIC_MODBUS_H */
