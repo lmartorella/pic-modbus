@@ -1,8 +1,6 @@
 #ifndef _PIC_MODBUS_H
 #define	_PIC_MODBUS_H
 
-#define HAS_EEPROM
-
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
