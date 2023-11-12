@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-void net_init(void);
-_Bool net_poll(void);
+void modbus_init(void);
+_Bool modbus_poll(void);
 
 /**
  * API

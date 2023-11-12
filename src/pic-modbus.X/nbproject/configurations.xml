@@ -32,7 +32,7 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>../rs485.c</itemPath>
-      <itemPath>../net.c</itemPath>
+      <itemPath>../modbus.c</itemPath>
       <itemPath>../crc.c</itemPath>
       <itemPath>../bus_client.c</itemPath>
     </logicalFolder>

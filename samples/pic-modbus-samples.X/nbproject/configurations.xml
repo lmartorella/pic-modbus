@@ -49,7 +49,7 @@
         </logicalFolder>
         <itemPath>../../src/bus_client.c</itemPath>
         <itemPath>../../src/crc.c</itemPath>
-        <itemPath>../../src/net.c</itemPath>
+        <itemPath>../../src/modbus.c</itemPath>
         <itemPath>../../src/rs485.c</itemPath>
       </logicalFolder>
       <logicalFolder name="sinks" displayName="samples" projectFiles="true">

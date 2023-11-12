@@ -106,7 +106,8 @@ typedef struct {
 } ModbusRtuHoldingRegisterRequest;
 
 /**
- * Header of the last request received
+ * Header of the last request received. It is valid for `regs_validateReg` processing and also during `regs_onReceive`
+ * and `regs_onSend`
  */
 extern ModbusRtuHoldingRegisterRequest bus_cl_header;
 
@@ -117,14 +118,17 @@ extern ModbusRtuHoldingRegisterRequest bus_cl_header;
 _Bool regs_validateReg();
 
 /**
- * Called when the registers (sys or app) are about to be read (sent out).
- * The rs485_buffer contains the data.
+ * Called when a range of registers (sys or app) is about to be written.
+ * Packet header data is in `bus_cl_header`.
+ * The `rs485_buffer` contains the data to write into the holding register(s).
+ * Return true for no errors. Returns false and set `bus_cl_exceptionCode` in case of errors.
  */
 _Bool regs_onReceive();
 
 /**
- * Called when the registers (sys or app) was written
- * The rs485_buffer should be filled with the data.
+ * Called when the holding registers are about to be read (sent out). 
+ * Packet header data is in `bus_cl_header`.
+ * The `rs485_buffer` should be filled with the register content.
  */
 void regs_onSend();
 
