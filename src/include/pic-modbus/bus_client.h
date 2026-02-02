@@ -64,6 +64,9 @@ typedef enum {
     ERR_INVALID_FUNCTION = 1,
     ERR_INVALID_ADDRESS = 2,
     ERR_INVALID_SIZE = 3,
+
+    ERR_DEVICE_FAILURE = 4,
+    ERR_DEVICE_ACK = 5,
             
     // Used by applicative code
     ERR_DEVICE_BUSY = 6,
