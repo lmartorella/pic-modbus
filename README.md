@@ -14,6 +14,7 @@ On a [PIC16F1827](https://www.microchip.com/en-us/product/PIC16F1827) device, (w
 - Leverage hardware USART and timers for accurate protocol timing
 - Implement system register (check reset/error codes, CRC errors, etc...)
 - Optimized for free XC8 compiler
+- Uses three I/O pins (a pair of UART TX/RX a one for RS485 direction) and one timer with hardware interrupt support (by default the TMR0 module)
 
 ## Samples
 
