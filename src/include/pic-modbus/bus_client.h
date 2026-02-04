@@ -116,7 +116,8 @@ extern ModbusRtuHoldingRegisterRequest bus_cl_header;
 
 /**
  * Validate request of read/write a register range. Must validate address and size.
- * Header to check: `bus_cl_header`. Errors must be set to `bus_cl_exceptionCode`
+ * Header to check: `bus_cl_header`. Errors must be set to `bus_cl_exceptionCode`.
+ * The call must be fast, and return before the timeout for the modbus TX frame expires.
  */
 _Bool regs_validateReg();
 
@@ -132,8 +133,9 @@ _Bool regs_onReceive();
  * Called when the holding registers are about to be read (sent out). 
  * Packet header data is in `bus_cl_header`.
  * The `rs485_buffer` should be filled with the register content.
+ * Return true for no errors. Returns false and set `bus_cl_exceptionCode` in case of errors.
  */
-void regs_onSend();
+_Bool regs_onSend();
 
 #ifdef __cplusplus
 }

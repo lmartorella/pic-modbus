@@ -120,29 +120,31 @@ _Bool regs_onReceive() {
     return false;
 }
 
-void regs_onSend() {
+_Bool regs_onSend() {
     if (addressBe == SYS_REGS_ADDRESS_BE) {
         ((SYS_REGISTERS*)rs485_buffer)->crcErrors = bus_cl_crcErrors;
         ((SYS_REGISTERS*)rs485_buffer)->resetReason = sys_resetReason;
-        return;
+        return true;
     }
     
 #ifdef HAS_LED_BLINK
     if (addressBe == LEDBLINK_REGS_ADDRESS_BE) {
         memcpy(rs485_buffer, &blinker_regs, sizeof(LedBlinkRegsiters));
-        return;
+        return true;
     }
 #endif
     
 #ifdef HAS_BMP180
     if (addressBe == BMP180_REGS_CALIB_ADDRESS_BE) {
         bmp180_readCalibrationData();
-        return;
+        return true;
     }
     if (addressBe == BMP180_REGS_DATA_ADDRESS_BE) {
         bmp180_readRawData();
-        return;
+        return true;
     }
 #endif
+
+    return false;
 }
 

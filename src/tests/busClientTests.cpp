@@ -262,7 +262,7 @@ public:
         throw std::runtime_error("onReceive called with invalid header");
     }
 
-    void onSend() {
+    bool onSend() {
         int address = be16toh(bus_cl_header.address.registerAddressBe);
         for (auto it = ranges.begin(); it != ranges.end(); ++it) {
             if (it->addressMatch(address)) {
@@ -291,8 +291,8 @@ extern "C" {
         return registersMock.onReceive();
     }
 
-    void regs_onSend() {
-        registersMock.onSend();
+    _Bool regs_onSend() {
+        return registersMock.onSend();
     }
 }
 

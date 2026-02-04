@@ -29,6 +29,16 @@ static uint8_t messageSize;
 BUS_CL_RTU_STATE bus_cl_rtu_state;
 uint8_t bus_cl_crcErrors;
 
+static void swap_bus_cl_header() {
+    uint8_t* src1 = (uint8_t*)&bus_cl_header;
+    uint8_t* src2 = &rs485_buffer[0];
+    for (uint8_t i = sizeof(ModbusRtuHoldingRegisterRequest); i >= 0; i--, src1++, src2++) {
+        uint8_t tmp = *src1;
+        *src1 = *src2;
+        *src2 = tmp;
+    }
+}
+
 void bus_cl_init() {
     // RS485 already in receive mode
     bus_cl_rtu_state = BUS_CL_RTU_IDLE;
@@ -150,21 +160,40 @@ __bit bus_cl_poll() {
     }
 
     if (bus_cl_rtu_state == BUS_CL_RTU_RESPONSE) {
-        // Copy whole header (and overwrite data in case of error)
-        // Response of write registers always contains the address and register count
-        *((ModbusRtuHoldingRegisterRequest*)rs485_buffer) = bus_cl_header;
+        // Before start sending the header, if the function is READ_HOLDING_REGISTERS, call the
+        // regs_onSend right now to allow the registry processor to use more time (the frame is not
+        // started so no risk of mark condition). In addition, if the registry processor detects
+        // an error, we can then send the appropriate header
+        if (bus_cl_header.header.function == READ_HOLDING_REGISTERS) {
+            // This will write in the rs485_buffer, even if the header is not sent yet
+            if (!regs_onSend()) {
+                // bus_cl_exceptionCode is set in this case
+                if (bus_cl_exceptionCode == NO_ERROR) {
+                    bus_cl_exceptionCode = ERR_DEVICE_FAILURE;
+                }
+            }
+        }
+
         if (bus_cl_exceptionCode == NO_ERROR) {
             // Transmit packet data in one go
             if (bus_cl_header.header.function == READ_HOLDING_REGISTERS) {
-                // Now, if write, open stream
+                // Copy whole header (and overwrite data in case of error)
+                // Response of write registers always contains the address and register count
+                // Swap the initial bytes of rs485_buffer to save them: bus_cl_header is not required anymore
+                swap_bus_cl_header();
+
                 ((ModbusRtuPacketReadResponse*)rs485_buffer)->size = messageSize;
                 rs485_write(sizeof(ModbusRtuPacketReadResponse));
+                // At the end re-swap the consumed bus_cl_header with rs485_buffer
                 bus_cl_rtu_state = BUS_CL_RTU_SEND_DATA;
             } else {
                 rs485_write(sizeof(ModbusRtuPacketWriteResponse));
                 bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
             }
         } else {
+            // Copy whole header (and overwrite data in case of error)
+            // Response of write registers always contains the address and register count
+            *((ModbusRtuHoldingRegisterRequest*)rs485_buffer) = bus_cl_header;
             // Transmit error data in one go
             ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function = ((ModbusRtuPacketErrorResponse*)rs485_buffer)->header.function | 0x80;
             ((ModbusRtuPacketErrorResponse*)rs485_buffer)->error = bus_cl_exceptionCode;
@@ -178,7 +207,9 @@ __bit bus_cl_poll() {
         if (rs485_writeInProgress()) {
             return false;
         }
-        regs_onSend();
+        // Restore the original rs485 buffer initial bytes
+        swap_bus_cl_header();
+        // Write the whole data
         rs485_write(messageSize);
         bus_cl_rtu_state = BUS_CL_RTU_WRITE_RESPONSE_CRC;
     }
